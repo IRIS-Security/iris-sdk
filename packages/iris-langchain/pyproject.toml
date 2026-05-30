@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iris-langchain"
+version = "0.1.0"
+description = "IRIS governance for LangChain agents — Cedar policy on every tool call"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10"
+authors = [
+  { name = "IRIS Platform", email = "sdk@iris.ai" }
+]
+keywords = ["ai-governance", "langchain", "compliance", "cedar-policy"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+  "iris-core",
+  "iris-sdk",
+  "langchain>=0.2",
+  "langchain-core>=0.2",
+]
+
+[project.optional-dependencies]
+openai = ["langchain-openai>=0.1"]
+anthropic = ["langchain-anthropic>=0.1"]
+all = ["iris-langchain[openai,anthropic]"]
+dev = [
+  "pytest>=8.0",
+  "pytest-asyncio>=0.23",
+  "ruff>=0.4",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
