@@ -23,7 +23,7 @@ def lookup_account(account_id: str, data_region: str = "us-east-1") -> str:
 
 def main() -> None:
     passport = AgentPassport(
-        name="support-agent",
+        name="research-agent",
         owner="team@company.com",
         compliance_tags=[ComplianceTag.COLORADO_AI_ACT],
         is_high_risk_ai=True,
@@ -34,20 +34,20 @@ def main() -> None:
     tools = [lookup_account]
     prompt = ChatPromptTemplate.from_messages(
         [
-            ("system", "You are a helpful support agent."),
+            ("system", "You are a helpful research agent."),
             ("human", "{input}"),
             MessagesPlaceholder("agent_scratchpad"),
         ]
     )
     agent_runnable = create_tool_calling_agent(llm, tools, prompt)
-    base_agent = AgentExecutor(agent=agent_runnable, tools=tools, verbose=True)
+    base_executor = AgentExecutor(agent=agent_runnable, tools=tools, verbose=True)
 
     agent = IrisLangChainAgent.from_agent(
-        base_agent,
+        base_executor,
         passport,
         compliance=["colorado-ai-act"],
     )
-    result = agent.run("Help this customer with their account")
+    result = agent.run("Research this topic and summarize findings")
     print(result)
     # IRIS evaluated every tool call. Violations blocked. Evidence logged.
 
