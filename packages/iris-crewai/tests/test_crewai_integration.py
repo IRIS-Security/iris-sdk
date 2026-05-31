@@ -4,12 +4,14 @@ Integration tests for iris-crewai agent wrapper, crew wrapper, and tool guard.
 
 from __future__ import annotations
 
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
 
 from iris import IrisViolationError
 from iris_core.engine.cedar import CedarEngine
+from iris_core.evidence.vault import EvidenceVault
 from iris_core.models.passport import (
     AgentPassport,
     ComplianceTag,
@@ -19,6 +21,7 @@ from iris_core.models.passport import (
 )
 
 from iris_crewai import IrisCrew, IrisCrewAgent, iris_crew_tool
+from iris_crewai._governance import EvaluationRecord, vault_partition_id
 
 
 @pytest.fixture
@@ -66,7 +69,7 @@ def engine_with_policy(permitted_passport):
 
 
 class TestIrisCrewAgent:
-    def test_crew_agent_blocks_denied_tool(
+    def test_crew_agent_blocks_denied_tool_in_production(
         self, permitted_passport, engine_with_policy, tmp_path
     ):
         from crewai.tools import tool
@@ -146,9 +149,31 @@ class TestIrisCrew:
         with pytest.raises(ValueError, match="Missing passports"):
             IrisCrew.from_crew(base_crew, passports={"Researcher": permitted_passport})
 
-    def test_crew_generates_compliance_report(self, permitted_passport, writer_passport):
-        from iris_crewai._governance import EvaluationRecord
+    def test_missing_passport_raises_clear_error(self, permitted_passport, writer_passport):
+        from crewai import Crew
 
+        researcher = IrisCrewAgent(
+            permitted_passport,
+            role="Researcher",
+            goal="Research",
+            backstory="Analyst",
+        )
+        writer = IrisCrewAgent(
+            writer_passport,
+            role="Writer",
+            goal="Write",
+            backstory="Writer",
+        )
+        base_crew = Crew(agents=[researcher, writer], tasks=[], verbose=False)
+
+        with pytest.raises(ValueError) as exc_info:
+            IrisCrew.from_crew(base_crew, passports={"Researcher": permitted_passport})
+
+        message = str(exc_info.value)
+        assert "Missing passports for: Writer" in message
+        assert "AgentPassport keyed by role name" in message
+
+    def test_crew_generates_compliance_report(self, permitted_passport, writer_passport):
         researcher = IrisCrewAgent(
             permitted_passport,
             role="Researcher",
@@ -190,16 +215,73 @@ class TestIrisCrew:
             base_crew,
             passports={"Researcher": permitted_passport, "Writer": writer_passport},
         )
-        crew.kickoff(inputs={"topic": "AI governance"})
+        kickoff_payload = crew.kickoff(inputs={"topic": "AI governance"})
         report = crew.compliance_report()
 
+        assert kickoff_payload["result"] == "done"
+        assert kickoff_payload["compliance"] == report
         assert report["total_evaluations"] == 2
-        assert report["total_violations"] == 1
-        assert report["violations_by_agent"]["writer-agent"] == 1
+        assert report["total_crew_violations"] == 1
+        assert report["crew_pass_rate"] == 0.5
+        assert report["most_problematic_agent"] == "writer-agent"
+        assert report["agents"]["Researcher"]["pass_rate"] == 1.0
+        assert report["agents"]["Writer"]["total_violations"] == 1
+        assert report["agents"]["Writer"]["most_violated_rule"] == "IRIS-TOOL-001"
         assert report["violations_by_severity"]["critical"] == 1
-        assert report["most_common_rule_violations"][0]["rule_id"] == "IRIS-TOOL-001"
-        assert "Researcher" in report["agents"]
-        assert "Writer" in report["agents"]
+
+    def test_per_agent_evidence_vault_partition(
+        self, permitted_passport, writer_passport, tmp_path, monkeypatch
+    ):
+        monkeypatch.setenv("HOME", str(tmp_path))
+
+        researcher = IrisCrewAgent(
+            permitted_passport,
+            role="Researcher",
+            goal="Research",
+            backstory="Analyst",
+        )
+        writer = IrisCrewAgent(
+            writer_passport,
+            role="Writer",
+            goal="Write",
+            backstory="Writer",
+        )
+
+        researcher._iris_governor.evaluate_tool(
+            action="call",
+            resource="web_search",
+            inputs={"query": "AI governance", "data_region": "us-east-1"},
+        )
+        writer._iris_governor.evaluate_tool(
+            action="call",
+            resource="write_summary",
+            inputs={"content": "summary"},
+        )
+
+        researcher_vault_path = (
+            Path(tmp_path) / ".iris" / "evidence" / vault_partition_id(permitted_passport)
+        )
+        writer_vault_path = (
+            Path(tmp_path) / ".iris" / "evidence" / vault_partition_id(writer_passport)
+        )
+
+        assert researcher_vault_path.exists()
+        assert writer_vault_path.exists()
+        assert researcher_vault_path != writer_vault_path
+
+        researcher_vault = EvidenceVault(agent_id=vault_partition_id(permitted_passport))
+        writer_vault = EvidenceVault(agent_id=vault_partition_id(writer_passport))
+
+        assert len(researcher_vault.get_events()) >= 1
+        assert len(writer_vault.get_events()) >= 1
+        assert all(
+            e["agent_id"] == vault_partition_id(permitted_passport)
+            for e in researcher_vault.get_events()
+        )
+        assert all(
+            e["agent_id"] == vault_partition_id(writer_passport)
+            for e in writer_vault.get_events()
+        )
 
 
 class TestIrisCrewTool:

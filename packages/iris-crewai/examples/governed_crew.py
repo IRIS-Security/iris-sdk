@@ -72,10 +72,11 @@ def main() -> None:
         passports={"Researcher": researcher_passport, "Writer": writer_passport},
     )
 
-    result = crew.kickoff(inputs={"topic": "AI governance"})
+    kickoff = crew.kickoff(inputs={"topic": "AI governance"})
     report = crew.compliance_report()
 
-    print(result)
+    print(kickoff["result"])
+    print(f"Crew pass rate: {report['crew_pass_rate']:.0%}")
     print("Compliance report:", report)
 
 

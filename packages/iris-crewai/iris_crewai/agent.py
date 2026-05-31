@@ -40,6 +40,10 @@ def _iris_crew_agent_class() -> type:
             object.__setattr__(self, "_iris_passport", passport)
             object.__setattr__(self, "_iris_governor", governor)
 
+        def _iris_step_callback(self, agent_action: Any) -> Any:
+            """Evaluate a CrewAI step against this agent's passport."""
+            return self._iris_governor.evaluate_step_action(agent_action)
+
         @classmethod
         def from_crew_agent(cls, agent: Agent, passport: AgentPassport) -> "_IrisCrewAgentImpl":
             """Wrap an existing CrewAI Agent with IRIS governance."""
