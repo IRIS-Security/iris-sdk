@@ -30,7 +30,7 @@ def iris_crew_tool(
     def _evaluate(inputs: Optional[dict]) -> None:
         resource = _tool_resource_name(tool_func)
         result = active_governor.evaluate_tool(action=action, resource=resource, inputs=inputs)
-        enforce_result(result)
+        enforce_result(result, active_governor.env)
 
     if _is_crewai_tool(tool_func):
         return _wrap_base_tool(tool_func, _evaluate)

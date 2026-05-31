@@ -67,28 +67,62 @@ class IrisLangChainAgent:
         return config
 
     def run(self, input: Union[str, dict], **kwargs: Any) -> Any:
-        if hasattr(self._agent, "run"):
-            callbacks = list(kwargs.pop("callbacks", None) or [])
-            if self._handler not in callbacks:
-                callbacks.append(self._handler)
-            return self._agent.run(input, callbacks=callbacks or [self._handler], **kwargs)
-        return self.invoke(input, **kwargs)
+        self._handler.begin_run()
+        try:
+            if hasattr(self._agent, "run"):
+                callbacks = list(kwargs.pop("callbacks", None) or [])
+                if self._handler not in callbacks:
+                    callbacks.append(self._handler)
+                result = self._agent.run(
+                    input,
+                    callbacks=callbacks or [self._handler],
+                    **kwargs,
+                )
+            else:
+                result = self.invoke(input, **kwargs)
+            if not self._handler.current_run or not self._handler.current_run.finalized:
+                self._handler.finalize_run(output=result)
+            return result
+        except Exception:
+            if self._handler.current_run and not self._handler.current_run.finalized:
+                self._handler.finalize_run()
+            raise
 
     async def ainvoke(self, input: Union[str, dict], **kwargs: Any) -> Any:
-        config = self._config_with_callbacks(kwargs.pop("config", None))
-        payload = input if isinstance(input, dict) else {"input": input}
-        if hasattr(self._agent, "ainvoke"):
-            return await self._agent.ainvoke(payload, config=config, **kwargs)
-        raise TypeError("Wrapped agent does not support ainvoke()")
+        self._handler.begin_run()
+        try:
+            config = self._config_with_callbacks(kwargs.pop("config", None))
+            payload = input if isinstance(input, dict) else {"input": input}
+            if hasattr(self._agent, "ainvoke"):
+                result = await self._agent.ainvoke(payload, config=config, **kwargs)
+            else:
+                raise TypeError("Wrapped agent does not support ainvoke()")
+            if not self._handler.current_run or not self._handler.current_run.finalized:
+                self._handler.finalize_run(output=result)
+            return result
+        except Exception:
+            if self._handler.current_run and not self._handler.current_run.finalized:
+                self._handler.finalize_run()
+            raise
 
     def invoke(self, input: Union[str, dict], **kwargs: Any) -> Any:
-        config = self._config_with_callbacks(kwargs.pop("config", None))
-        payload = input if isinstance(input, dict) else {"input": input}
-        if hasattr(self._agent, "invoke"):
-            return self._agent.invoke(payload, config=config, **kwargs)
-        if hasattr(self._agent, "run"):
-            return self.run(input, **kwargs)
-        raise TypeError("Wrapped agent does not support invoke() or run()")
+        self._handler.begin_run()
+        try:
+            config = self._config_with_callbacks(kwargs.pop("config", None))
+            payload = input if isinstance(input, dict) else {"input": input}
+            if hasattr(self._agent, "invoke"):
+                result = self._agent.invoke(payload, config=config, **kwargs)
+            elif hasattr(self._agent, "run"):
+                return self.run(input, **kwargs)
+            else:
+                raise TypeError("Wrapped agent does not support invoke() or run()")
+            if not self._handler.current_run or not self._handler.current_run.finalized:
+                self._handler.finalize_run(output=result)
+            return result
+        except Exception:
+            if self._handler.current_run and not self._handler.current_run.finalized:
+                self._handler.finalize_run()
+            raise
 
     def compliance_check(self) -> List[Violation]:
         registry = ComplianceRegistry()
