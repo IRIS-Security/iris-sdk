@@ -11,6 +11,7 @@ import pytest
 
 from iris import IrisViolationError
 from iris_core.engine.cedar import CedarEngine
+from iris_core.evidence.vault import EvidenceVault
 from iris_core.models.passport import (
     AgentPassport,
     ComplianceTag,
@@ -59,6 +60,7 @@ def engine_with_policy(permitted_passport):
 class TestIrisCallbackHandler:
     def test_callback_permits_allowed_tool(self, handler, permitted_passport, engine_with_policy):
         handler._engine = engine_with_policy
+        handler.begin_run()
         handler.on_tool_start(
             {"name": "lookup_account", "description": "lookup"},
             '{"account_id": "1"}',
@@ -66,7 +68,9 @@ class TestIrisCallbackHandler:
             inputs={"account_id": "1", "data_region": "us-east-1"},
         )
 
-    def test_callback_blocks_denied_tool(self, handler, permitted_passport, engine_with_policy):
+    def test_callback_blocks_denied_tool_in_production(
+        self, handler, permitted_passport, engine_with_policy
+    ):
         handler._engine = engine_with_policy
         handler.env = Environment.PRODUCTION
         with pytest.raises(IrisViolationError) as exc_info:
@@ -79,7 +83,7 @@ class TestIrisCallbackHandler:
         assert exc_info.value.result.decision == "DENY"
         assert any(v.rule_id == "IRIS-TOOL-001" for v in exc_info.value.result.violations)
 
-    def test_callback_warns_in_dev_env(self, handler, permitted_passport, engine_with_policy):
+    def test_callback_warns_in_dev(self, handler, permitted_passport, engine_with_policy):
         handler._engine = engine_with_policy
         handler.env = Environment.DEV
         handler.on_tool_start(
@@ -123,6 +127,54 @@ class TestIrisCallbackHandler:
             )
         assert exc_info.value.result.decision == "DENY"
 
+    def test_pii_detection_in_tool_output(self, handler, permitted_passport, engine_with_policy):
+        handler._engine = engine_with_policy
+        handler.env = Environment.PRODUCTION
+        handler.begin_run()
+        run_id = uuid4()
+        handler.on_tool_start(
+            {"name": "lookup_account", "description": "lookup"},
+            "{}",
+            run_id=run_id,
+            inputs={"data_region": "us-east-1"},
+        )
+        handler.on_tool_end(
+            "Customer SSN is 123-45-6789",
+            run_id=run_id,
+        )
+        events = handler._vault.get_events(limit=50)
+        pii_events = [e for e in events if e.get("event_type") == "pii_output_guardrail"]
+        assert len(pii_events) == 1
+        assert pii_events[0]["decision"] == "VIOLATION"
+        assert handler.current_run.pii_output_violations == 1
+
+    def test_evidence_vault_records_per_run(self, handler, permitted_passport, engine_with_policy):
+        handler._engine = engine_with_policy
+        run_id = handler.begin_run()
+        tool_run_id = uuid4()
+        handler.on_tool_start(
+            {"name": "lookup_account", "description": "lookup"},
+            "{}",
+            run_id=tool_run_id,
+            inputs={"data_region": "us-east-1"},
+        )
+        handler.on_tool_end("Account active", run_id=tool_run_id)
+        handler.finalize_run(output="done")
+
+        events = handler._vault.get_events(limit=100)
+        run_events = [e for e in events if e.get("run_id") == run_id]
+        assert len(run_events) >= 3
+        event_types = {e.get("event_type") for e in run_events}
+        assert "run_start" in event_types
+        assert "tool_end" in event_types
+        assert "run_summary" in event_types
+
+        summary_events = [e for e in run_events if e.get("event_type") == "run_summary"]
+        summary = summary_events[0]["details"]["summary"]
+        assert summary["run_id"] == run_id
+        assert summary["total_tool_calls"] == 1
+        assert "pass_rate" in summary
+
 
 class TestIrisLangChainAgent:
     def test_agent_wraps_cleanly(self, permitted_passport):
@@ -136,6 +188,8 @@ class TestIrisLangChainAgent:
         assert result == "ok"
         mock_agent.run.assert_called_once()
         assert wrapped._handler in mock_agent.callbacks
+        assert wrapped._handler.current_run is not None
+        assert wrapped._handler.current_run.finalized is True
 
     def test_compliance_check_on_agent(self, permitted_passport):
         incomplete = AgentPassport(

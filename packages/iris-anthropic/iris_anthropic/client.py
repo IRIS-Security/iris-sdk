@@ -1,0 +1,167 @@
+"""Drop-in Anthropic client wrapper with IRIS governance on every messages call."""
+
+from __future__ import annotations
+
+from typing import Any, List
+
+from iris_core.engine.cedar import CedarEngine
+from iris_core.evidence.vault import EvidenceVault
+from iris_core.models.passport import AgentPassport
+from iris_anthropic._governance import (
+    current_environment,
+    enforce_result,
+    evaluate_api_call,
+    load_passport_policy,
+)
+from iris_anthropic.guardrails import (
+    check_prompt_for_violations,
+    effective_data_classification,
+)
+
+
+def _lazy_anthropic():
+    import anthropic
+
+    return anthropic
+
+
+def _extract_prompt_text(kwargs: dict) -> str:
+    parts: List[str] = []
+    system = kwargs.get("system")
+    if system:
+        if isinstance(system, str):
+            parts.append(system)
+        elif isinstance(system, list):
+            for block in system:
+                if isinstance(block, dict):
+                    text = block.get("text") or block.get("content")
+                    if text:
+                        parts.append(str(text))
+    for msg in kwargs.get("messages") or []:
+        if not isinstance(msg, dict):
+            continue
+        content = msg.get("content")
+        if isinstance(content, str):
+            parts.append(content)
+        elif isinstance(content, list):
+            for block in content:
+                if isinstance(block, dict):
+                    text = block.get("text") or block.get("content")
+                    if text:
+                        parts.append(str(text))
+    return "\n".join(parts)
+
+
+class _IrisAnthropicClientBase:
+    _passport: AgentPassport
+    _engine: CedarEngine
+    _vault: EvidenceVault
+
+
+class _GovernedMessagesBase:
+    """Uses the parent client so engine/vault stay in sync when replaced in tests."""
+
+    def __init__(self, parent: _IrisAnthropicClientBase, messages_resource: Any):
+        self._parent = parent
+        self._messages = messages_resource
+
+    @property
+    def _passport(self) -> AgentPassport:
+        return self._parent._passport
+
+    @property
+    def _engine(self) -> CedarEngine:
+        return self._parent._engine
+
+    @property
+    def _vault(self) -> EvidenceVault:
+        return self._parent._vault
+
+    def _govern_kwargs(self, kwargs: dict) -> None:
+        env = current_environment()
+        prompt = _extract_prompt_text(kwargs)
+        prompt_violations = check_prompt_for_violations(prompt, self._passport)
+        data_classification = effective_data_classification(prompt, self._passport)
+        additional = {
+            "model": kwargs.get("model"),
+            "max_tokens": kwargs.get("max_tokens"),
+            "prompt_violation_count": len(prompt_violations),
+        }
+        if prompt_violations:
+            additional["prompt_violations"] = [v.rule_id for v in prompt_violations]
+
+        result = evaluate_api_call(
+            self._engine,
+            self._vault,
+            self._passport,
+            env,
+            data_classification=data_classification,
+            prompt_violations=prompt_violations,
+            additional=additional,
+        )
+        enforce_result(result, env)
+
+
+class IrisMessagesResource(_GovernedMessagesBase):
+    def create(self, **kwargs: Any) -> Any:
+        self._govern_kwargs(kwargs)
+        return self._messages.create(**kwargs)
+
+    def stream(self, **kwargs: Any) -> Any:
+        self._govern_kwargs(kwargs)
+        return self._messages.stream(**kwargs)
+
+
+class IrisMessagesResourceAsync(_GovernedMessagesBase):
+    async def create(self, **kwargs: Any) -> Any:
+        self._govern_kwargs(kwargs)
+        return await self._messages.create(**kwargs)
+
+    async def stream(self, **kwargs: Any) -> Any:
+        self._govern_kwargs(kwargs)
+        return await self._messages.stream(**kwargs)
+
+
+class IrisAnthropic(_IrisAnthropicClientBase):
+    """
+    Drop-in replacement for anthropic.Anthropic() with IRIS governance.
+
+    Pass an AgentPassport and the same kwargs you would give Anthropic().
+    All attributes not defined here are proxied to the underlying client.
+    """
+
+    def __init__(self, passport: AgentPassport, **anthropic_kwargs: Any):
+        anthropic = _lazy_anthropic()
+        self._passport = passport
+        self._engine = CedarEngine()
+        self._vault = EvidenceVault(agent_id=passport.agent_id)
+        load_passport_policy(self._engine, passport)
+        self._client = anthropic.Anthropic(**anthropic_kwargs)
+        self._messages_resource = IrisMessagesResource(self, self._client.messages)
+
+    @property
+    def messages(self) -> IrisMessagesResource:
+        return self._messages_resource
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._client, name)
+
+
+class IrisAnthropicAsync(_IrisAnthropicClientBase):
+    """Async drop-in replacement for anthropic.AsyncAnthropic()."""
+
+    def __init__(self, passport: AgentPassport, **anthropic_kwargs: Any):
+        anthropic = _lazy_anthropic()
+        self._passport = passport
+        self._engine = CedarEngine()
+        self._vault = EvidenceVault(agent_id=passport.agent_id)
+        load_passport_policy(self._engine, passport)
+        self._client = anthropic.AsyncAnthropic(**anthropic_kwargs)
+        self._messages_resource = IrisMessagesResourceAsync(self, self._client.messages)
+
+    @property
+    def messages(self) -> IrisMessagesResourceAsync:
+        return self._messages_resource
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._client, name)

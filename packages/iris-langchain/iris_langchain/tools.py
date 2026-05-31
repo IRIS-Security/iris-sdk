@@ -53,7 +53,7 @@ def iris_tool_guard(
             destination_region=destination_region,
             data_classification=data_classification,
         )
-        enforce_result(result)
+        enforce_result(result, env)
 
     if isinstance(tool, StructuredTool):
         original = tool.func

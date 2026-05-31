@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 import logging
+import os
 import sys
 import threading
 from collections import Counter
@@ -13,13 +15,14 @@ from typing import Any, Callable, Dict, List, Optional
 from iris_core.engine.cedar import CedarEngine, EvaluationContext
 from iris_core.evidence.vault import EvidenceVault
 from iris_core.models.passport import AgentPassport, Environment
-from iris_core.models.policy import PolicyResult, Severity
+from iris_core.models.policy import PolicyResult
 
 from iris import IrisViolationError
 
 logger = logging.getLogger("iris.crewai")
 
 _VAULT_LOCK = threading.Lock()
+_MOCK_SAFE_RESPONSE = "[IRIS] Action blocked by policy — mock safe response returned."
 
 
 @dataclass
@@ -29,6 +32,12 @@ class EvaluationRecord:
     resource: str
     decision: str
     violations: List[dict] = field(default_factory=list)
+
+
+def resolve_environment(env: Optional[Environment] = None) -> Environment:
+    if env is not None:
+        return env
+    return Environment(os.environ.get("IRIS_ENV", "dev"))
 
 
 def has_policy_loaded(engine: CedarEngine, passport: AgentPassport) -> bool:
@@ -79,6 +88,22 @@ def extract_regions(inputs: Optional[Dict[str, Any]]) -> tuple[Optional[str], Op
     )
 
 
+def parse_tool_input(tool_input: str) -> Optional[Dict[str, Any]]:
+    """Parse CrewAI tool_input string into a dict when possible."""
+    if not tool_input:
+        return None
+    stripped = tool_input.strip()
+    if not stripped:
+        return None
+    try:
+        parsed = json.loads(stripped)
+        if isinstance(parsed, dict):
+            return parsed
+    except json.JSONDecodeError:
+        pass
+    return {"input": stripped}
+
+
 def vault_partition_id(passport: AgentPassport) -> str:
     """Evidence vault partition key — one vault per agent name."""
     return passport.name or passport.agent_id
@@ -88,10 +113,8 @@ class AgentGovernor:
     """Per-agent Cedar evaluation, evidence recording, and compliance tracking."""
 
     def __init__(self, passport: AgentPassport, environment: Optional[Environment] = None):
-        import os
-
         self.passport = passport
-        self.env = environment or Environment(os.environ.get("IRIS_ENV", "dev"))
+        self.env = resolve_environment(environment)
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=vault_partition_id(passport))
         load_passport_policy(self._engine, passport)
@@ -144,29 +167,73 @@ class AgentGovernor:
             )
         )
 
-    def record_step(self, step_output: Any) -> None:
-        """Record crew step metadata without altering crew output formatting."""
+    def evaluate_step_action(self, agent_action: Any) -> Optional[str]:
+        """
+        Evaluate a CrewAI AgentAction step without altering crew output formatting.
+
+        Returns a mock safe response in dev when denied; raises in production.
+        """
         from crewai.agents.parser import AgentAction, AgentFinish
 
-        if isinstance(step_output, AgentAction):
-            logger.debug(
-                "IRIS step: agent=%s tool=%s decision logged",
-                vault_partition_id(self.passport),
-                step_output.tool,
-            )
-        elif isinstance(step_output, AgentFinish):
+        if isinstance(agent_action, AgentFinish):
             logger.debug(
                 "IRIS step: agent=%s finished",
                 vault_partition_id(self.passport),
             )
+            return None
+
+        if not isinstance(agent_action, AgentAction):
+            return None
+
+        tool_name = agent_action.tool
+        inputs = parse_tool_input(agent_action.tool_input)
+        result = self.evaluate_tool(action="call", resource=tool_name, inputs=inputs)
+
+        if result.decision == "DENY":
+            if self.env in (Environment.DEV, Environment.TEST):
+                for violation in result.violations:
+                    msg = (
+                        f"[IRIS WARNING] {violation.message} "
+                        f"Remediation: {violation.remediation}"
+                    )
+                    logger.warning(msg)
+                    print(msg, file=sys.stderr)
+                return _MOCK_SAFE_RESPONSE
+            raise IrisViolationError(result)
+
+        if result.decision == "PERMIT_WITH_WARNINGS":
+            for violation in result.violations:
+                msg = (
+                    f"[IRIS WARNING] {violation.message} "
+                    f"Remediation: {violation.remediation}"
+                )
+                logger.warning(msg)
+                print(msg, file=sys.stderr)
+
+        logger.debug(
+            "IRIS step: agent=%s tool=%s decision=%s",
+            vault_partition_id(self.passport),
+            tool_name,
+            result.decision,
+        )
+        return None
 
     @property
     def vault(self) -> EvidenceVault:
         return self._vault
 
 
-def enforce_result(result: PolicyResult) -> None:
+def enforce_result(result: PolicyResult, env: Environment) -> None:
     if result.decision == "DENY":
+        if env in (Environment.DEV, Environment.TEST):
+            for violation in result.violations:
+                msg = (
+                    f"[IRIS WARNING] {violation.message} "
+                    f"Remediation: {violation.remediation}"
+                )
+                logger.warning(msg)
+                print(msg, file=sys.stderr)
+            return
         raise IrisViolationError(result)
     if result.decision == "PERMIT_WITH_WARNINGS":
         for violation in result.violations:
@@ -182,61 +249,113 @@ def make_step_callback(
     governor: AgentGovernor,
     user_callback: Optional[Callable[..., Any]] = None,
 ) -> Callable[[Any], Any]:
-    """Chain IRIS step recording with an optional user step_callback."""
+    """Chain IRIS step evaluation with an optional user step_callback."""
 
     def iris_step_callback(step_output: Any) -> Any:
-        governor.record_step(step_output)
+        mock_response = governor.evaluate_step_action(step_output)
         if user_callback is not None:
-            return user_callback(step_output)
-        return None
+            user_result = user_callback(step_output)
+            return user_result if user_result is not None else mock_response
+        return mock_response
 
     return iris_step_callback
 
 
-def build_compliance_report(governors: Dict[str, AgentGovernor]) -> dict:
-    """Aggregate per-agent evaluations into a crew compliance report."""
-    all_records: List[EvaluationRecord] = []
-    for governor in governors.values():
-        all_records.extend(governor.records)
+def _agent_pass_rate(records: List[EvaluationRecord]) -> float:
+    if not records:
+        return 1.0
+    violations = sum(
+        len(r.violations) if r.violations else (1 if r.decision == "DENY" else 0)
+        for r in records
+        if r.decision != "PERMIT"
+    )
+    return max(0.0, (len(records) - violations) / len(records))
 
-    violation_records = [
-        r for r in all_records if r.decision in ("DENY", "PERMIT_WITH_WARNINGS")
-    ]
-    violations_by_agent: Dict[str, int] = Counter()
-    violations_by_severity: Counter = Counter()
-    rule_counter: Counter = Counter()
 
-    for record in violation_records:
-        violations_by_agent[record.agent_name] += len(record.violations) or 1
-        for v in record.violations:
-            violations_by_severity[v["severity"]] += 1
-            rule_counter[v["rule_id"]] += 1
-
-    total_violations = sum(
-        len(r.violations) if r.violations else 1
-        for r in violation_records
+def _agent_violation_count(records: List[EvaluationRecord]) -> int:
+    return sum(
+        len(r.violations) if r.violations else (1 if r.decision == "DENY" else 0)
+        for r in records
+        if r.decision != "PERMIT"
     )
 
+
+def _violations_by_severity(records: List[EvaluationRecord]) -> Dict[str, int]:
+    counter: Counter[str] = Counter()
+    for record in records:
+        if record.decision == "PERMIT":
+            continue
+        if record.violations:
+            for v in record.violations:
+                counter[v["severity"]] += 1
+        elif record.decision == "DENY":
+            counter["unknown"] += 1
+    return dict(counter)
+
+
+def _most_violated_rule(records: List[EvaluationRecord]) -> Optional[str]:
+    counter: Counter[str] = Counter()
+    for record in records:
+        if record.decision == "PERMIT":
+            continue
+        for v in record.violations:
+            counter[v["rule_id"]] += 1
+    if not counter:
+        return None
+    return counter.most_common(1)[0][0]
+
+
+def build_compliance_report(governors: Dict[str, AgentGovernor]) -> dict:
+    """Aggregate per-agent evaluations into a crew compliance report."""
+    agents_report: Dict[str, dict] = {}
+    total_evaluations = 0
+    total_crew_violations = 0
+    violations_by_agent: Counter[str] = Counter()
+
+    for role, governor in governors.items():
+        records = governor.records
+        agent_name = vault_partition_id(governor.passport)
+        agent_violations = _agent_violation_count(records)
+        total_evaluations += len(records)
+        total_crew_violations += agent_violations
+        violations_by_agent[agent_name] = agent_violations
+
+        agents_report[role] = {
+            "agent_name": agent_name,
+            "total_evaluations": len(records),
+            "total_violations": agent_violations,
+            "violations_by_severity": _violations_by_severity(records),
+            "most_violated_rule": _most_violated_rule(records),
+            "pass_rate": round(_agent_pass_rate(records), 4),
+        }
+
+    crew_pass_rate = (
+        round(max(0.0, (total_evaluations - total_crew_violations) / total_evaluations), 4)
+        if total_evaluations
+        else 1.0
+    )
+    most_problematic_agent = (
+        violations_by_agent.most_common(1)[0][0] if violations_by_agent else None
+    )
+
+    all_severity: Counter[str] = Counter()
+    all_rules: Counter[str] = Counter()
+    for role, governor in governors.items():
+        for severity, count in _violations_by_severity(governor.records).items():
+            all_severity[severity] += count
+        rule = _most_violated_rule(governor.records)
+        if rule:
+            all_rules[rule] += _agent_violation_count(governor.records)
+
     return {
-        "total_evaluations": len(all_records),
-        "total_violations": total_violations,
-        "violations_by_agent": dict(violations_by_agent),
-        "violations_by_severity": dict(violations_by_severity),
+        "agents": agents_report,
+        "most_problematic_agent": most_problematic_agent,
+        "total_crew_violations": total_crew_violations,
+        "crew_pass_rate": crew_pass_rate,
+        "total_evaluations": total_evaluations,
+        "violations_by_severity": dict(all_severity),
         "most_common_rule_violations": [
             {"rule_id": rule_id, "count": count}
-            for rule_id, count in rule_counter.most_common(10)
+            for rule_id, count in all_rules.most_common(10)
         ],
-        "agents": {
-            role: {
-                "evaluations": len(governor.records),
-                "violations": sum(
-                    len(r.violations) if r.violations else (1 if r.decision == "DENY" else 0)
-                    for r in governor.records
-                    if r.decision != "PERMIT"
-                ),
-                "permits": sum(1 for r in governor.records if r.decision == "PERMIT"),
-                "evidence_events": len(governor.vault.get_events()),
-            }
-            for role, governor in governors.items()
-        },
     }
