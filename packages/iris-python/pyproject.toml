@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "iris-sdk"
+name = "iris-security-sdk"
 version = "0.1.0"
 description = "IRIS — AI Agent Governance SDK. Govern AI agents locally."
 readme = "README.md"
@@ -28,7 +28,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-  "iris-core>=0.1.0",
+  "iris-security-core>=0.1.0",
   "pyyaml>=6.0",
   "pydantic>=2.0",
   "click>=8.1",
@@ -40,7 +40,7 @@ anthropic = ["anthropic>=0.25"]
 openai = ["openai>=1.30"]
 langchain = ["langchain>=0.2", "langchain-core>=0.2"]
 crewai = ["crewai>=0.30"]
-all = ["iris-sdk[anthropic,openai,langchain,crewai]"]
+all = ["iris-security-sdk[anthropic,openai,langchain,crewai]"]
 dev = [
   "pytest>=8.0",
   "pytest-asyncio>=0.23",

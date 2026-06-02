@@ -1,4 +1,4 @@
-# iris-sdk
+# iris-security-sdk
 
 IRIS — AI Agent Governance SDK. Govern AI agents locally.
 
@@ -10,15 +10,15 @@ Part of the [IRIS SDK](https://github.com/gimartinb/iris-sdk).
 ## Install
 
 ```bash
-pip install iris-sdk
+pip install iris-security-sdk
 ```
 
 ## Optional integrations
 
 ```bash
-pip install iris-sdk[anthropic]
-pip install iris-sdk[openai]
-pip install iris-sdk[langchain]
-pip install iris-sdk[crewai]
-pip install iris-sdk[all]
+pip install iris-security-sdk[anthropic]
+pip install iris-security-sdk[openai]
+pip install iris-security-sdk[langchain]
+pip install iris-security-sdk[crewai]
+pip install iris-security-sdk[all]
 ```
