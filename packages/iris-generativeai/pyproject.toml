@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iris-security-generativeai"
+version = "0.1.0"
+description = "IRIS governance for Gemini via legacy google-generativeai"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10"
+authors = [{ name = "IRIS Platform", email = "sdk@iris.ai" }]
+dependencies = [
+  "iris-security-core",
+  "iris-security-sdk",
+  "google-generativeai>=0.7",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-asyncio>=0.23",
+  "ruff>=0.4",
+]
+
+[tool.setuptools]
+packages = ["iris_generativeai"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
