@@ -18,6 +18,8 @@ pip install iris-security-sdk
 ```bash
 pip install iris-security-sdk[anthropic]
 pip install iris-security-sdk[openai]
+pip install iris-security-sdk[gemini]
+pip install iris-security-sdk[vertexai]
 pip install iris-security-sdk[langchain]
 pip install iris-security-sdk[crewai]
 pip install iris-security-sdk[all]

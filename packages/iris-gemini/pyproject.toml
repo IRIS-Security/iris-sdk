@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iris-security-gemini"
+version = "0.1.0"
+description = "IRIS governance for Google Gemini via google-genai"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10"
+authors = [{ name = "IRIS Platform", email = "sdk@iris.ai" }]
+dependencies = [
+  "iris-security-core",
+  "iris-security-sdk",
+  "google-genai>=0.3",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-asyncio>=0.23",
+  "ruff>=0.4",
+]
+
+[tool.setuptools]
+packages = ["iris_gemini"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

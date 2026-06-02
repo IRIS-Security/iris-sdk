@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iris-security-vertexai"
+version = "0.1.0"
+description = "IRIS governance for Vertex AI via google-cloud-aiplatform"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10"
+authors = [{ name = "IRIS Platform", email = "sdk@iris.ai" }]
+dependencies = [
+  "iris-security-core",
+  "iris-security-sdk",
+  "google-cloud-aiplatform>=1.60",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.4",
+]
+
+[tool.setuptools]
+packages = ["iris_vertexai"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

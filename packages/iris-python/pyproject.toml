@@ -38,9 +38,11 @@ dependencies = [
 [project.optional-dependencies]
 anthropic = ["anthropic>=0.25"]
 openai = ["openai>=1.30"]
+gemini = ["google-genai>=0.3"]
+vertexai = ["google-cloud-aiplatform>=1.60"]
 langchain = ["langchain>=0.2", "langchain-core>=0.2"]
 crewai = ["crewai>=0.30"]
-all = ["iris-security-sdk[anthropic,openai,langchain,crewai]"]
+all = ["iris-security-sdk[anthropic,openai,gemini,vertexai,langchain,crewai]"]
 dev = [
   "pytest>=8.0",
   "pytest-asyncio>=0.23",
