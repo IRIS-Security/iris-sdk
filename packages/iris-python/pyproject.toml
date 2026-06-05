@@ -48,7 +48,7 @@ vertexai = ["google-cloud-aiplatform>=1.60"]
 langchain = ["langchain>=0.2", "langchain-core>=0.2"]
 crewai = ["crewai>=0.30"]
 all = [
-  "iris-security-sdk[anthropic,openai,google,mistral,groq,litellm,gemini,vertexai,langchain,crewai]",
+  "iris-security-sdk[anthropic,openai,google,mistral,groq,litellm]",
 ]
 dev = [
   "pytest>=8.0",
