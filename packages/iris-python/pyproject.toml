@@ -38,11 +38,18 @@ dependencies = [
 [project.optional-dependencies]
 anthropic = ["anthropic>=0.25"]
 openai = ["openai>=1.30"]
+google = ["google-genai>=0.3"]
 gemini = ["google-genai>=0.3"]
+mistral = ["mistralai>=0.4"]
+groq = ["groq>=0.4"]
+litellm = ["litellm>=1.0"]
+ollama = ["litellm>=1.0"]
 vertexai = ["google-cloud-aiplatform>=1.60"]
 langchain = ["langchain>=0.2", "langchain-core>=0.2"]
 crewai = ["crewai>=0.30"]
-all = ["iris-security-sdk[anthropic,openai,gemini,vertexai,langchain,crewai]"]
+all = [
+  "iris-security-sdk[anthropic,openai,google,mistral,groq,litellm,gemini,vertexai,langchain,crewai]",
+]
 dev = [
   "pytest>=8.0",
   "pytest-asyncio>=0.23",
