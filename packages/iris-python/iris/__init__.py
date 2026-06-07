@@ -125,7 +125,7 @@ class IrisAgent:
         self._current_env = current_env
         self._policy_dir = policy_dir or Path.cwd() / "governance" / "agents" / name
         self._engine = CedarEngine(policy_dir=self._policy_dir)
-        self._compiler = PolicyCompiler()
+        self._compiler: Optional[PolicyCompiler] = None
         self._vault = EvidenceVault(agent_id=self.passport.agent_id)
         self._telemetry = telemetry
 
@@ -133,6 +133,11 @@ class IrisAgent:
         policy_file = self._policy_dir / "policy.cedar"
         if policy_file.exists():
             self._engine.load_policy_file(self.passport.agent_id, policy_file)
+
+    def _get_compiler(self) -> PolicyCompiler:
+        if self._compiler is None:
+            self._compiler = PolicyCompiler()
+        return self._compiler
 
     def compile_policy(
         self,
@@ -149,7 +154,7 @@ class IrisAgent:
             write_to_disk: If True, writes policy.cedar and policy-intent.md
                            to the governance GitOps directory.
         """
-        result = self._compiler.compile(intent, self.passport)
+        result = self._get_compiler().compile(intent, self.passport)
 
         if write_to_disk and result.success:
             self._policy_dir.mkdir(parents=True, exist_ok=True)
