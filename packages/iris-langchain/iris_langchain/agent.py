@@ -44,6 +44,9 @@ class IrisLangChainAgent:
         compliance: Optional[List[str]] = None,
         environment: Optional[str] = None,
     ) -> "IrisLangChainAgent":
+        from iris_core.dev_trust import print_dev_trust_message
+
+        print_dev_trust_message()
         if compliance:
             passport.compliance_tags = [ComplianceTag(c) for c in compliance]
         env_name = environment or os.environ.get("IRIS_ENV", "dev")

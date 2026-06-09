@@ -1,0 +1,41 @@
+apiVersion: iris.io/v1alpha1
+kind: AgentPassport
+metadata:
+  name: demo-hr-agent
+  agent_id: demo-0002-meridian-hr-hiring
+spec:
+  version: 1.0.0
+  description: Screens job applicants and assists in hiring decisions for Meridian Health
+  owner: hr-platform@meridianhealth.org
+  team: people-ops-ai
+  contact_email: hr-platform@meridianhealth.org
+  data_classification: pii
+  allowed_regions:
+    - us-east-1
+    - us-west-2
+  compliance_tags:
+    - colorado-ai-act
+  environments:
+    - dev
+    - staging
+    - production
+  tool_permissions:
+    - tool_id: applicant-tracking-api
+      description: Read applicant resumes and employment history
+      allowed_actions: [read]
+      data_classifications_allowed: [pii]
+      requires_user_consent: false
+      environments: [dev, staging, production]
+    - tool_id: openai-api
+      description: GPT-4o for resume screening and ranking
+      allowed_actions: [call]
+      data_classifications_allowed: [pii]
+      requires_user_consent: true
+      environments: [dev, staging, production]
+  policy_ref: null
+  intent_ref: demo/governance/agents/demo-hr-agent/policy-intent.md
+  evidence_vault_id: IA-demo-hr-agent-MERID0002
+  is_high_risk_ai: true
+  created_at: "2026-06-01T00:00:00"
+  last_reviewed_at: "2026-06-01T00:00:00"
+  reviewed_by: ciso@meridianhealth.org

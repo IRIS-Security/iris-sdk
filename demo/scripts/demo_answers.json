@@ -1,0 +1,13 @@
+{
+  "domain": "financial services",
+  "consequential": true,
+  "data_types": [
+    "financial data (account numbers, transactions)",
+    "name / contact information"
+  ],
+  "human_review": true,
+  "opt_out": true,
+  "discrimination_review": true,
+  "training_data": "GPT-4o via LangChain for loan application analysis at Apex Capital",
+  "mitigations": "IRIS policy enforcement, user consent gate, human review for decisions above $50K"
+}

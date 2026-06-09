@@ -253,6 +253,9 @@ class IrisGenerativeAI:
     """
 
     def __init__(self, passport: AgentPassport, api_key: Optional[str] = None) -> None:
+        from iris_core.dev_trust import print_dev_trust_message
+
+        print_dev_trust_message()
         genai = _lazy_google_generativeai()
         self._passport = passport
         self._engine = CedarEngine()

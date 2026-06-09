@@ -79,6 +79,9 @@ class IrisVertexAI:
         location: Optional[str] = None,
         **kwargs: Any,
     ):
+        from iris_core.dev_trust import print_dev_trust_message
+
+        print_dev_trust_message()
         evidence_vault_dir = kwargs.pop("evidence_vault_dir", None)
         vertexai = _lazy_vertexai()
         vertexai.init(project=project, location=location, **kwargs)
