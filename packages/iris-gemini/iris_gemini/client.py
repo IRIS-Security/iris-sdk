@@ -209,6 +209,9 @@ class IrisGemini(_IrisGeminiBase):
     """Drop-in replacement for google.genai.Client()."""
 
     def __init__(self, passport: AgentPassport, **genai_kwargs: Any):
+        from iris_core.dev_trust import print_dev_trust_message
+
+        print_dev_trust_message()
         genai = _lazy_genai()
         self._passport = passport
         self._engine = CedarEngine()

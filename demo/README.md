@@ -20,33 +20,55 @@ PAUSE=true bash demo/run_demo.sh    # live demo with pauses
 
 ## The demo story (say this out loud)
 
-**"Let me show you what IRIS does to an existing codebase first."**
-→ `iris scan --dir demo/customers --discover`
+**STEP 0 — Brownfield discovery arc**
+→ `iris scan --dir demo/customers/meridian_health --discover`
+→ `iris scan --dir demo/customers/meridian_health --discover --govern --no-auto-apply`
 
-See those findings? Those are real agent files with no governance.
-IRIS found them automatically. In your org, it would scan every
-repository and show you every ungoverned agent your team has built.
+IRIS found ungoverned agents and showed the exact one-line change for each file.
 
-**"Now let me register a new one from scratch."**
+**STEP 1 — Build trust before changing anything**
+→ `iris explain`
+
+**STEP 2 — Register and get an action plan (not a checklist)**
 → `iris register --name apex-loan-processor ...`
-
-**"IRIS immediately tells me which regulations apply."**
 → `iris framework suggest --agent apex-loan-processor`
 
-**"Watch what happens when I check compliance on a new agent."**
-→ `iris compliance check` (it fails — this is the hook)
+**STEP 3 — Status check (like git status for compliance)**
+→ `iris status`
 
-**"Now I run the impact assessment. Eight questions. Takes two minutes."**
+**STEP 4 — Follow the action plan**
 → `iris compliance assess --agent apex-loan-processor`
+→ `iris compliance check --framework colorado-ai-act`
 
-**"Here is an agent that has already been through this process."**
-→ Show `demo-payment-agent` compliance check — PASS
+**STEP 5 — Watch decisions in real time**
+→ Second terminal: `iris watch --agent demo-payment-agent`
 
-**"And here is the full audit trail IRIS generates."**
+**STEP 6 — Score moved up**
+→ `iris status` again
+
+**STEP 7 — Audit trail**
 → `iris evidence report --agent demo-payment-agent --dir demo/governance/agents`
 
-**"And Cursor caught it in the IDE before it ever ran."**
-→ Show Cursor MCP integration screenshot
+## How to handle the trust question
+
+When a developer or SRE says: *"I am not comfortable adding a dependency
+to my production agent code"*
+
+Say this:
+
+*"Completely fair. Let me show you exactly what it does."*
+→ Run: `iris explain`
+
+*"It proxies every single attribute identically. Your existing tests
+will pass. In dev mode it cannot block anything. And you can watch every
+decision it makes in real time."*
+→ Open a second terminal: `iris watch --agent <name>`
+→ In the first terminal: run your agent once
+
+*"You just saw every decision IRIS made. Nothing was blocked.
+Everything was logged. That log is your audit trail."*
+
+That sequence converts a skeptical SRE in under three minutes.
 
 ## Demo customers
 

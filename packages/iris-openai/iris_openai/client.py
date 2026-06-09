@@ -202,6 +202,9 @@ class IrisOpenAI(_IrisOpenAIClientBase):
     """
 
     def __init__(self, passport: AgentPassport, **openai_kwargs: Any):
+        from iris_core.dev_trust import print_dev_trust_message
+
+        print_dev_trust_message()
         openai = _lazy_openai()
         self._passport = passport
         self._engine = CedarEngine()

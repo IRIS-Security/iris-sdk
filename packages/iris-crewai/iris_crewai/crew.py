@@ -44,6 +44,9 @@ class IrisCrew:
         crew: Any,
         passports: Dict[str, AgentPassport],
     ) -> "IrisCrew":
+        from iris_core.dev_trust import print_dev_trust_message
+
+        print_dev_trust_message()
         cls._validate_passports(crew, passports, strict=True)
         governors = cls._collect_governors(crew, passports)
         return cls(crew, passports, governors)
