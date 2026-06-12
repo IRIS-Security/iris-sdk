@@ -4,6 +4,12 @@ from __future__ import annotations
 
 from typing import Any, List, Optional
 
+from iris_core.dlp import DLPScanner
+from iris_core.dlp.enforcement import (
+    enforce_prompt_dlp,
+    extract_openai_response_text,
+    handle_response_dlp,
+)
 from iris_core.engine.cedar import CedarEngine
 from iris_core.evidence.vault import EvidenceVault
 from iris_core.models.passport import AgentPassport
@@ -38,6 +44,23 @@ def _extract_tool_names_from_messages(messages: List[Any]) -> List[str]:
     return names
 
 
+def _extract_prompt_text(kwargs: dict) -> str:
+    parts: List[str] = []
+    for msg in kwargs.get("messages") or []:
+        if not isinstance(msg, dict):
+            continue
+        content = msg.get("content")
+        if isinstance(content, str):
+            parts.append(content)
+        elif isinstance(content, list):
+            for block in content:
+                if isinstance(block, dict):
+                    text = block.get("text") or block.get("content")
+                    if text:
+                        parts.append(str(text))
+    return "\n".join(parts)
+
+
 def _extract_tool_names_from_kwargs(kwargs: dict) -> List[str]:
     names: List[str] = []
     tools = kwargs.get("tools") or kwargs.get("functions") or []
@@ -59,6 +82,7 @@ class _IrisOpenAIClientBase:
     _passport: AgentPassport
     _engine: CedarEngine
     _vault: EvidenceVault
+    _dlp: DLPScanner
     _azure_endpoint: Optional[str] = None
 
 
@@ -81,6 +105,15 @@ class _GovernedCompletionsBase:
 
     def _govern_kwargs(self, kwargs: dict) -> None:
         env = current_environment()
+        prompt = _extract_prompt_text(kwargs)
+        dlp_result = enforce_prompt_dlp(
+            self._parent._dlp,
+            self._vault,
+            self._passport,
+            env,
+            prompt,
+            resource="openai-api",
+        )
         if kwargs.get("tools"):
             kwargs["tools"] = guard_openai_tools(kwargs["tools"], self._passport, env)
         tool_names = _extract_tool_names_from_kwargs(kwargs)
@@ -93,12 +126,28 @@ class _GovernedCompletionsBase:
             model=kwargs.get("model"),
             tool_names=tool_names,
             azure_endpoint=getattr(self._parent, "_azure_endpoint", None),
+            dlp_prompt_findings=dlp_result.findings,
         )
         enforce_result(result, env)
 
+    def _scan_response(self, response: Any) -> Any:
+        env = current_environment()
+        response_text = extract_openai_response_text(response)
+        blocked, _ = handle_response_dlp(
+            self._parent._dlp,
+            self._vault,
+            self._passport,
+            env,
+            response_text,
+            response,
+            resource="openai-api",
+        )
+        return blocked
+
     def create(self, **kwargs: Any) -> Any:
         self._govern_kwargs(kwargs)
-        return self._completions.create(**kwargs)
+        response = self._completions.create(**kwargs)
+        return self._scan_response(response)
 
     def stream(self, **kwargs: Any) -> Any:
         self._govern_kwargs(kwargs)
@@ -108,7 +157,8 @@ class _GovernedCompletionsBase:
 class _GovernedCompletionsAsyncBase(_GovernedCompletionsBase):
     async def create(self, **kwargs: Any) -> Any:
         self._govern_kwargs(kwargs)
-        return await self._completions.create(**kwargs)
+        response = await self._completions.create(**kwargs)
+        return self._scan_response(response)
 
     async def stream(self, **kwargs: Any) -> Any:
         self._govern_kwargs(kwargs)
@@ -209,6 +259,7 @@ class IrisOpenAI(_IrisOpenAIClientBase):
         self._passport = passport
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=passport.agent_id)
+        self._dlp = DLPScanner(passport)
         load_passport_policy(self._engine, passport)
         self._client = openai.OpenAI(**openai_kwargs)
         self._chat_resource = IrisChatResource(self, self._client.chat)
@@ -234,6 +285,7 @@ class IrisOpenAIAsync(_IrisOpenAIClientBase):
         self._passport = passport
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=passport.agent_id)
+        self._dlp = DLPScanner(passport)
         load_passport_policy(self._engine, passport)
         self._client = openai.AsyncOpenAI(**openai_kwargs)
         self._chat_resource = IrisChatResourceAsync(self, self._client.chat)

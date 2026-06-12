@@ -253,6 +253,7 @@ def evaluate_openai_call(
     data_classification: Optional[str] = None,
     azure_endpoint: Optional[str] = None,
     extra_violations: Optional[List[Violation]] = None,
+    dlp_prompt_findings: Optional[list] = None,
 ) -> PolicyResult:
     data_region = passport.allowed_regions[0] if passport.allowed_regions else None
     destination_region = parse_azure_endpoint_region(azure_endpoint)
@@ -266,6 +267,7 @@ def evaluate_openai_call(
         data_region=data_region,
         destination_region=destination_region,
         data_classification=data_classification or passport.data_classification.value,
+        dlp_prompt_findings=dlp_prompt_findings,
         additional={
             "operation": operation,
             "model": model,

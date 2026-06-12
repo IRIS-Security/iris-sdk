@@ -249,6 +249,7 @@ def evaluate_and_record(
     user_consent_logged: bool = False,
     run_id: Optional[str] = None,
     extra_violations: Optional[List[Violation]] = None,
+    dlp_prompt_findings: Optional[list] = None,
 ) -> PolicyResult:
     ctx = EvaluationContext(
         agent_id=passport.agent_id,
@@ -260,6 +261,7 @@ def evaluate_and_record(
         destination_region=destination_region,
         data_classification=data_classification,
         user_consent_logged=user_consent_logged,
+        dlp_prompt_findings=dlp_prompt_findings,
         additional={"run_id": run_id} if run_id else {},
     )
     result = engine.evaluate(passport, ctx)

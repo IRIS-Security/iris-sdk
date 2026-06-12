@@ -16,6 +16,8 @@ except ImportError:  # pragma: no cover - graceful when langchain-core missing
         pass
 
 
+from iris_core.dlp import DLPScanner
+from iris_core.dlp.enforcement import enforce_prompt_dlp, handle_response_dlp
 from iris_core.engine.cedar import CedarEngine
 from iris_core.evidence.vault import EvidenceVault
 from iris_core.models.passport import AgentPassport, Environment
@@ -50,6 +52,7 @@ class IrisCallbackHandler(BaseCallbackHandler):
         self.env = resolve_environment(env)
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=passport.agent_id)
+        self._dlp = DLPScanner(passport)
         load_passport_policy(self._engine, passport)
         self._pending_runs: Dict[UUID, str] = {}
         self._tool_results: Dict[UUID, "PolicyResult"] = {}
@@ -212,6 +215,14 @@ class IrisCallbackHandler(BaseCallbackHandler):
         **kwargs: Any,
     ) -> None:
         combined_prompt = "\n".join(prompts or [])
+        dlp_result = enforce_prompt_dlp(
+            self._dlp,
+            self._vault,
+            self.passport,
+            self.env,
+            combined_prompt,
+            resource="langchain-llm",
+        )
         guardrail_violations = check_prompt_guardrails(combined_prompt, self.passport)
 
         meta = metadata or {}
@@ -231,6 +242,7 @@ class IrisCallbackHandler(BaseCallbackHandler):
             destination_region=str(destination_region) if destination_region else None,
             run_id=self._current_run.run_id if self._current_run else None,
             extra_violations=guardrail_violations,
+            dlp_prompt_findings=dlp_result.findings,
         )
         track_result(self._current_run, result)
         enforce_result(result, self.env)
@@ -271,11 +283,25 @@ class IrisCallbackHandler(BaseCallbackHandler):
             output_text = str(output)
 
         run_id_str = self._current_run.run_id if self._current_run else "unknown"
+        blocked, dlp_result = handle_response_dlp(
+            self._dlp,
+            self._vault,
+            self.passport,
+            self.env,
+            output_text,
+            output_text,
+            resource="langchain-agent",
+        )
+        if isinstance(blocked, str) and blocked != output_text:
+            output_text = blocked
         record_audit_event(
             self._vault,
             run_id=run_id_str,
             event_type="agent_finish",
             resource=self.passport.name,
-            details={"output_preview": output_text[:2000]},
+            details={
+                "output_preview": output_text[:2000],
+                "dlp_response_findings": len(dlp_result.findings),
+            },
         )
         self.finalize_run(output=output_text)

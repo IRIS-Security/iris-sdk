@@ -12,6 +12,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
+from iris_core.dlp import DLPScanner
+from iris_core.dlp.enforcement import enforce_prompt_dlp
 from iris_core.engine.cedar import CedarEngine, EvaluationContext
 from iris_core.evidence.vault import EvidenceVault
 from iris_core.models.passport import AgentPassport, Environment
@@ -117,6 +119,7 @@ class AgentGovernor:
         self.env = resolve_environment(environment)
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=vault_partition_id(passport))
+        self._dlp = DLPScanner(passport)
         load_passport_policy(self._engine, passport)
         self.records: List[EvaluationRecord] = []
 
@@ -131,6 +134,26 @@ class AgentGovernor:
         data_classification = None
         if inputs and inputs.get("data_classification") is not None:
             data_classification = str(inputs["data_classification"])
+        prompt_text = ""
+        if inputs:
+            prompt_text = str(
+                inputs.get("input")
+                or inputs.get("prompt")
+                or inputs.get("tool_input")
+                or ""
+            )
+        dlp_result = (
+            enforce_prompt_dlp(
+                self._dlp,
+                self._vault,
+                self.passport,
+                self.env,
+                prompt_text,
+                resource=resource,
+            )
+            if prompt_text.strip()
+            else None
+        )
         ctx = EvaluationContext(
             agent_id=self.passport.agent_id,
             action=action,
@@ -141,6 +164,7 @@ class AgentGovernor:
             destination_region=destination_region,
             data_classification=data_classification,
             user_consent_logged=bool(inputs.get("user_consent_logged")) if inputs else False,
+            dlp_prompt_findings=dlp_result.findings if dlp_result else None,
         )
         result = self._engine.evaluate(self.passport, ctx)
         result = apply_no_policy_gate(self._engine, self.passport, self.env, result)

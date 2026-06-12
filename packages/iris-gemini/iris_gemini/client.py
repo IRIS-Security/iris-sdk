@@ -11,12 +11,18 @@ from pathlib import Path
 from typing import Any, Optional
 
 from iris import IrisViolationError
+from iris_core.dlp import DLPScanner
+from iris_core.dlp.enforcement import (
+    enforce_prompt_dlp,
+    extract_gemini_response_text,
+    handle_response_dlp,
+)
 from iris_core.engine.cedar import CedarEngine, EvaluationContext
 from iris_core.evidence.vault import EvidenceVault
 from iris_core.models.passport import AgentPassport, Environment
 from iris_core.models.policy import PolicyResult, Severity
 
-from iris_gemini.guardrails import scan_gemini_content
+from iris_gemini.guardrails import _extract_text, scan_gemini_content
 
 logger = logging.getLogger("iris.gemini")
 _VAULT_LOCK = threading.Lock()
@@ -118,6 +124,7 @@ class _IrisGeminiBase:
     _passport: AgentPassport
     _engine: CedarEngine
     _vault: EvidenceVault
+    _dlp: DLPScanner
 
 
 class IrisModelsResource:
@@ -143,6 +150,15 @@ class IrisModelsResource:
         env = _current_environment()
         model_name = model or kwargs.get("model") or "unknown-model"
         request_contents = contents if contents is not None else kwargs.get("contents")
+        prompt_text = "\n".join(_extract_text(request_contents))
+        dlp_result = enforce_prompt_dlp(
+            self._parent._dlp,
+            self._vault,
+            self._passport,
+            env,
+            prompt_text,
+            resource=f"gemini-api/{model_name}",
+        )
         content_violations = scan_gemini_content(request_contents, self._passport)
         ctx = EvaluationContext(
             agent_id=self._passport.agent_id,
@@ -151,6 +167,7 @@ class IrisModelsResource:
             resource_type="api",
             environment=env,
             data_classification=self._passport.data_classification.value,
+            dlp_prompt_findings=dlp_result.findings,
             additional={
                 "model": model_name,
                 "content_violation_count": len(content_violations),
@@ -163,13 +180,28 @@ class IrisModelsResource:
             self._vault.record(ctx, result)
         _enforce_result(result, env)
 
+    def _scan_response(self, response: Any) -> Any:
+        env = _current_environment()
+        response_text = extract_gemini_response_text(response)
+        blocked, _ = handle_response_dlp(
+            self._parent._dlp,
+            self._vault,
+            self._passport,
+            env,
+            response_text,
+            response,
+            resource="gemini-api",
+        )
+        return blocked
+
     def generate_content(self, model: Any = None, contents: Any = None, **kwargs: Any) -> Any:
         self._govern(model, contents, kwargs)
         if model is not None:
             kwargs["model"] = model
         if contents is not None:
             kwargs["contents"] = contents
-        return self._models.generate_content(**kwargs)
+        response = self._models.generate_content(**kwargs)
+        return self._scan_response(response)
 
     def generate_content_stream(
         self, model: Any = None, contents: Any = None, **kwargs: Any
@@ -189,7 +221,8 @@ class IrisModelsResource:
             kwargs["model"] = model
         if contents is not None:
             kwargs["contents"] = contents
-        return await self._models.generate_content_async(**kwargs)
+        response = await self._models.generate_content_async(**kwargs)
+        return self._scan_response(response)
 
     async def generate_content_stream_async(
         self, model: Any = None, contents: Any = None, **kwargs: Any
@@ -216,6 +249,7 @@ class IrisGemini(_IrisGeminiBase):
         self._passport = passport
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=passport.agent_id)
+        self._dlp = DLPScanner(passport)
         _load_passport_policy(self._engine, passport)
         self._client = genai.Client(**genai_kwargs)
         self._models_resource = IrisModelsResource(self, self._client.models)
@@ -236,6 +270,7 @@ class IrisGeminiAsync(_IrisGeminiBase):
         self._passport = passport
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=passport.agent_id)
+        self._dlp = DLPScanner(passport)
         _load_passport_policy(self._engine, passport)
         self._client = genai.Client(**genai_kwargs)
         self._models_resource = IrisModelsResource(self, self._client.models)

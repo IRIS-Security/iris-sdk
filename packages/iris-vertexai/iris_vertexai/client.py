@@ -10,10 +10,18 @@ from datetime import datetime
 from typing import Any, Optional
 
 from iris import IrisViolationError
+from iris_core.dlp import DLPScanner
+from iris_core.dlp.enforcement import (
+    enforce_prompt_dlp,
+    extract_gemini_response_text,
+    handle_response_dlp,
+)
 from iris_core.engine.cedar import CedarEngine, EvaluationContext
 from iris_core.evidence.vault import EvidenceVault
 from iris_core.models.passport import AgentPassport
 from iris_core.models.policy import PolicyResult, Severity, Violation
+
+from iris_gemini.guardrails import _extract_text
 
 from iris_vertexai.fedramp import check_fedramp_location, check_fedramp_model
 
@@ -90,6 +98,7 @@ class IrisVertexAI:
         self._location = location
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=passport.agent_id, vault_dir=evidence_vault_dir)
+        self._dlp = DLPScanner(passport)
         _load_passport_policy(self._engine, passport)
 
     def get_model(self, model_name: str) -> "IrisGenerativeModel":
@@ -100,6 +109,7 @@ class IrisVertexAI:
             project=self._project,
             engine=self._engine,
             vault=self._vault,
+            dlp=self._dlp,
         )
 
 
@@ -114,6 +124,7 @@ class IrisGenerativeModel:
         project: Optional[str] = None,
         engine: Optional[CedarEngine] = None,
         vault: Optional[EvidenceVault] = None,
+        dlp: Optional[DLPScanner] = None,
     ):
         generative_models = _lazy_vertexai_generative_models()
         self._model_name = model_name
@@ -122,6 +133,7 @@ class IrisGenerativeModel:
         self._project = project
         self._engine = engine or CedarEngine()
         self._vault = vault or EvidenceVault(agent_id=passport.agent_id)
+        self._dlp = dlp or DLPScanner(passport)
         self._model = generative_models.GenerativeModel(model_name)
 
     def _record_with_metadata(
@@ -155,8 +167,17 @@ class IrisGenerativeModel:
         with open(self._vault._log_file, "a") as handle:
             handle.write(json.dumps(entry) + "\n")
 
-    def _govern(self, action: str) -> None:
+    def _govern(self, action: str, contents: Any = None) -> None:
         env = _current_environment()
+        prompt_text = "\n".join(_extract_text(contents))
+        dlp_result = enforce_prompt_dlp(
+            self._dlp,
+            self._vault,
+            self._passport,
+            env,
+            prompt_text,
+            resource=f"vertexai/{self._model_name}",
+        )
         violations: list[Violation] = []
 
         if self._location:
@@ -216,6 +237,7 @@ class IrisGenerativeModel:
             environment=env,
             data_region=self._location,
             data_classification=self._passport.data_classification.value,
+            dlp_prompt_findings=dlp_result.findings,
             additional={
                 "model": self._model_name,
                 "gcp_project": self._project,
@@ -236,12 +258,27 @@ class IrisGenerativeModel:
         self._record_with_metadata(ctx, result, [])
         _enforce_result(result)
 
+    def _scan_response(self, response: Any) -> Any:
+        env = _current_environment()
+        response_text = extract_gemini_response_text(response)
+        blocked, _ = handle_response_dlp(
+            self._dlp,
+            self._vault,
+            self._passport,
+            env,
+            response_text,
+            response,
+            resource=f"vertexai/{self._model_name}",
+        )
+        return blocked
+
     def generate_content(self, contents: Any, **kwargs: Any) -> Any:
-        self._govern(action="generate_content")
-        return self._model.generate_content(contents, **kwargs)
+        self._govern(action="generate_content", contents=contents)
+        response = self._model.generate_content(contents, **kwargs)
+        return self._scan_response(response)
 
     def generate_content_stream(self, **kwargs: Any) -> Any:
-        self._govern(action="generate_content_stream")
+        self._govern(action="generate_content_stream", contents=kwargs.get("contents"))
         return self._model.generate_content_stream(**kwargs)
 
     def start_chat(self) -> "IrisChatSession":
@@ -259,5 +296,6 @@ class IrisChatSession:
         self._model = model
 
     def send_message(self, content: Any, **kwargs: Any) -> Any:
-        self._model._govern(action="chat.send_message")
-        return self._chat_session.send_message(content, **kwargs)
+        self._model._govern(action="chat.send_message", contents=content)
+        response = self._chat_session.send_message(content, **kwargs)
+        return self._model._scan_response(response)
