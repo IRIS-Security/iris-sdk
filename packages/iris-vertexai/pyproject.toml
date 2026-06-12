@@ -6,21 +6,24 @@ build-backend = "setuptools.build_meta"
 name = "iris-security-vertexai"
 version = "0.1.0"
 description = "IRIS governance for Vertex AI via google-cloud-aiplatform"
-readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 authors = [{ name = "IRIS Platform", email = "sdk@iris.ai" }]
 dependencies = [
-  "iris-security-core",
-  "iris-security-sdk",
-  "google-cloud-aiplatform>=1.60",
+  "iris-security-core>=0.1.0",
+  "iris-security-sdk>=0.1.0",
 ]
 
 [project.optional-dependencies]
+vertexai = ["google-cloud-aiplatform>=1.60"]
 dev = [
   "pytest>=8.0",
   "ruff>=0.4",
 ]
+
+[project.urls]
+Homepage = "https://github.com/gimartinb/iris-sdk"
+Repository = "https://github.com/gimartinb/iris-sdk"
 
 [tool.setuptools]
 packages = ["iris_vertexai"]

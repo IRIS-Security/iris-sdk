@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "iris-security-sdk"
-version = "0.1.0"
+version = "0.1.1"
 description = "IRIS — AI Agent Governance SDK. Govern AI agents locally."
 readme = "README.md"
 license = { text = "Apache-2.0" }
@@ -36,19 +36,19 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-anthropic = ["anthropic>=0.25"]
-openai = ["openai>=1.30"]
-google = ["google-genai>=0.3"]
-gemini = ["google-genai>=0.3"]
-mistral = ["mistralai>=0.4"]
-groq = ["groq>=0.4"]
-litellm = ["litellm>=1.0"]
-ollama = ["litellm>=1.0"]
-vertexai = ["google-cloud-aiplatform>=1.60"]
-langchain = ["langchain>=0.2", "langchain-core>=0.2"]
-crewai = ["crewai>=0.30"]
+anthropic = ["iris-security-anthropic>=0.1.0"]
+openai = ["iris-security-openai>=0.1.0"]
+google = ["iris-security-gemini>=0.1.0"]
+vertexai = ["iris-security-vertexai>=0.1.0"]
+langchain = ["iris-security-langchain>=0.1.0"]
+crewai = ["iris-security-crewai>=0.1.0"]
 all = [
-  "iris-security-sdk[anthropic,openai,google,mistral,groq,litellm]",
+  "iris-security-anthropic>=0.1.0",
+  "iris-security-openai>=0.1.0",
+  "iris-security-gemini>=0.1.0",
+  "iris-security-vertexai>=0.1.0",
+  "iris-security-langchain>=0.1.0",
+  "iris-security-crewai>=0.1.0",
 ]
 dev = [
   "pytest>=8.0",
