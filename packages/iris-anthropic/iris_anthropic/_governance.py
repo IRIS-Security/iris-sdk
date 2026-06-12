@@ -97,6 +97,7 @@ def evaluate_api_call(
     data_classification: Optional[str] = None,
     prompt_violations: Optional[List[Violation]] = None,
     additional: Optional[dict] = None,
+    dlp_prompt_findings: Optional[list] = None,
 ) -> PolicyResult:
     ctx = EvaluationContext(
         agent_id=passport.agent_id,
@@ -105,6 +106,7 @@ def evaluate_api_call(
         resource_type="api",
         environment=env,
         data_classification=data_classification or passport.data_classification.value,
+        dlp_prompt_findings=dlp_prompt_findings,
         additional=additional or {},
     )
     result = engine.evaluate(passport, ctx)

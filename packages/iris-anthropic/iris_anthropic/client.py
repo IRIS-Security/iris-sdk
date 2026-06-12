@@ -4,6 +4,12 @@ from __future__ import annotations
 
 from typing import Any, List
 
+from iris_core.dlp import DLPScanner
+from iris_core.dlp.enforcement import (
+    enforce_prompt_dlp,
+    extract_anthropic_response_text,
+    handle_response_dlp,
+)
 from iris_core.engine.cedar import CedarEngine
 from iris_core.evidence.vault import EvidenceVault
 from iris_core.models.passport import AgentPassport
@@ -56,6 +62,7 @@ class _IrisAnthropicClientBase:
     _passport: AgentPassport
     _engine: CedarEngine
     _vault: EvidenceVault
+    _dlp: DLPScanner
 
 
 class _GovernedMessagesBase:
@@ -80,6 +87,14 @@ class _GovernedMessagesBase:
     def _govern_kwargs(self, kwargs: dict) -> None:
         env = current_environment()
         prompt = _extract_prompt_text(kwargs)
+        dlp_result = enforce_prompt_dlp(
+            self._parent._dlp,
+            self._vault,
+            self._passport,
+            env,
+            prompt,
+            resource="anthropic-api",
+        )
         prompt_violations = check_prompt_for_violations(prompt, self._passport)
         data_classification = effective_data_classification(prompt, self._passport)
         additional = {
@@ -98,14 +113,30 @@ class _GovernedMessagesBase:
             data_classification=data_classification,
             prompt_violations=prompt_violations,
             additional=additional,
+            dlp_prompt_findings=dlp_result.findings,
         )
         enforce_result(result, env)
+
+    def _scan_response(self, response: Any) -> Any:
+        env = current_environment()
+        response_text = extract_anthropic_response_text(response)
+        blocked, _ = handle_response_dlp(
+            self._parent._dlp,
+            self._vault,
+            self._passport,
+            env,
+            response_text,
+            response,
+            resource="anthropic-api",
+        )
+        return blocked
 
 
 class IrisMessagesResource(_GovernedMessagesBase):
     def create(self, **kwargs: Any) -> Any:
         self._govern_kwargs(kwargs)
-        return self._messages.create(**kwargs)
+        response = self._messages.create(**kwargs)
+        return self._scan_response(response)
 
     def stream(self, **kwargs: Any) -> Any:
         self._govern_kwargs(kwargs)
@@ -115,7 +146,8 @@ class IrisMessagesResource(_GovernedMessagesBase):
 class IrisMessagesResourceAsync(_GovernedMessagesBase):
     async def create(self, **kwargs: Any) -> Any:
         self._govern_kwargs(kwargs)
-        return await self._messages.create(**kwargs)
+        response = await self._messages.create(**kwargs)
+        return self._scan_response(response)
 
     async def stream(self, **kwargs: Any) -> Any:
         self._govern_kwargs(kwargs)
@@ -138,6 +170,7 @@ class IrisAnthropic(_IrisAnthropicClientBase):
         self._passport = passport
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=passport.agent_id)
+        self._dlp = DLPScanner(passport)
         load_passport_policy(self._engine, passport)
         self._client = anthropic.Anthropic(**anthropic_kwargs)
         self._messages_resource = IrisMessagesResource(self, self._client.messages)
@@ -158,6 +191,7 @@ class IrisAnthropicAsync(_IrisAnthropicClientBase):
         self._passport = passport
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=passport.agent_id)
+        self._dlp = DLPScanner(passport)
         load_passport_policy(self._engine, passport)
         self._client = anthropic.AsyncAnthropic(**anthropic_kwargs)
         self._messages_resource = IrisMessagesResourceAsync(self, self._client.messages)
