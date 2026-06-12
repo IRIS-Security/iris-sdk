@@ -17,6 +17,7 @@ from iris_core.dlp.enforcement import (
     handle_response_dlp,
 )
 from iris_core.engine.cedar import CedarEngine, EvaluationContext
+from iris_core.rbac.context import UserContext
 from iris_core.evidence.vault import EvidenceVault
 from iris_core.models.passport import AgentPassport
 from iris_core.models.policy import PolicyResult, Severity, Violation
@@ -85,6 +86,8 @@ class IrisVertexAI:
         passport: AgentPassport,
         project: Optional[str] = None,
         location: Optional[str] = None,
+        user_email: Optional[str] = None,
+        user_role: Optional[str] = None,
         **kwargs: Any,
     ):
         from iris_core.dev_trust import print_dev_trust_message
@@ -96,6 +99,8 @@ class IrisVertexAI:
         self._passport = passport
         self._project = project
         self._location = location
+        self._user_email = user_email
+        self._user_role = user_role
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=passport.agent_id, vault_dir=evidence_vault_dir)
         self._dlp = DLPScanner(passport)
@@ -110,6 +115,8 @@ class IrisVertexAI:
             engine=self._engine,
             vault=self._vault,
             dlp=self._dlp,
+            user_email=self._user_email,
+            user_role=self._user_role,
         )
 
 
@@ -125,6 +132,8 @@ class IrisGenerativeModel:
         engine: Optional[CedarEngine] = None,
         vault: Optional[EvidenceVault] = None,
         dlp: Optional[DLPScanner] = None,
+        user_email: Optional[str] = None,
+        user_role: Optional[str] = None,
     ):
         generative_models = _lazy_vertexai_generative_models()
         self._model_name = model_name
@@ -134,6 +143,8 @@ class IrisGenerativeModel:
         self._engine = engine or CedarEngine()
         self._vault = vault or EvidenceVault(agent_id=passport.agent_id)
         self._dlp = dlp or DLPScanner(passport)
+        self._user_email = user_email
+        self._user_role = user_role
         self._model = generative_models.GenerativeModel(model_name)
 
     def _record_with_metadata(
@@ -229,6 +240,7 @@ class IrisGenerativeModel:
             if fedramp_model_violation:
                 violations.append(fedramp_model_violation)
 
+        user_ctx = UserContext.from_params(self._user_email, self._user_role)
         ctx = EvaluationContext(
             agent_id=self._passport.agent_id,
             action=action,
@@ -243,6 +255,7 @@ class IrisGenerativeModel:
                 "gcp_project": self._project,
                 "gcp_location": self._location,
             },
+            **user_ctx.evaluation_fields(),
         )
         result = self._engine.evaluate(self._passport, ctx)
         if violations:

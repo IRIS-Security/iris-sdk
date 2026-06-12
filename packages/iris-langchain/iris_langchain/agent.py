@@ -43,6 +43,8 @@ class IrisLangChainAgent:
         passport: AgentPassport,
         compliance: Optional[List[str]] = None,
         environment: Optional[str] = None,
+        user_email: Optional[str] = None,
+        user_role: Optional[str] = None,
     ) -> "IrisLangChainAgent":
         from iris_core.dev_trust import print_dev_trust_message
 
@@ -51,7 +53,7 @@ class IrisLangChainAgent:
             passport.compliance_tags = [ComplianceTag(c) for c in compliance]
         env_name = environment or os.environ.get("IRIS_ENV", "dev")
         env = Environment(env_name)
-        handler = IrisCallbackHandler(passport, env)
+        handler = IrisCallbackHandler(passport, env, user_email=user_email, user_role=user_role)
         return cls(agent, passport, handler, compliance_frameworks=compliance)
 
     def _inject_callbacks(self) -> None:

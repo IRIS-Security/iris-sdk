@@ -46,10 +46,18 @@ class IrisCallbackHandler(BaseCallbackHandler):
     before execution and records evidence for audit.
     """
 
-    def __init__(self, passport: AgentPassport, env: Optional[Environment] = None):
+    def __init__(
+        self,
+        passport: AgentPassport,
+        env: Optional[Environment] = None,
+        user_email: Optional[str] = None,
+        user_role: Optional[str] = None,
+    ):
         super().__init__()
         self.passport = passport
         self.env = resolve_environment(env)
+        self._user_email = user_email
+        self._user_role = user_role
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=passport.agent_id)
         self._dlp = DLPScanner(passport)
@@ -136,6 +144,8 @@ class IrisCallbackHandler(BaseCallbackHandler):
             data_classification=data_classification,
             user_consent_logged=bool(inputs.get("user_consent_logged")) if inputs else False,
             run_id=self._current_run.run_id if self._current_run else None,
+            user_email=self._user_email,
+            user_role=self._user_role,
         )
         self._tool_results[run_id] = result
         track_result(self._current_run, result)
@@ -243,6 +253,8 @@ class IrisCallbackHandler(BaseCallbackHandler):
             run_id=self._current_run.run_id if self._current_run else None,
             extra_violations=guardrail_violations,
             dlp_prompt_findings=dlp_result.findings,
+            user_email=self._user_email,
+            user_role=self._user_role,
         )
         track_result(self._current_run, result)
         enforce_result(result, self.env)

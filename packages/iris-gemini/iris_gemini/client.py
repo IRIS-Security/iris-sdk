@@ -18,6 +18,7 @@ from iris_core.dlp.enforcement import (
     handle_response_dlp,
 )
 from iris_core.engine.cedar import CedarEngine, EvaluationContext
+from iris_core.rbac.context import UserContext
 from iris_core.evidence.vault import EvidenceVault
 from iris_core.models.passport import AgentPassport, Environment
 from iris_core.models.policy import PolicyResult, Severity
@@ -125,6 +126,8 @@ class _IrisGeminiBase:
     _engine: CedarEngine
     _vault: EvidenceVault
     _dlp: DLPScanner
+    _user_email: Optional[str] = None
+    _user_role: Optional[str] = None
 
 
 class IrisModelsResource:
@@ -160,6 +163,7 @@ class IrisModelsResource:
             resource=f"gemini-api/{model_name}",
         )
         content_violations = scan_gemini_content(request_contents, self._passport)
+        user_ctx = UserContext.from_params(self._parent._user_email, self._parent._user_role)
         ctx = EvaluationContext(
             agent_id=self._passport.agent_id,
             action="call",
@@ -172,6 +176,7 @@ class IrisModelsResource:
                 "model": model_name,
                 "content_violation_count": len(content_violations),
             },
+            **user_ctx.evaluation_fields(),
         )
         result = self._engine.evaluate(self._passport, ctx)
         result = _apply_no_policy_gate(self._engine, self._passport, env, result)
@@ -241,12 +246,20 @@ class IrisModelsResource:
 class IrisGemini(_IrisGeminiBase):
     """Drop-in replacement for google.genai.Client()."""
 
-    def __init__(self, passport: AgentPassport, **genai_kwargs: Any):
+    def __init__(
+        self,
+        passport: AgentPassport,
+        user_email: Optional[str] = None,
+        user_role: Optional[str] = None,
+        **genai_kwargs: Any,
+    ):
         from iris_core.dev_trust import print_dev_trust_message
 
         print_dev_trust_message()
         genai = _lazy_genai()
         self._passport = passport
+        self._user_email = user_email
+        self._user_role = user_role
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=passport.agent_id)
         self._dlp = DLPScanner(passport)
@@ -265,9 +278,17 @@ class IrisGemini(_IrisGeminiBase):
 class IrisGeminiAsync(_IrisGeminiBase):
     """Async drop-in wrapper for google.genai.Client async methods."""
 
-    def __init__(self, passport: AgentPassport, **genai_kwargs: Any):
+    def __init__(
+        self,
+        passport: AgentPassport,
+        user_email: Optional[str] = None,
+        user_role: Optional[str] = None,
+        **genai_kwargs: Any,
+    ):
         genai = _lazy_genai()
         self._passport = passport
+        self._user_email = user_email
+        self._user_role = user_role
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=passport.agent_id)
         self._dlp = DLPScanner(passport)

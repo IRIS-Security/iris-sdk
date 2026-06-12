@@ -22,6 +22,8 @@ def iris_tool_guard(
     passport: AgentPassport,
     action: str = "call",
     environment: Optional[str] = None,
+    user_email: Optional[str] = None,
+    user_role: Optional[str] = None,
 ) -> Any:
     """
     Wrap a LangChain Tool or StructuredTool with IRIS policy evaluation.
@@ -52,6 +54,8 @@ def iris_tool_guard(
             data_region=data_region,
             destination_region=destination_region,
             data_classification=data_classification,
+            user_email=user_email,
+            user_role=user_role,
         )
         enforce_result(result, env)
 

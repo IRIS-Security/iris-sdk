@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, List
+from typing import Any, List, Optional
 
 from iris_core.dlp import DLPScanner
 from iris_core.dlp.enforcement import (
@@ -63,6 +63,8 @@ class _IrisAnthropicClientBase:
     _engine: CedarEngine
     _vault: EvidenceVault
     _dlp: DLPScanner
+    _user_email: Optional[str] = None
+    _user_role: Optional[str] = None
 
 
 class _GovernedMessagesBase:
@@ -114,6 +116,8 @@ class _GovernedMessagesBase:
             prompt_violations=prompt_violations,
             additional=additional,
             dlp_prompt_findings=dlp_result.findings,
+            user_email=self._parent._user_email,
+            user_role=self._parent._user_role,
         )
         enforce_result(result, env)
 
@@ -162,12 +166,20 @@ class IrisAnthropic(_IrisAnthropicClientBase):
     All attributes not defined here are proxied to the underlying client.
     """
 
-    def __init__(self, passport: AgentPassport, **anthropic_kwargs: Any):
+    def __init__(
+        self,
+        passport: AgentPassport,
+        user_email: Optional[str] = None,
+        user_role: Optional[str] = None,
+        **anthropic_kwargs: Any,
+    ):
         from iris_core.dev_trust import print_dev_trust_message
 
         print_dev_trust_message()
         anthropic = _lazy_anthropic()
         self._passport = passport
+        self._user_email = user_email
+        self._user_role = user_role
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=passport.agent_id)
         self._dlp = DLPScanner(passport)
@@ -186,9 +198,17 @@ class IrisAnthropic(_IrisAnthropicClientBase):
 class IrisAnthropicAsync(_IrisAnthropicClientBase):
     """Async drop-in replacement for anthropic.AsyncAnthropic()."""
 
-    def __init__(self, passport: AgentPassport, **anthropic_kwargs: Any):
+    def __init__(
+        self,
+        passport: AgentPassport,
+        user_email: Optional[str] = None,
+        user_role: Optional[str] = None,
+        **anthropic_kwargs: Any,
+    ):
         anthropic = _lazy_anthropic()
         self._passport = passport
+        self._user_email = user_email
+        self._user_role = user_role
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=passport.agent_id)
         self._dlp = DLPScanner(passport)

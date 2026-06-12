@@ -15,6 +15,7 @@ from typing import Any, Callable, Dict, List, Optional
 from iris_core.dlp import DLPScanner
 from iris_core.dlp.enforcement import enforce_prompt_dlp
 from iris_core.engine.cedar import CedarEngine, EvaluationContext
+from iris_core.rbac.context import UserContext
 from iris_core.evidence.vault import EvidenceVault
 from iris_core.models.passport import AgentPassport, Environment
 from iris_core.models.policy import PolicyResult
@@ -114,9 +115,17 @@ def vault_partition_id(passport: AgentPassport) -> str:
 class AgentGovernor:
     """Per-agent Cedar evaluation, evidence recording, and compliance tracking."""
 
-    def __init__(self, passport: AgentPassport, environment: Optional[Environment] = None):
+    def __init__(
+        self,
+        passport: AgentPassport,
+        environment: Optional[Environment] = None,
+        user_email: Optional[str] = None,
+        user_role: Optional[str] = None,
+    ):
         self.passport = passport
         self.env = resolve_environment(environment)
+        self._user_email = user_email
+        self._user_role = user_role
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=vault_partition_id(passport))
         self._dlp = DLPScanner(passport)
@@ -154,6 +163,7 @@ class AgentGovernor:
             if prompt_text.strip()
             else None
         )
+        user_ctx = UserContext.from_params(self._user_email, self._user_role)
         ctx = EvaluationContext(
             agent_id=self.passport.agent_id,
             action=action,
@@ -165,6 +175,7 @@ class AgentGovernor:
             data_classification=data_classification,
             user_consent_logged=bool(inputs.get("user_consent_logged")) if inputs else False,
             dlp_prompt_findings=dlp_result.findings if dlp_result else None,
+            **user_ctx.evaluation_fields(),
         )
         result = self._engine.evaluate(self.passport, ctx)
         result = apply_no_policy_gate(self._engine, self.passport, self.env, result)

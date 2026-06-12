@@ -36,6 +36,7 @@ from iris_core.models.passport import (
 )
 from iris_core.models.policy import PolicyResult, Violation, Severity
 from iris_core.engine.cedar import CedarEngine, EvaluationContext
+from iris_core.rbac.context import UserContext
 from iris_core.engine.compiler import PolicyCompiler, CompilationResult
 from iris_core.compliance.registry import ComplianceRegistry
 from iris_core.evidence.vault import EvidenceVault
@@ -107,10 +108,13 @@ class IrisAgent:
         policy_dir: Optional[Path] = None,
         telemetry: bool = False,          # opt-in only, never default True
         environment: Optional[str] = None,
+        user_email: Optional[str] = None,
+        user_role: Optional[str] = None,
     ):
         compliance_tags = [ComplianceTag(c) for c in (compliance or [])]
         envs = [Environment(e) for e in (environments or ["dev", "test", "staging", "production"])]
         current_env = Environment(environment or os.environ.get("IRIS_ENV", "dev"))
+        self._user_ctx = UserContext.from_params(user_email, user_role)
 
         self.passport = AgentPassport(
             name=name,
@@ -197,6 +201,7 @@ class IrisAgent:
                     data_region=data_region,
                     destination_region=destination_region,
                     data_classification=data_classification,
+                    **self._user_ctx.evaluation_fields(),
                 )
                 result = self._engine.evaluate(self.passport, ctx)
                 self._vault.record(ctx, result)

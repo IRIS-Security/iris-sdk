@@ -23,6 +23,7 @@ from iris_core.dlp.enforcement import (
     handle_response_dlp,
 )
 from iris_core.engine.cedar import CedarEngine, EvaluationContext
+from iris_core.rbac.context import UserContext
 from iris_core.evidence.vault import EvidenceVault
 from iris_core.models.passport import AgentPassport, Environment
 from iris_core.models.policy import PolicyResult, Severity, Violation
@@ -182,6 +183,8 @@ class IrisGenerativeModel:
         engine: CedarEngine,
         vault: EvidenceVault,
         dlp: DLPScanner,
+        user_email: Optional[str] = None,
+        user_role: Optional[str] = None,
     ) -> None:
         self._passport = passport
         self._model_name = model_name
@@ -189,6 +192,8 @@ class IrisGenerativeModel:
         self._engine = engine
         self._vault = vault
         self._dlp = dlp
+        self._user_email = user_email
+        self._user_role = user_role
 
     def _govern(self, contents: Any) -> None:
         env = _current_environment()
@@ -202,6 +207,7 @@ class IrisGenerativeModel:
             resource=f"gemini-api/{self._model_name}",
         )
         content_violations = _scan_content_violations(contents, self._passport)
+        user_ctx = UserContext.from_params(self._user_email, self._user_role)
         ctx = EvaluationContext(
             agent_id=self._passport.agent_id,
             action="call",
@@ -214,6 +220,7 @@ class IrisGenerativeModel:
                 "model": self._model_name,
                 "content_violation_count": len(content_violations),
             },
+            **user_ctx.evaluation_fields(),
         )
         result = self._engine.evaluate(self._passport, ctx)
         result = _apply_no_policy_gate(self._engine, self._passport, env, result)
@@ -289,12 +296,20 @@ class IrisGenerativeAI:
     Consider migrating to IrisGemini (iris-security-gemini) for new projects.
     """
 
-    def __init__(self, passport: AgentPassport, api_key: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        passport: AgentPassport,
+        api_key: Optional[str] = None,
+        user_email: Optional[str] = None,
+        user_role: Optional[str] = None,
+    ) -> None:
         from iris_core.dev_trust import print_dev_trust_message
 
         print_dev_trust_message()
         genai = _lazy_google_generativeai()
         self._passport = passport
+        self._user_email = user_email
+        self._user_role = user_role
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=passport.agent_id)
         self._dlp = DLPScanner(passport)
@@ -311,4 +326,6 @@ class IrisGenerativeAI:
             engine=self._engine,
             vault=self._vault,
             dlp=self._dlp,
+            user_email=self._user_email,
+            user_role=self._user_role,
         )

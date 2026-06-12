@@ -43,12 +43,14 @@ class IrisCrew:
         cls,
         crew: Any,
         passports: Dict[str, AgentPassport],
+        user_email: Optional[str] = None,
+        user_role: Optional[str] = None,
     ) -> "IrisCrew":
         from iris_core.dev_trust import print_dev_trust_message
 
         print_dev_trust_message()
         cls._validate_passports(crew, passports, strict=True)
-        governors = cls._collect_governors(crew, passports)
+        governors = cls._collect_governors(crew, passports, user_email, user_role)
         return cls(crew, passports, governors)
 
     @staticmethod
@@ -76,6 +78,8 @@ class IrisCrew:
     def _collect_governors(
         crew: Any,
         passports: Dict[str, AgentPassport],
+        user_email: Optional[str] = None,
+        user_role: Optional[str] = None,
     ) -> Dict[str, AgentGovernor]:
         governors: Dict[str, AgentGovernor] = {}
         for agent in crew.agents:
@@ -83,7 +87,11 @@ class IrisCrew:
             if hasattr(agent, "_iris_governor"):
                 governors[role] = agent._iris_governor
             else:
-                governors[role] = AgentGovernor(passports[role])
+                governors[role] = AgentGovernor(
+                    passports[role],
+                    user_email=user_email,
+                    user_role=user_role,
+                )
         return governors
 
     def kickoff(self, inputs: Optional[dict] = None, **kwargs: Any) -> dict:

@@ -14,6 +14,7 @@ import yaml
 
 from iris import IrisViolationError
 from iris_core.engine.cedar import CedarEngine, EvaluationContext
+from iris_core.rbac.context import UserContext
 from iris_core.evidence.vault import EvidenceVault
 from iris_core.models.passport import AgentPassport, Environment
 from iris_core.models.policy import PolicyResult, Severity, Violation
@@ -254,9 +255,13 @@ def evaluate_openai_call(
     azure_endpoint: Optional[str] = None,
     extra_violations: Optional[List[Violation]] = None,
     dlp_prompt_findings: Optional[list] = None,
+    user_email: Optional[str] = None,
+    user_role: Optional[str] = None,
 ) -> PolicyResult:
     data_region = passport.allowed_regions[0] if passport.allowed_regions else None
     destination_region = parse_azure_endpoint_region(azure_endpoint)
+    user_ctx = UserContext.from_params(user_email, user_role)
+    user_fields = user_ctx.evaluation_fields()
 
     ctx = EvaluationContext(
         agent_id=passport.agent_id,
@@ -274,6 +279,7 @@ def evaluate_openai_call(
             "tool_names": tool_names or [],
             "azure_endpoint": azure_endpoint,
         },
+        **user_fields,
     )
 
     result = engine.evaluate(passport, ctx)
@@ -292,6 +298,7 @@ def evaluate_openai_call(
             resource_type="tool",
             environment=env,
             data_classification=data_classification or passport.data_classification.value,
+            **user_fields,
         )
         tool_result = engine.evaluate(passport, tool_ctx)
         tool_result = apply_no_policy_gate(engine, passport, env, tool_result)

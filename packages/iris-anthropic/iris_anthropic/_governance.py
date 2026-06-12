@@ -11,6 +11,7 @@ from typing import List, Optional
 
 from iris import IrisViolationError
 from iris_core.engine.cedar import CedarEngine, EvaluationContext
+from iris_core.rbac.context import UserContext
 from iris_core.evidence.vault import EvidenceVault
 from iris_core.models.passport import AgentPassport, Environment
 from iris_core.models.policy import PolicyResult, Violation
@@ -98,7 +99,10 @@ def evaluate_api_call(
     prompt_violations: Optional[List[Violation]] = None,
     additional: Optional[dict] = None,
     dlp_prompt_findings: Optional[list] = None,
+    user_email: Optional[str] = None,
+    user_role: Optional[str] = None,
 ) -> PolicyResult:
+    user_ctx = UserContext.from_params(user_email, user_role)
     ctx = EvaluationContext(
         agent_id=passport.agent_id,
         action="call",
@@ -108,6 +112,7 @@ def evaluate_api_call(
         data_classification=data_classification or passport.data_classification.value,
         dlp_prompt_findings=dlp_prompt_findings,
         additional=additional or {},
+        **user_ctx.evaluation_fields(),
     )
     result = engine.evaluate(passport, ctx)
     result = apply_no_policy_gate(engine, passport, env, result)

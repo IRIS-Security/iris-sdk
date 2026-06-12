@@ -84,6 +84,8 @@ class _IrisOpenAIClientBase:
     _vault: EvidenceVault
     _dlp: DLPScanner
     _azure_endpoint: Optional[str] = None
+    _user_email: Optional[str] = None
+    _user_role: Optional[str] = None
 
 
 class _GovernedCompletionsBase:
@@ -127,6 +129,8 @@ class _GovernedCompletionsBase:
             tool_names=tool_names,
             azure_endpoint=getattr(self._parent, "_azure_endpoint", None),
             dlp_prompt_findings=dlp_result.findings,
+            user_email=getattr(self._parent, "_user_email", None),
+            user_role=getattr(self._parent, "_user_role", None),
         )
         enforce_result(result, env)
 
@@ -221,6 +225,8 @@ class _GovernedEmbeddingsBase:
             model=kwargs.get("model"),
             data_classification=self._parent._passport.data_classification.value,
             azure_endpoint=getattr(self._parent, "_azure_endpoint", None),
+            user_email=getattr(self._parent, "_user_email", None),
+            user_role=getattr(self._parent, "_user_role", None),
         )
         enforce_result(result, env)
 
@@ -251,12 +257,20 @@ class IrisOpenAI(_IrisOpenAIClientBase):
     All attributes not defined here are proxied to the underlying client.
     """
 
-    def __init__(self, passport: AgentPassport, **openai_kwargs: Any):
+    def __init__(
+        self,
+        passport: AgentPassport,
+        user_email: Optional[str] = None,
+        user_role: Optional[str] = None,
+        **openai_kwargs: Any,
+    ):
         from iris_core.dev_trust import print_dev_trust_message
 
         print_dev_trust_message()
         openai = _lazy_openai()
         self._passport = passport
+        self._user_email = user_email
+        self._user_role = user_role
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=passport.agent_id)
         self._dlp = DLPScanner(passport)
@@ -280,9 +294,17 @@ class IrisOpenAI(_IrisOpenAIClientBase):
 class IrisOpenAIAsync(_IrisOpenAIClientBase):
     """Async drop-in replacement for openai.AsyncOpenAI()."""
 
-    def __init__(self, passport: AgentPassport, **openai_kwargs: Any):
+    def __init__(
+        self,
+        passport: AgentPassport,
+        user_email: Optional[str] = None,
+        user_role: Optional[str] = None,
+        **openai_kwargs: Any,
+    ):
         openai = _lazy_openai()
         self._passport = passport
+        self._user_email = user_email
+        self._user_role = user_role
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=passport.agent_id)
         self._dlp = DLPScanner(passport)
