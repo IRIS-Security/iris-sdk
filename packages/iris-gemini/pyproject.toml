@@ -11,17 +11,21 @@ license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 authors = [{ name = "IRIS Platform", email = "sdk@iris.ai" }]
 dependencies = [
-  "iris-security-core",
-  "iris-security-sdk",
-  "google-genai>=0.3",
+  "iris-security-core>=0.1.0",
+  "iris-security-sdk>=0.1.0",
 ]
 
 [project.optional-dependencies]
+google = ["google-genai>=0.3"]
 dev = [
   "pytest>=8.0",
   "pytest-asyncio>=0.23",
   "ruff>=0.4",
 ]
+
+[project.urls]
+Homepage = "https://github.com/gimartinb/iris-sdk"
+Repository = "https://github.com/gimartinb/iris-sdk"
 
 [tool.setuptools]
 packages = ["iris_gemini"]
