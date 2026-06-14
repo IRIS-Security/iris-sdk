@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "iris-security-vertexai"
-version = "0.1.0"
+version = "0.1.1"
 description = "IRIS governance for Vertex AI via google-cloud-aiplatform"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 authors = [{ name = "IRIS Platform", email = "sdk@iris.ai" }]
 dependencies = [
-  "iris-security-core>=0.1.0",
+  "iris-security-core>=0.1.2",
   "iris-security-sdk>=0.1.0",
 ]
 
