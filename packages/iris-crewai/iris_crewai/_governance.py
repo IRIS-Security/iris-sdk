@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
+from iris_core.cost import record_llm_cost_async
 from iris_core.dlp import DLPScanner
 from iris_core.dlp.enforcement import enforce_prompt_dlp
 from iris_core.engine.cedar import CedarEngine, EvaluationContext
@@ -253,6 +254,39 @@ class AgentGovernor:
         )
         return None
 
+    def record_step_llm_cost(self, agent_action: Any) -> None:
+        """Record LLM cost when token usage is available on a CrewAI step."""
+        usage = getattr(agent_action, "usage", None) or getattr(agent_action, "token_usage", None)
+        if usage is None:
+            return
+
+        model = (
+            getattr(agent_action, "model", None)
+            or getattr(agent_action, "model_name", None)
+            or "crewai-llm"
+        )
+        provider = "openai"
+        model_lower = str(model).lower()
+        if "claude" in model_lower:
+            provider = "anthropic"
+        elif "gemini" in model_lower:
+            provider = "google"
+
+        class _UsageResponse:
+            def __init__(self, usage_data: Any):
+                self.usage = usage_data
+
+        record_llm_cost_async(
+            agent_id=self.passport.agent_id,
+            agent_name=vault_partition_id(self.passport),
+            provider=provider,
+            model=str(model),
+            response=_UsageResponse(usage),
+            tool_name=getattr(agent_action, "tool", "crewai-llm"),
+            duration_ms=0.0,
+            environment=self.env.value,
+        )
+
     @property
     def vault(self) -> EvidenceVault:
         return self._vault
@@ -288,6 +322,7 @@ def make_step_callback(
 
     def iris_step_callback(step_output: Any) -> Any:
         mock_response = governor.evaluate_step_action(step_output)
+        governor.record_step_llm_cost(step_output)
         if user_callback is not None:
             user_result = user_callback(step_output)
             return user_result if user_result is not None else mock_response

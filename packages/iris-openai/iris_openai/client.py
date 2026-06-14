@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import time
 from typing import Any, List, Optional
 
+from iris_core.cost import record_llm_cost_async
 from iris_core.dlp import DLPScanner
 from iris_core.dlp.enforcement import (
     enforce_prompt_dlp,
@@ -150,8 +152,23 @@ class _GovernedCompletionsBase:
 
     def create(self, **kwargs: Any) -> Any:
         self._govern_kwargs(kwargs)
+        model = kwargs.get("model", "unknown")
+        env = current_environment()
+        start = time.perf_counter()
         response = self._completions.create(**kwargs)
-        return self._scan_response(response)
+        elapsed_ms = (time.perf_counter() - start) * 1000
+        scanned = self._scan_response(response)
+        record_llm_cost_async(
+            agent_id=self._passport.agent_id,
+            agent_name=self._passport.name,
+            provider="openai",
+            model=model,
+            response=response,
+            tool_name="openai-api",
+            duration_ms=elapsed_ms,
+            environment=env.value,
+        )
+        return scanned
 
     def stream(self, **kwargs: Any) -> Any:
         self._govern_kwargs(kwargs)
@@ -161,8 +178,23 @@ class _GovernedCompletionsBase:
 class _GovernedCompletionsAsyncBase(_GovernedCompletionsBase):
     async def create(self, **kwargs: Any) -> Any:
         self._govern_kwargs(kwargs)
+        model = kwargs.get("model", "unknown")
+        env = current_environment()
+        start = time.perf_counter()
         response = await self._completions.create(**kwargs)
-        return self._scan_response(response)
+        elapsed_ms = (time.perf_counter() - start) * 1000
+        scanned = self._scan_response(response)
+        record_llm_cost_async(
+            agent_id=self._passport.agent_id,
+            agent_name=self._passport.name,
+            provider="openai",
+            model=model,
+            response=response,
+            tool_name="openai-api",
+            duration_ms=elapsed_ms,
+            environment=env.value,
+        )
+        return scanned
 
     async def stream(self, **kwargs: Any) -> Any:
         self._govern_kwargs(kwargs)

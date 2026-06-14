@@ -12,10 +12,12 @@ import os
 import re
 import sys
 import threading
+import time
 from pathlib import Path
 from typing import Any, Optional
 
 from iris import IrisViolationError
+from iris_core.cost import record_llm_cost_async
 from iris_core.dlp import DLPScanner
 from iris_core.dlp.enforcement import (
     enforce_prompt_dlp,
@@ -245,17 +247,45 @@ class IrisGenerativeModel:
 
     def generate_content(self, contents: Any, **kwargs: Any) -> Any:
         self._govern(contents)
+        env = _current_environment()
+        start = time.perf_counter()
         response = self._model.generate_content(contents, **kwargs)
-        return self._scan_response(response)
+        elapsed_ms = (time.perf_counter() - start) * 1000
+        scanned = self._scan_response(response)
+        record_llm_cost_async(
+            agent_id=self._passport.agent_id,
+            agent_name=self._passport.name,
+            provider="google",
+            model=self._model_name,
+            response=response,
+            tool_name=f"gemini-api/{self._model_name}",
+            duration_ms=elapsed_ms,
+            environment=env.value,
+        )
+        return scanned
 
     async def generate_content_async(self, contents: Any = None, **kwargs: Any) -> Any:
         payload = contents if contents is not None else kwargs.get("contents")
         self._govern(payload)
+        env = _current_environment()
+        start = time.perf_counter()
         if contents is not None:
             response = await self._model.generate_content_async(contents, **kwargs)
         else:
             response = await self._model.generate_content_async(**kwargs)
-        return self._scan_response(response)
+        elapsed_ms = (time.perf_counter() - start) * 1000
+        scanned = self._scan_response(response)
+        record_llm_cost_async(
+            agent_id=self._passport.agent_id,
+            agent_name=self._passport.name,
+            provider="google",
+            model=self._model_name,
+            response=response,
+            tool_name=f"gemini-api/{self._model_name}",
+            duration_ms=elapsed_ms,
+            environment=env.value,
+        )
+        return scanned
 
     def start_chat(self, **kwargs: Any) -> "IrisChatSession":
         session = self._model.start_chat(**kwargs)

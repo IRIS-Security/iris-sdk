@@ -7,10 +7,12 @@ import logging
 import os
 import sys
 import threading
+import time
 from pathlib import Path
 from typing import Any, Optional
 
 from iris import IrisViolationError
+from iris_core.cost import record_llm_cost_async
 from iris_core.dlp import DLPScanner
 from iris_core.dlp.enforcement import (
     enforce_prompt_dlp,
@@ -201,12 +203,27 @@ class IrisModelsResource:
 
     def generate_content(self, model: Any = None, contents: Any = None, **kwargs: Any) -> Any:
         self._govern(model, contents, kwargs)
+        model_name = str(model or kwargs.get("model") or "unknown-model")
+        env = _current_environment()
         if model is not None:
             kwargs["model"] = model
         if contents is not None:
             kwargs["contents"] = contents
+        start = time.perf_counter()
         response = self._models.generate_content(**kwargs)
-        return self._scan_response(response)
+        elapsed_ms = (time.perf_counter() - start) * 1000
+        scanned = self._scan_response(response)
+        record_llm_cost_async(
+            agent_id=self._passport.agent_id,
+            agent_name=self._passport.name,
+            provider="google",
+            model=model_name,
+            response=response,
+            tool_name=f"gemini-api/{model_name}",
+            duration_ms=elapsed_ms,
+            environment=env.value,
+        )
+        return scanned
 
     def generate_content_stream(
         self, model: Any = None, contents: Any = None, **kwargs: Any
@@ -222,12 +239,27 @@ class IrisModelsResource:
         self, model: Any = None, contents: Any = None, **kwargs: Any
     ) -> Any:
         self._govern(model, contents, kwargs)
+        model_name = str(model or kwargs.get("model") or "unknown-model")
+        env = _current_environment()
         if model is not None:
             kwargs["model"] = model
         if contents is not None:
             kwargs["contents"] = contents
+        start = time.perf_counter()
         response = await self._models.generate_content_async(**kwargs)
-        return self._scan_response(response)
+        elapsed_ms = (time.perf_counter() - start) * 1000
+        scanned = self._scan_response(response)
+        record_llm_cost_async(
+            agent_id=self._passport.agent_id,
+            agent_name=self._passport.name,
+            provider="google",
+            model=model_name,
+            response=response,
+            tool_name=f"gemini-api/{model_name}",
+            duration_ms=elapsed_ms,
+            environment=env.value,
+        )
+        return scanned
 
     async def generate_content_stream_async(
         self, model: Any = None, contents: Any = None, **kwargs: Any
