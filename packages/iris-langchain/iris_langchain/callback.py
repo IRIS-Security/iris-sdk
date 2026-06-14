@@ -16,6 +16,7 @@ except ImportError:  # pragma: no cover - graceful when langchain-core missing
         pass
 
 
+from iris_core.cost import record_llm_cost_async
 from iris_core.dlp import DLPScanner
 from iris_core.dlp.enforcement import enforce_prompt_dlp, handle_response_dlp
 from iris_core.engine.cedar import CedarEngine
@@ -258,6 +259,52 @@ class IrisCallbackHandler(BaseCallbackHandler):
         )
         track_result(self._current_run, result)
         enforce_result(result, self.env)
+
+    def on_llm_end(
+        self,
+        response: Any,
+        *,
+        run_id: UUID,
+        parent_run_id: Optional[UUID] = None,
+        **kwargs: Any,
+    ) -> None:
+        llm_output = getattr(response, "llm_output", None) or {}
+        token_usage = {}
+        if isinstance(llm_output, dict):
+            token_usage = llm_output.get("token_usage") or {}
+
+        model_name = kwargs.get("model") or llm_output.get("model_name") or "langchain-llm"
+        provider = "openai"
+        model_lower = str(model_name).lower()
+        if "claude" in model_lower or "anthropic" in model_lower:
+            provider = "anthropic"
+        elif "gemini" in model_lower or "google" in model_lower:
+            provider = "google"
+
+        class _UsageResponse:
+            def __init__(self, usage_data: dict):
+                self.usage = type(
+                    "Usage",
+                    (),
+                    {
+                        "prompt_tokens": usage_data.get("prompt_tokens", 0),
+                        "completion_tokens": usage_data.get("completion_tokens", 0),
+                        "input_tokens": usage_data.get("input_tokens", usage_data.get("prompt_tokens", 0)),
+                        "output_tokens": usage_data.get("output_tokens", usage_data.get("completion_tokens", 0)),
+                    },
+                )()
+
+        usage_response = _UsageResponse(token_usage)
+        record_llm_cost_async(
+            agent_id=self.passport.agent_id,
+            agent_name=self.passport.name,
+            provider=provider,
+            model=str(model_name),
+            response=usage_response,
+            tool_name="langchain-llm",
+            duration_ms=float(kwargs.get("duration_ms", 0.0)),
+            environment=self.env.value,
+        )
 
     def on_chain_start(
         self,

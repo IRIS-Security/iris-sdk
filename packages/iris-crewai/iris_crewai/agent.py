@@ -42,7 +42,9 @@ def _iris_crew_agent_class() -> type:
 
         def _iris_step_callback(self, agent_action: Any) -> Any:
             """Evaluate a CrewAI step against this agent's passport."""
-            return self._iris_governor.evaluate_step_action(agent_action)
+            result = self._iris_governor.evaluate_step_action(agent_action)
+            self._iris_governor.record_step_llm_cost(agent_action)
+            return result
 
         @classmethod
         def from_crew_agent(cls, agent: Agent, passport: AgentPassport) -> "_IrisCrewAgentImpl":

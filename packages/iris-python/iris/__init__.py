@@ -23,6 +23,7 @@ from __future__ import annotations
 from typing import Optional, List, Callable, Any
 from functools import wraps
 from pathlib import Path
+from datetime import datetime, timedelta
 import os
 import sys
 
@@ -40,6 +41,8 @@ from iris_core.rbac.context import UserContext
 from iris_core.engine.compiler import PolicyCompiler, CompilationResult
 from iris_core.compliance.registry import ComplianceRegistry
 from iris_core.evidence.vault import EvidenceVault
+from iris_core.cost.tracker import CostSummary, CostTracker, CostEntry
+from iris_core.cost.pricing import PricingRegistry
 
 __version__ = "0.1.0"
 __all__ = [
@@ -63,6 +66,10 @@ __all__ = [
     "CompilationResult",
     "ComplianceRegistry",
     "EvidenceVault",
+    "CostTracker",
+    "CostSummary",
+    "CostEntry",
+    "PricingRegistry",
 ]
 
 
@@ -131,6 +138,10 @@ class IrisAgent:
         self._engine = CedarEngine(policy_dir=self._policy_dir)
         self._compiler: Optional[PolicyCompiler] = None
         self._vault = EvidenceVault(agent_id=self.passport.agent_id)
+        self._cost_tracker = CostTracker(
+            agent_id=self.passport.agent_id,
+            agent_name=self.passport.name,
+        )
         self._telemetry = telemetry
 
         # Load policy if it exists on disk
@@ -235,6 +246,17 @@ class IrisAgent:
             self.passport,
             framework or [t.value for t in self.passport.compliance_tags],
         )
+
+    @property
+    def total_cost_usd(self) -> float:
+        """Total LLM spend for this agent since install."""
+        summary = self._cost_tracker.get_summary()
+        return summary.total_cost_usd
+
+    def cost_report(self, days: int = 30) -> CostSummary:
+        """Return a cost summary for the last N days."""
+        since = (datetime.utcnow() - timedelta(days=days)).isoformat()
+        return self._cost_tracker.get_summary(since=since)
 
     @property
     def is_ready_for_production(self) -> bool:

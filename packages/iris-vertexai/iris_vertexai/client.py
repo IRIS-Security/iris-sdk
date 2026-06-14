@@ -5,11 +5,13 @@ from __future__ import annotations
 import importlib
 import json
 import os
+import time
 import uuid
 from datetime import datetime
 from typing import Any, Optional
 
 from iris import IrisViolationError
+from iris_core.cost import record_llm_cost_async
 from iris_core.dlp import DLPScanner
 from iris_core.dlp.enforcement import (
     enforce_prompt_dlp,
@@ -287,8 +289,22 @@ class IrisGenerativeModel:
 
     def generate_content(self, contents: Any, **kwargs: Any) -> Any:
         self._govern(action="generate_content", contents=contents)
+        env = _current_environment()
+        start = time.perf_counter()
         response = self._model.generate_content(contents, **kwargs)
-        return self._scan_response(response)
+        elapsed_ms = (time.perf_counter() - start) * 1000
+        scanned = self._scan_response(response)
+        record_llm_cost_async(
+            agent_id=self._passport.agent_id,
+            agent_name=self._passport.name,
+            provider="google",
+            model=self._model_name,
+            response=response,
+            tool_name=f"vertexai/{self._model_name}",
+            duration_ms=elapsed_ms,
+            environment=env.value,
+        )
+        return scanned
 
     def generate_content_stream(self, **kwargs: Any) -> Any:
         self._govern(action="generate_content_stream", contents=kwargs.get("contents"))
