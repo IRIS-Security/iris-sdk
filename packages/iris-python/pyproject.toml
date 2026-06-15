@@ -65,6 +65,7 @@ Repository = "https://github.com/gimartinb/iris-sdk"
 
 [tool.setuptools.packages.find]
 where = ["."]
+exclude = ["tools*", "demo*", "docs*"]
 
 [tool.ruff]
 line-length = 100
