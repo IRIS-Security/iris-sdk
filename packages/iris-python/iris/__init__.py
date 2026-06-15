@@ -34,10 +34,10 @@ from iris_core.models.passport import (
     Environment,
     ComplianceTag,
     ToolPermission,
+    UserContext,
 )
 from iris_core.models.policy import PolicyResult, Violation, Severity
 from iris_core.engine.cedar import CedarEngine, EvaluationContext
-from iris_core.rbac.context import UserContext
 from iris_core.engine.compiler import PolicyCompiler, CompilationResult
 from iris_core.compliance.registry import ComplianceRegistry
 from iris_core.evidence.vault import EvidenceVault
@@ -56,6 +56,7 @@ __all__ = [
     "Environment",
     "ComplianceTag",
     "ToolPermission",
+    "UserContext",
     "EvaluationContext",
     "PolicyResult",
     "Violation",
@@ -119,11 +120,15 @@ class IrisAgent:
         environment: Optional[str] = None,
         user_email: Optional[str] = None,
         user_role: Optional[str] = None,
+        user_context: Optional[UserContext] = None,
     ):
         compliance_tags = [ComplianceTag(c) for c in (compliance or [])]
         envs = [Environment(e) for e in (environments or ["dev", "test", "staging", "production"])]
         current_env = Environment(environment or os.environ.get("IRIS_ENV", "dev"))
-        self._user_ctx = UserContext.from_params(user_email, user_role)
+        self._user_ctx = user_context or UserContext.from_params(
+            user_email=user_email, user_role=user_role
+        )
+        self._default_user_context = user_context
 
         self.passport = AgentPassport(
             name=name,
@@ -190,6 +195,7 @@ class IrisAgent:
         data_region: Optional[str] = None,
         destination_region: Optional[str] = None,
         data_classification: Optional[str] = None,
+        user_context: Optional[UserContext] = None,
     ) -> Callable:
         """
         Decorator that intercepts function calls and evaluates them against policy.
@@ -205,6 +211,10 @@ class IrisAgent:
         def decorator(func: Callable) -> Callable:
             @wraps(func)
             def wrapper(*args, **kwargs) -> Any:
+                effective_user = user_context or self._default_user_context
+                user_fields = self._user_ctx.evaluation_fields()
+                if effective_user:
+                    user_fields = effective_user.evaluation_fields()
                 ctx = EvaluationContext(
                     agent_id=self.passport.agent_id,
                     action=action,
@@ -214,7 +224,8 @@ class IrisAgent:
                     data_region=data_region,
                     destination_region=destination_region,
                     data_classification=data_classification,
-                    **self._user_ctx.evaluation_fields(),
+                    user_context=effective_user,
+                    **user_fields,
                 )
                 result = self.evaluate(ctx)
 
@@ -231,7 +242,7 @@ class IrisAgent:
     def evaluate(self, context: EvaluationContext) -> PolicyResult:
         """Direct policy evaluation without the decorator pattern."""
         result = self._engine.evaluate(self.passport, context)
-        self._vault.record(context, result)
+        self._vault.record(context, result, passport=self.passport)
         from iris._telemetry import maybe_fire_first_policy_run
 
         maybe_fire_first_policy_run()

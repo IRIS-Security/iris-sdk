@@ -14,7 +14,7 @@ from iris_core.dlp.enforcement import (
 )
 from iris_core.engine.cedar import CedarEngine
 from iris_core.evidence.vault import EvidenceVault
-from iris_core.models.passport import AgentPassport
+from iris_core.models.passport import AgentPassport, UserContext
 
 from iris_openai._governance import (
     current_environment,
@@ -88,6 +88,7 @@ class _IrisOpenAIClientBase:
     _azure_endpoint: Optional[str] = None
     _user_email: Optional[str] = None
     _user_role: Optional[str] = None
+    _user_context: Optional[UserContext] = None
 
 
 class _GovernedCompletionsBase:
@@ -109,6 +110,9 @@ class _GovernedCompletionsBase:
 
     def _govern_kwargs(self, kwargs: dict) -> None:
         env = current_environment()
+        call_user_context = kwargs.pop("user_context", None) or getattr(
+            self._parent, "_user_context", None
+        )
         prompt = _extract_prompt_text(kwargs)
         dlp_result = enforce_prompt_dlp(
             self._parent._dlp,
@@ -133,6 +137,7 @@ class _GovernedCompletionsBase:
             dlp_prompt_findings=dlp_result.findings,
             user_email=getattr(self._parent, "_user_email", None),
             user_role=getattr(self._parent, "_user_role", None),
+            user_context=call_user_context,
         )
         enforce_result(result, env)
 
@@ -294,6 +299,7 @@ class IrisOpenAI(_IrisOpenAIClientBase):
         passport: AgentPassport,
         user_email: Optional[str] = None,
         user_role: Optional[str] = None,
+        user_context: Optional[UserContext] = None,
         **openai_kwargs: Any,
     ):
         from iris_core.dev_trust import print_dev_trust_message
@@ -303,6 +309,7 @@ class IrisOpenAI(_IrisOpenAIClientBase):
         self._passport = passport
         self._user_email = user_email
         self._user_role = user_role
+        self._user_context = user_context
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=passport.agent_id)
         self._dlp = DLPScanner(passport)
@@ -331,12 +338,14 @@ class IrisOpenAIAsync(_IrisOpenAIClientBase):
         passport: AgentPassport,
         user_email: Optional[str] = None,
         user_role: Optional[str] = None,
+        user_context: Optional[UserContext] = None,
         **openai_kwargs: Any,
     ):
         openai = _lazy_openai()
         self._passport = passport
         self._user_email = user_email
         self._user_role = user_role
+        self._user_context = user_context
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=passport.agent_id)
         self._dlp = DLPScanner(passport)
