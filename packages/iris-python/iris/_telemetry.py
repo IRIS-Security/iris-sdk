@@ -15,7 +15,8 @@ from iris._telemetry_config import TELEMETRY_ENABLED, TELEMETRY_ENDPOINT
 
 _IRIS_DIR = Path.home() / ".iris"
 _INSTALL_ID_FILE = _IRIS_DIR / "install_id"
-_SENTINEL_FILE = _IRIS_DIR / ".telemetry_sent"
+_FIRST_RUN_SENTINEL = _IRIS_DIR / ".telemetry_sent"
+_FIRST_POLICY_SENTINEL = _IRIS_DIR / ".first_policy_sent"
 
 
 def detect_install_method() -> str:
@@ -36,8 +37,12 @@ def detect_install_method() -> str:
     return "unknown"
 
 
-def _telemetry_opted_out() -> bool:
+def telemetry_opted_out() -> bool:
     return os.environ.get("IRIS_TELEMETRY_OPT_OUT", "").strip() in {"1", "true", "yes"}
+
+
+def telemetry_enabled() -> bool:
+    return TELEMETRY_ENABLED and not telemetry_opted_out()
 
 
 def _get_or_create_install_id() -> str:
@@ -59,9 +64,9 @@ def _get_iris_version() -> str:
         return "unknown"
 
 
-def _build_payload() -> dict[str, str]:
+def _build_payload(event: str) -> dict[str, str]:
     return {
-        "event": "first_run",
+        "event": event,
         "install_id": _get_or_create_install_id(),
         "install_method": detect_install_method(),
         "python_version": sys.version,
@@ -71,28 +76,44 @@ def _build_payload() -> dict[str, str]:
     }
 
 
-def _send_first_run_event() -> None:
+def _send_event(event: str) -> None:
     try:
         import httpx
 
-        httpx.post(TELEMETRY_ENDPOINT, json=_build_payload(), timeout=2.0)
+        httpx.post(TELEMETRY_ENDPOINT, json=_build_payload(event), timeout=2.0)
     except Exception:
         pass
 
 
-def maybe_fire_first_run() -> None:
-    """Fire a one-time first-run telemetry event on this machine."""
-    if not TELEMETRY_ENABLED or _telemetry_opted_out():
+def _maybe_fire_once(event: str, sentinel: Path) -> None:
+    if not telemetry_enabled():
         return
 
-    if _SENTINEL_FILE.exists():
+    if sentinel.exists():
         return
 
     try:
         _IRIS_DIR.mkdir(parents=True, exist_ok=True)
-        _SENTINEL_FILE.touch()
+        sentinel.touch()
     except OSError:
         return
 
-    thread = threading.Thread(target=_send_first_run_event, daemon=True)
+    thread = threading.Thread(target=_send_event, args=(event,), daemon=True)
     thread.start()
+
+
+def maybe_fire_first_run() -> None:
+    """Fire a one-time first-run telemetry event on this machine."""
+    _maybe_fire_once("first_run", _FIRST_RUN_SENTINEL)
+
+
+def maybe_fire_first_policy_run() -> None:
+    """Fire a one-time telemetry event after the first policy evaluation."""
+    _maybe_fire_once("first_policy_run", _FIRST_POLICY_SENTINEL)
+
+
+def send_ping() -> None:
+    """Fire a test telemetry ping event (internal verification)."""
+    if not telemetry_enabled():
+        return
+    _send_event("ping")

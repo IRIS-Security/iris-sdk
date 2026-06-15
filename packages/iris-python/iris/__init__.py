@@ -214,8 +214,7 @@ class IrisAgent:
                     data_classification=data_classification,
                     **self._user_ctx.evaluation_fields(),
                 )
-                result = self._engine.evaluate(self.passport, ctx)
-                self._vault.record(ctx, result)
+                result = self.evaluate(ctx)
 
                 if result.decision == "DENY":
                     raise IrisViolationError(result)
@@ -231,6 +230,9 @@ class IrisAgent:
         """Direct policy evaluation without the decorator pattern."""
         result = self._engine.evaluate(self.passport, context)
         self._vault.record(context, result)
+        from iris._telemetry import maybe_fire_first_policy_run
+
+        maybe_fire_first_policy_run()
         return result
 
     def check_compliance(
