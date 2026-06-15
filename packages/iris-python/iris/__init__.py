@@ -70,6 +70,8 @@ __all__ = [
     "CostSummary",
     "CostEntry",
     "PricingRegistry",
+    "IrisViolationError",
+    "IrisCrisisDetectedError",
 ]
 
 
@@ -293,6 +295,28 @@ class IrisViolationError(Exception):
                 f"Compliance: {', '.join(primary.compliance_refs)}\n"
                 f"Remediation: {primary.remediation}\n"
             )
+        super().__init__(message)
+
+
+class IrisCrisisDetectedError(Exception):
+    """
+    Raised when crisis language is detected in user input (CHAT-004).
+
+    This is NOT a policy violation — applications catch this error and
+    display crisis resources to the user.
+    """
+
+    def __init__(self, crisis_response):
+        from iris_core.dlp.types import CrisisResponse
+
+        self.crisis_response: CrisisResponse = crisis_response
+        message = (
+            f"\n[IRIS CRISIS DETECTED — CHAT-004]\n"
+            f"{crisis_response.message}\n\n"
+            f"Crisis resources (display to user):\n"
+            + "\n".join(f"  • {r}" for r in crisis_response.resources)
+            + f"\n\nAction required: {crisis_response.action_required}\n"
+        )
         super().__init__(message)
 
 
