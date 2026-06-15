@@ -11,9 +11,8 @@ from typing import List, Optional
 
 from iris import IrisViolationError
 from iris_core.engine.cedar import CedarEngine, EvaluationContext
-from iris_core.rbac.context import UserContext
 from iris_core.evidence.vault import EvidenceVault
-from iris_core.models.passport import AgentPassport, Environment
+from iris_core.models.passport import AgentPassport, Environment, UserContext
 from iris_core.models.policy import PolicyResult, Violation
 
 logger = logging.getLogger("iris.anthropic")
@@ -101,8 +100,12 @@ def evaluate_api_call(
     dlp_prompt_findings: Optional[list] = None,
     user_email: Optional[str] = None,
     user_role: Optional[str] = None,
+    user_context: Optional[UserContext] = None,
 ) -> PolicyResult:
-    user_ctx = UserContext.from_params(user_email, user_role)
+    effective_user = user_context or UserContext.from_params(
+        user_email=user_email, user_role=user_role
+    )
+    user_fields = effective_user.evaluation_fields()
     ctx = EvaluationContext(
         agent_id=passport.agent_id,
         action="call",
@@ -112,13 +115,14 @@ def evaluate_api_call(
         data_classification=data_classification or passport.data_classification.value,
         dlp_prompt_findings=dlp_prompt_findings,
         additional=additional or {},
-        **user_ctx.evaluation_fields(),
+        user_context=user_context,
+        **user_fields,
     )
     result = engine.evaluate(passport, ctx)
     result = apply_no_policy_gate(engine, passport, env, result)
     result = merge_prompt_violations(result, prompt_violations or [])
     with _VAULT_LOCK:
-        vault.record(ctx, result)
+        vault.record(ctx, result, passport=passport)
     return result
 
 
