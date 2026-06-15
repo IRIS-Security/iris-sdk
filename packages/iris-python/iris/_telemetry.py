@@ -1,4 +1,7 @@
-"""First-run telemetry for IRIS SDK installs. Opt-out via IRIS_TELEMETRY_OPT_OUT=1."""
+"""First-run telemetry for IRIS SDK installs. Opt-out via IRIS_TELEMETRY_OPT_OUT=1.
+
+Each event includes an ISO 8601 UTC timestamp for server-side DoD/WoW/MoM aggregation.
+"""
 
 from __future__ import annotations
 
