@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import logging
+import os
+import sys
 import time
 from typing import Any, List, Optional
 
@@ -25,6 +28,8 @@ from iris_anthropic.guardrails import (
     check_prompt_for_violations,
     effective_data_classification,
 )
+
+logger = logging.getLogger("iris.anthropic")
 
 
 def _lazy_anthropic():
@@ -67,6 +72,9 @@ class _IrisAnthropicClientBase:
     _dlp: DLPScanner
     _user_email: Optional[str] = None
     _user_role: Optional[str] = None
+    _user_work_authorization: Optional[str] = None
+    _auto_fallback: bool = True
+    _hitl_approved: bool = False
 
 
 class _GovernedMessagesBase:
@@ -89,7 +97,29 @@ class _GovernedMessagesBase:
         return self._parent._vault
 
     def _govern_kwargs(self, kwargs: dict) -> None:
+        from iris_core.engine.model_governance import resolve_fallback_model
+
         env = current_environment()
+        model_id = kwargs.get("model")
+        auto_fallback_applied = False
+        if model_id and self._parent._auto_fallback:
+            self._engine.reload_model_governance()
+            fallback = resolve_fallback_model(
+                str(model_id),
+                self._engine._model_registry,
+                self._engine._directive_registry,
+            )
+            if fallback and fallback != model_id:
+                msg = (
+                    f"[IRIS] Model '{model_id}' is suspended — "
+                    f"auto-fallback to '{fallback}'"
+                )
+                logger.warning(msg)
+                print(msg, file=sys.stderr)
+                kwargs["model"] = fallback
+                model_id = fallback
+                auto_fallback_applied = True
+
         prompt = _extract_prompt_text(kwargs)
         dlp_result = enforce_prompt_dlp(
             self._parent._dlp,
@@ -120,6 +150,10 @@ class _GovernedMessagesBase:
             dlp_prompt_findings=dlp_result.findings,
             user_email=self._parent._user_email,
             user_role=self._parent._user_role,
+            model_id=str(model_id) if model_id else None,
+            user_work_authorization=self._parent._user_work_authorization,
+            hitl_approved=self._parent._hitl_approved,
+            auto_fallback_applied=auto_fallback_applied,
         )
         enforce_result(result, env)
 
@@ -203,6 +237,9 @@ class IrisAnthropic(_IrisAnthropicClientBase):
         passport: AgentPassport,
         user_email: Optional[str] = None,
         user_role: Optional[str] = None,
+        user_work_authorization: Optional[str] = None,
+        auto_fallback: bool = True,
+        hitl_approved: bool = False,
         **anthropic_kwargs: Any,
     ):
         from iris_core.dev_trust import print_dev_trust_message
@@ -210,8 +247,13 @@ class IrisAnthropic(_IrisAnthropicClientBase):
         print_dev_trust_message()
         anthropic = _lazy_anthropic()
         self._passport = passport
-        self._user_email = user_email
-        self._user_role = user_role
+        self._user_email = user_email or os.environ.get("IRIS_USER_EMAIL")
+        self._user_role = user_role or os.environ.get("IRIS_USER_ROLE")
+        self._user_work_authorization = (
+            user_work_authorization or os.environ.get("IRIS_USER_WORK_AUTHORIZATION")
+        )
+        self._auto_fallback = auto_fallback
+        self._hitl_approved = hitl_approved
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=passport.agent_id)
         self._dlp = DLPScanner(passport)
@@ -235,12 +277,20 @@ class IrisAnthropicAsync(_IrisAnthropicClientBase):
         passport: AgentPassport,
         user_email: Optional[str] = None,
         user_role: Optional[str] = None,
+        user_work_authorization: Optional[str] = None,
+        auto_fallback: bool = True,
+        hitl_approved: bool = False,
         **anthropic_kwargs: Any,
     ):
         anthropic = _lazy_anthropic()
         self._passport = passport
-        self._user_email = user_email
-        self._user_role = user_role
+        self._user_email = user_email or os.environ.get("IRIS_USER_EMAIL")
+        self._user_role = user_role or os.environ.get("IRIS_USER_ROLE")
+        self._user_work_authorization = (
+            user_work_authorization or os.environ.get("IRIS_USER_WORK_AUTHORIZATION")
+        )
+        self._auto_fallback = auto_fallback
+        self._hitl_approved = hitl_approved
         self._engine = CedarEngine()
         self._vault = EvidenceVault(agent_id=passport.agent_id)
         self._dlp = DLPScanner(passport)

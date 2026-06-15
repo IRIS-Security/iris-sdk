@@ -101,7 +101,19 @@ def evaluate_api_call(
     dlp_prompt_findings: Optional[list] = None,
     user_email: Optional[str] = None,
     user_role: Optional[str] = None,
+    model_id: Optional[str] = None,
+    user_work_authorization: Optional[str] = None,
+    hitl_approved: bool = False,
+    auto_fallback_applied: bool = False,
 ) -> PolicyResult:
+    from iris_core.engine.model_governance import resolve_model_context
+
+    model_context = resolve_model_context(
+        model_id,
+        engine._model_registry,
+        engine._directive_registry,
+    )
+    merged_additional = {**(additional or {}), **model_context}
     user_ctx = UserContext.from_params(user_email, user_role)
     ctx = EvaluationContext(
         agent_id=passport.agent_id,
@@ -111,7 +123,13 @@ def evaluate_api_call(
         environment=env,
         data_classification=data_classification or passport.data_classification.value,
         dlp_prompt_findings=dlp_prompt_findings,
-        additional=additional or {},
+        model_id=model_context.get("model_id") or model_id,
+        model_tier=model_context.get("model_tier"),
+        user_work_authorization=user_work_authorization,
+        directive_status=model_context.get("directive_status"),
+        hitl_approved=hitl_approved,
+        auto_fallback_applied=auto_fallback_applied,
+        additional=merged_additional,
         **user_ctx.evaluation_fields(),
     )
     result = engine.evaluate(passport, ctx)
