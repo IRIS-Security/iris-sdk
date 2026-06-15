@@ -22,6 +22,35 @@ _FIRST_RUN_SENTINEL = _IRIS_DIR / ".telemetry_sent"
 _FIRST_POLICY_SENTINEL = _IRIS_DIR / ".first_policy_sent"
 
 
+def detect_country() -> str:
+    """Infer ISO 3166-1 alpha-2 country from system locale (not GPS or IP)."""
+    candidates: list[str] = []
+    for env in ("LC_ALL", "LC_CTYPE", "LANG"):
+        val = os.environ.get(env, "").strip()
+        if val:
+            candidates.append(val)
+
+    try:
+        import locale
+
+        for getter in (locale.getlocale, locale.getdefaultlocale):
+            try:
+                loc = getter()
+                if loc and loc[0]:
+                    candidates.append(loc[0])
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+    for tag in candidates:
+        normalized = tag.split(".")[0].replace("-", "_")
+        parts = normalized.split("_")
+        if len(parts) >= 2 and len(parts[-1]) == 2 and parts[-1].isalpha():
+            return parts[-1].upper()
+    return "unknown"
+
+
 def detect_install_method() -> str:
     """Detect how the iris CLI was installed from the executable path."""
     iris_path = shutil.which("iris")
@@ -72,6 +101,7 @@ def _build_payload(event: str) -> dict[str, str]:
         "event": event,
         "install_id": _get_or_create_install_id(),
         "install_method": detect_install_method(),
+        "country": detect_country(),
         "python_version": sys.version,
         "platform": sys.platform,
         "iris_version": _get_iris_version(),
