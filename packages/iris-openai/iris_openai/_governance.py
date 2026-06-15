@@ -14,9 +14,8 @@ import yaml
 
 from iris import IrisViolationError
 from iris_core.engine.cedar import CedarEngine, EvaluationContext
-from iris_core.rbac.context import UserContext
 from iris_core.evidence.vault import EvidenceVault
-from iris_core.models.passport import AgentPassport, Environment
+from iris_core.models.passport import AgentPassport, Environment, UserContext
 from iris_core.models.policy import PolicyResult, Severity, Violation
 from iris_core.models.region import RegionPolicy, TransferRule
 
@@ -257,11 +256,14 @@ def evaluate_openai_call(
     dlp_prompt_findings: Optional[list] = None,
     user_email: Optional[str] = None,
     user_role: Optional[str] = None,
+    user_context: Optional[UserContext] = None,
 ) -> PolicyResult:
     data_region = passport.allowed_regions[0] if passport.allowed_regions else None
     destination_region = parse_azure_endpoint_region(azure_endpoint)
-    user_ctx = UserContext.from_params(user_email, user_role)
-    user_fields = user_ctx.evaluation_fields()
+    effective_user = user_context or UserContext.from_params(
+        user_email=user_email, user_role=user_role
+    )
+    user_fields = effective_user.evaluation_fields()
 
     ctx = EvaluationContext(
         agent_id=passport.agent_id,
@@ -279,6 +281,7 @@ def evaluate_openai_call(
             "tool_names": tool_names or [],
             "azure_endpoint": azure_endpoint,
         },
+        user_context=user_context,
         **user_fields,
     )
 
@@ -298,6 +301,7 @@ def evaluate_openai_call(
             resource_type="tool",
             environment=env,
             data_classification=data_classification or passport.data_classification.value,
+            user_context=user_context,
             **user_fields,
         )
         tool_result = engine.evaluate(passport, tool_ctx)
@@ -342,7 +346,7 @@ def evaluate_openai_call(
     result = merge_results(result, violations)
 
     with _VAULT_LOCK:
-        vault.record(ctx, result)
+        vault.record(ctx, result, passport=passport)
     return result
 
 

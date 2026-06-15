@@ -17,7 +17,7 @@ from iris_core.dlp.enforcement import (
 )
 from iris_core.engine.cedar import CedarEngine
 from iris_core.evidence.vault import EvidenceVault
-from iris_core.models.passport import AgentPassport
+from iris_core.models.passport import AgentPassport, UserContext
 from iris_anthropic._governance import (
     current_environment,
     enforce_result,
@@ -72,6 +72,7 @@ class _IrisAnthropicClientBase:
     _dlp: DLPScanner
     _user_email: Optional[str] = None
     _user_role: Optional[str] = None
+    _user_context: Optional[UserContext] = None
     _user_work_authorization: Optional[str] = None
     _auto_fallback: bool = True
     _hitl_approved: bool = False
@@ -100,6 +101,7 @@ class _GovernedMessagesBase:
         from iris_core.engine.model_governance import resolve_fallback_model
 
         env = current_environment()
+        call_user_context = kwargs.pop("user_context", None) or self._parent._user_context
         model_id = kwargs.get("model")
         auto_fallback_applied = False
         if model_id and self._parent._auto_fallback:
@@ -150,6 +152,7 @@ class _GovernedMessagesBase:
             dlp_prompt_findings=dlp_result.findings,
             user_email=self._parent._user_email,
             user_role=self._parent._user_role,
+            user_context=call_user_context,
             model_id=str(model_id) if model_id else None,
             user_work_authorization=self._parent._user_work_authorization,
             hitl_approved=self._parent._hitl_approved,
@@ -237,6 +240,7 @@ class IrisAnthropic(_IrisAnthropicClientBase):
         passport: AgentPassport,
         user_email: Optional[str] = None,
         user_role: Optional[str] = None,
+        user_context: Optional[UserContext] = None,
         user_work_authorization: Optional[str] = None,
         auto_fallback: bool = True,
         hitl_approved: bool = False,
@@ -249,6 +253,7 @@ class IrisAnthropic(_IrisAnthropicClientBase):
         self._passport = passport
         self._user_email = user_email or os.environ.get("IRIS_USER_EMAIL")
         self._user_role = user_role or os.environ.get("IRIS_USER_ROLE")
+        self._user_context = user_context
         self._user_work_authorization = (
             user_work_authorization or os.environ.get("IRIS_USER_WORK_AUTHORIZATION")
         )
@@ -277,6 +282,7 @@ class IrisAnthropicAsync(_IrisAnthropicClientBase):
         passport: AgentPassport,
         user_email: Optional[str] = None,
         user_role: Optional[str] = None,
+        user_context: Optional[UserContext] = None,
         user_work_authorization: Optional[str] = None,
         auto_fallback: bool = True,
         hitl_approved: bool = False,
@@ -286,6 +292,7 @@ class IrisAnthropicAsync(_IrisAnthropicClientBase):
         self._passport = passport
         self._user_email = user_email or os.environ.get("IRIS_USER_EMAIL")
         self._user_role = user_role or os.environ.get("IRIS_USER_ROLE")
+        self._user_context = user_context
         self._user_work_authorization = (
             user_work_authorization or os.environ.get("IRIS_USER_WORK_AUTHORIZATION")
         )
