@@ -26,7 +26,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-  "iris-security-core>=0.1.11",
+  "iris-security-core>=0.1.12",
   "pyyaml>=6.0",
   "pydantic>=2.0",
   "click>=8.1",
