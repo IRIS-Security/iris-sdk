@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from mcp.types import Resource
 
-from iris_core.compliance.registry import ComplianceRegistry, _BUNDLE_LOADERS, _is_paid_bundle
+from iris_core.compliance.framework_check import load_bundle_data
+from iris_core.compliance.registry import _BUNDLE_LOADERS, _is_paid_bundle
 
 _FRAMEWORK_NAMES = {
     "colorado-ai-act": "Colorado AI Act (SB 26-189)",
@@ -13,6 +14,8 @@ _FRAMEWORK_NAMES = {
     "colorado-mental-health-ai": "Colorado Mental Health AI (HB 1195)",
     "ccpa-admt": "California CCPA/ADMT",
     "china-pipl": "China PIPL",
+    "illinois-ai-video": "Illinois AI Video Interview Act",
+    "nyc-ll144": "NYC Local Law 144 — AEDTs",
     "hipaa": "HIPAA",
     "soc2": "SOC 2",
     "gdpr": "GDPR",
@@ -20,6 +23,11 @@ _FRAMEWORK_NAMES = {
     "nist-ai-rmf": "NIST AI RMF",
     "fedramp": "FedRAMP Moderate",
 }
+
+
+def _load_bundle_metadata(bundle_id: str) -> dict:
+    """Load bundle docs without Pro entitlement gating (discovery/docs only)."""
+    return load_bundle_data(bundle_id)
 
 
 def _framework_markdown(bundle_id: str, rules: dict) -> str:
@@ -51,10 +59,9 @@ def _framework_markdown(bundle_id: str, rules: dict) -> str:
 
 
 def build_framework_resources() -> list[Resource]:
-    registry = ComplianceRegistry()
     resources: list[Resource] = []
     for bundle_id in sorted(_BUNDLE_LOADERS):
-        rules = registry._load_bundle_rules(bundle_id)
+        rules = _load_bundle_metadata(bundle_id)
         name = rules.get("full_name") or _FRAMEWORK_NAMES.get(bundle_id, bundle_id)
         resources.append(
             Resource(
@@ -73,9 +80,8 @@ _FRAMEWORK_TEXT: dict[str, str] = {}
 
 def get_framework_text(uri: str) -> str | None:
     if not _FRAMEWORK_TEXT:
-        registry = ComplianceRegistry()
         for bundle_id in _BUNDLE_LOADERS:
-            rules = registry._load_bundle_rules(bundle_id)
+            rules = _load_bundle_metadata(bundle_id)
             _FRAMEWORK_TEXT[f"iris://frameworks/{bundle_id}"] = _framework_markdown(
                 bundle_id, rules
             )

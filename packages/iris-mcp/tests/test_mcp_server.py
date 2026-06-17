@@ -21,6 +21,15 @@ def clear_license(monkeypatch, tmp_path):
     yield
 
 
+def test_framework_resources_load_without_pro_license():
+    from iris_mcp.resources.frameworks import FRAMEWORK_RESOURCES, get_framework_text
+
+    assert len(FRAMEWORK_RESOURCES) >= 12
+    nyc = get_framework_text("iris://frameworks/nyc-ll144")
+    assert nyc is not None
+    assert "LL 144" in nyc or "AEDT" in nyc
+
+
 def test_server_starts_and_lists_tools():
     tools = collect_tools(include_pro=True)
     names = {tool.name for tool in tools}
