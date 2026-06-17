@@ -4,18 +4,16 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "iris-security-sdk"
-version = "0.2.2"
+version = "0.2.0"
 description = "IRIS — AI Agent Governance SDK. Govern AI agents locally."
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 keywords = [
-  "ai-governance",
-  "ai-agents",
-  "colorado-ai-act",
-  "cedar-policy",
-  "llm",
-  "compliance",
+  "ai-governance", "policy-as-code", "cedar", "compliance",
+  "llm", "ai-agents", "langchain", "anthropic", "openai",
+  "colorado-ai-act", "eu-ai-act", "hipaa", "fedramp",
+  "mcp", "claude", "iris", "guardrails", "responsible-ai",
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -28,7 +26,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-  "iris-security-core>=0.1.10",
+  "iris-security-core>=0.2.0",
   "pyyaml>=6.0",
   "pydantic>=2.0",
   "click>=8.1",
@@ -37,19 +35,23 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-anthropic = ["iris-security-anthropic>=0.1.1"]
-openai = ["iris-security-openai>=0.1.1"]
-google = ["iris-security-gemini>=0.1.1"]
-vertexai = ["iris-security-vertexai>=0.1.1"]
-langchain = ["iris-security-langchain>=0.1.1"]
-crewai = ["iris-security-crewai>=0.1.1"]
+anthropic = ["iris-security-anthropic>=0.2.0"]
+openai = ["iris-security-openai>=0.2.0"]
+google = ["iris-security-gemini>=0.2.0"]
+vertexai = ["iris-security-vertexai>=0.2.0"]
+langchain = ["iris-security-langchain>=0.2.0"]
+crewai = ["iris-security-crewai>=0.2.0"]
+mcp = ["iris-security-mcp>=0.2.0"]
+scm = ["iris-security-scm>=0.2.0"]
 all = [
-  "iris-security-anthropic>=0.1.1",
-  "iris-security-openai>=0.1.1",
-  "iris-security-gemini>=0.1.1",
-  "iris-security-vertexai>=0.1.1",
-  "iris-security-langchain>=0.1.1",
-  "iris-security-crewai>=0.1.1",
+  "iris-security-anthropic>=0.2.0",
+  "iris-security-openai>=0.2.0",
+  "iris-security-gemini>=0.2.0",
+  "iris-security-vertexai>=0.2.0",
+  "iris-security-langchain>=0.2.0",
+  "iris-security-crewai>=0.2.0",
+  "iris-security-mcp>=0.2.0",
+  "iris-security-scm>=0.2.0",
 ]
 dev = [
   "pytest>=8.0",
@@ -60,7 +62,7 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/gimartinb/iris-sdk"
+Homepage = "https://gimartinb.github.io/iris-sdk/"
 Repository = "https://github.com/gimartinb/iris-sdk"
 
 [tool.setuptools.packages.find]

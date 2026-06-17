@@ -4,15 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "iris-security-anthropic"
-version = "0.1.1"
+version = "0.2.0"
 description = "IRIS governance for Anthropic Claude — Cedar policy on every API call"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 authors = [{ name = "IRIS Platform", email = "sdk@iris.ai" }]
 dependencies = [
-  "iris-security-core>=0.1.10",
-  "iris-security-sdk>=0.2.2",
+  "iris-security-core>=0.2.0",
+  "iris-security-sdk>=0.2.0",
 ]
 
 [project.optional-dependencies]
