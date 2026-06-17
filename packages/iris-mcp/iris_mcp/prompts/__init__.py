@@ -1,0 +1,1 @@
+"""IRIS MCP prompt templates."""

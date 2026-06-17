@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iris-security-mcp"
+version = "0.2.0"
+description = "IRIS MCP Server — connect Claude to AI agent governance"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10"
+authors = [
+  { name = "IRIS Platform", email = "sdk@iris.ai" }
+]
+keywords = ["ai-governance", "mcp", "claude", "compliance", "cursor"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+  "iris-security-sdk>=0.2.0",
+  "iris-security-cli>=0.2.0",
+  "mcp>=1.0.0",
+  "anyio>=4.0",
+]
+
+[project.scripts]
+iris-mcp = "iris_mcp.server:cli_main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["iris_mcp*"]
+
+[project.urls]
+Homepage = "https://github.com/gimartinb/iris-sdk"
+Repository = "https://github.com/gimartinb/iris-sdk"
+Documentation = "https://gimartinb.github.io/iris-sdk/docs/mcp/"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
