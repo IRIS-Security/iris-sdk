@@ -47,7 +47,7 @@ from iris_core.evidence.vault import EvidenceVault
 from iris_core.cost.tracker import CostSummary, CostTracker, CostEntry
 from iris_core.cost.pricing import PricingRegistry
 
-__version__ = "0.2.3"
+__version__ = "0.2.4"
 __all__ = [
     # Main classes
     "IrisAgent",

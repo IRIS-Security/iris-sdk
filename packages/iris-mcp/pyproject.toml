@@ -23,7 +23,7 @@ classifiers = [
 ]
 dependencies = [
   "iris-security-sdk>=0.2.2",
-  "iris-security-cli>=0.2.2",
+  "iris-security-cli>=0.2.0",
   "mcp>=1.0.0",
   "anyio>=4.0",
 ]
