@@ -65,6 +65,8 @@ class Feature(str, Enum):
     BUNDLE_EU_AI_ACT = "bundle_eu_ai_act"
     BUNDLE_CCPA_ADMT = "bundle_ccpa_admt"
     BUNDLE_CHINA_PIPL = "bundle_china_pipl"
+    BUNDLE_ILLINOIS_AI_VIDEO = "bundle_illinois_ai_video"
+    BUNDLE_NYC_LL144 = "bundle_nyc_ll144"
     # Pro iris test (full report)
     CLI_TEST_FULL_REPORT = "cli_test_full_report"
     CLI_TEST_ALL_GAPS = "cli_test_all_gaps"
@@ -152,6 +154,8 @@ FEATURE_TIERS: Dict[Feature, Tier] = {
     Feature.BUNDLE_EU_AI_ACT: Tier.PRO,
     Feature.BUNDLE_CCPA_ADMT: Tier.PRO,
     Feature.BUNDLE_CHINA_PIPL: Tier.PRO,
+    Feature.BUNDLE_ILLINOIS_AI_VIDEO: Tier.PRO,
+    Feature.BUNDLE_NYC_LL144: Tier.PRO,
     Feature.CLI_TEST_FULL_REPORT: Tier.PRO,
     Feature.CLI_TEST_ALL_GAPS: Tier.PRO,
     Feature.CLI_TEST_PROGRESS_TRACKING: Tier.PRO,
@@ -210,4 +214,6 @@ BUNDLE_ID_TO_FEATURE: Dict[str, Feature] = {
     "eu-ai-act": Feature.BUNDLE_EU_AI_ACT,
     "ccpa-admt": Feature.BUNDLE_CCPA_ADMT,
     "china-pipl": Feature.BUNDLE_CHINA_PIPL,
+    "illinois-ai-video": Feature.BUNDLE_ILLINOIS_AI_VIDEO,
+    "nyc-ll144": Feature.BUNDLE_NYC_LL144,
 }
