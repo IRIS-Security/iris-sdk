@@ -16,7 +16,7 @@ import time
 from pathlib import Path
 from typing import Any, Optional
 
-from iris import IrisViolationError
+from iris_core.hitl.handler import enforce_policy_result, finalize_evaluation
 from iris_core.cost import record_llm_cost_async
 from iris_core.dlp import DLPScanner
 from iris_core.dlp.enforcement import (
@@ -228,8 +228,15 @@ class IrisGenerativeModel:
         result = _apply_no_policy_gate(self._engine, self._passport, env, result)
         result = _merge_content_violations(result, env, content_violations)
         with _VAULT_LOCK:
-            self._vault.record(ctx, result)
-        _enforce_result(result, env)
+            finalize_evaluation(
+                self._passport,
+                ctx,
+                result,
+                self._vault,
+                tool_name=f"gemini-api/{self._model_name}",
+                action="call",
+            )
+        enforce_policy_result(result, env)
 
     def _scan_response(self, response: Any) -> Any:
         env = _current_environment()

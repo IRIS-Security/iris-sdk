@@ -10,7 +10,7 @@ import uuid
 from datetime import datetime
 from typing import Any, Optional
 
-from iris import IrisViolationError
+from iris_core.hitl.handler import enforce_policy_result, finalize_evaluation
 from iris_core.cost import record_llm_cost_async
 from iris_core.dlp import DLPScanner
 from iris_core.dlp.enforcement import (
@@ -75,9 +75,10 @@ def _current_environment():
     return Environment(os.environ.get("IRIS_ENV", "dev"))
 
 
-def _enforce_result(result: PolicyResult) -> None:
-    if result.decision == "DENY":
-        raise IrisViolationError(result)
+def _enforce_result(result: PolicyResult, env=None) -> None:
+    from iris_core.models.passport import Environment
+
+    enforce_policy_result(result, env or Environment.PRODUCTION)
 
 
 class IrisVertexAI:
@@ -268,10 +269,26 @@ class IrisGenerativeModel:
                 action=result.action,
                 resource=result.resource,
                 environment=result.environment,
+                requires_hitl=result.requires_hitl,
+                hitl_rule=result.hitl_rule,
+                hitl_review_type=result.hitl_review_type,
+                compliance_hitl_violation=result.compliance_hitl_violation,
+                is_compliance_block=result.is_compliance_block,
+                cedar_annotations=result.cedar_annotations,
+                inform_violations=result.inform_violations,
             )
 
+        finalize_evaluation(
+            self._passport,
+            ctx,
+            result,
+            self._vault,
+            tool_name=f"vertexai/{self._model_name}",
+            action=action,
+            record=False,
+        )
         self._record_with_metadata(ctx, result, [])
-        _enforce_result(result)
+        _enforce_result(result, env)
 
     def _scan_response(self, response: Any) -> Any:
         env = _current_environment()

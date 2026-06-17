@@ -22,6 +22,7 @@ from iris_core.models.passport import AgentPassport, Environment
 from iris_core.models.policy import PolicyResult
 
 from iris import IrisViolationError
+from iris_core.hitl.handler import enforce_policy_result, finalize_evaluation
 
 logger = logging.getLogger("iris.crewai")
 
@@ -181,7 +182,14 @@ class AgentGovernor:
         result = self._engine.evaluate(self.passport, ctx)
         result = apply_no_policy_gate(self._engine, self.passport, self.env, result)
         with _VAULT_LOCK:
-            self._vault.record(ctx, result)
+            finalize_evaluation(
+                self.passport,
+                ctx,
+                result,
+                self._vault,
+                tool_name=resource,
+                action=action,
+            )
         self._track(result)
         return result
 
@@ -293,25 +301,7 @@ class AgentGovernor:
 
 
 def enforce_result(result: PolicyResult, env: Environment) -> None:
-    if result.decision == "DENY":
-        if env in (Environment.DEV, Environment.TEST):
-            for violation in result.violations:
-                msg = (
-                    f"[IRIS WARNING] {violation.message} "
-                    f"Remediation: {violation.remediation}"
-                )
-                logger.warning(msg)
-                print(msg, file=sys.stderr)
-            return
-        raise IrisViolationError(result)
-    if result.decision == "PERMIT_WITH_WARNINGS":
-        for violation in result.violations:
-            msg = (
-                f"[IRIS WARNING] {violation.message} "
-                f"Remediation: {violation.remediation}"
-            )
-            logger.warning(msg)
-            print(msg, file=sys.stderr)
+    enforce_policy_result(result, env)
 
 
 def make_step_callback(

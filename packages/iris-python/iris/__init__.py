@@ -36,6 +36,9 @@ from iris_core.models.passport import (
     ToolPermission,
     UserContext,
 )
+from iris_core.hitl.models import HITLConfig, HITLConditionRule, HITLStatus
+from iris_core.hitl.error import IrisHITLRequiredError
+from iris.hitl import HITLPoller
 from iris_core.models.policy import PolicyResult, Violation, Severity
 from iris_core.engine.cedar import CedarEngine, EvaluationContext
 from iris_core.engine.compiler import PolicyCompiler, CompilationResult
@@ -44,7 +47,7 @@ from iris_core.evidence.vault import EvidenceVault
 from iris_core.cost.tracker import CostSummary, CostTracker, CostEntry
 from iris_core.cost.pricing import PricingRegistry
 
-__version__ = "0.1.9"
+__version__ = "0.2.0"
 __all__ = [
     # Main classes
     "IrisAgent",
@@ -73,6 +76,11 @@ __all__ = [
     "PricingRegistry",
     "IrisViolationError",
     "IrisCrisisDetectedError",
+    "IrisHITLRequiredError",
+    "HITLConfig",
+    "HITLConditionRule",
+    "HITLStatus",
+    "HITLPoller",
 ]
 
 
@@ -289,8 +297,11 @@ class IrisViolationError(Exception):
     explanation of what was blocked and how to remediate.
     """
 
-    def __init__(self, result: PolicyResult):
+    def __init__(self, result: PolicyResult, is_compliance_block: bool = False):
         self.result = result
+        self.is_compliance_block = is_compliance_block or getattr(
+            result, "is_compliance_block", False
+        )
         primary = result.violations[0] if result.violations else None
         message = (
             f"\n[IRIS POLICY VIOLATION]\n"

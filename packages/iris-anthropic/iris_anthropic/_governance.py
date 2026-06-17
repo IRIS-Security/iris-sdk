@@ -85,6 +85,13 @@ def merge_prompt_violations(result: PolicyResult, prompt_violations: List[Violat
         action=result.action,
         resource=result.resource,
         environment=result.environment,
+        requires_hitl=result.requires_hitl,
+        hitl_rule=result.hitl_rule,
+        hitl_review_type=result.hitl_review_type,
+        compliance_hitl_violation=result.compliance_hitl_violation,
+        is_compliance_block=result.is_compliance_block,
+        cedar_annotations=result.cedar_annotations,
+        inform_violations=result.inform_violations,
     )
 
 
@@ -105,6 +112,9 @@ def evaluate_api_call(
     user_work_authorization: Optional[str] = None,
     hitl_approved: bool = False,
     auto_fallback_applied: bool = False,
+    require_hitl: bool = False,
+    require_hitl_reason: Optional[str] = None,
+    messages: Optional[list] = None,
 ) -> PolicyResult:
     from iris_core.engine.model_governance import resolve_model_context
 
@@ -132,6 +142,8 @@ def evaluate_api_call(
         directive_status=model_context.get("directive_status"),
         hitl_approved=hitl_approved,
         auto_fallback_applied=auto_fallback_applied,
+        require_hitl=require_hitl,
+        require_hitl_reason=require_hitl_reason,
         additional=merged_additional,
         user_context=user_context,
         **user_fields,
@@ -141,10 +153,25 @@ def evaluate_api_call(
     result = merge_prompt_violations(result, prompt_violations or [])
     with _VAULT_LOCK:
         vault.record(ctx, result, passport=passport)
+        for inform_v in result.inform_violations:
+            vault.record_compliance_violation(inform_v.rule_id, ctx, "inform")
+    from iris_core.hitl.handler import handle_hitl_if_required
+
+    handle_hitl_if_required(
+        passport,
+        ctx,
+        result,
+        vault,
+        tool_name=ctx.resource,
+        action=ctx.action,
+        messages=messages,
+    )
     return result
 
 
 def enforce_result(result: PolicyResult, env: Environment) -> None:
+    if result.is_compliance_block and result.decision == "DENY":
+        raise IrisViolationError(result, is_compliance_block=True)
     if result.decision == "DENY":
         if env in (Environment.DEV, Environment.TEST):
             for violation in result.violations:

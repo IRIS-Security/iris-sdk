@@ -347,10 +347,24 @@ def evaluate_openai_call(
 
     with _VAULT_LOCK:
         vault.record(ctx, result, passport=passport)
+        for inform_v in result.inform_violations:
+            vault.record_compliance_violation(inform_v.rule_id, ctx, "inform")
+    from iris_core.hitl.handler import handle_hitl_if_required
+
+    handle_hitl_if_required(
+        passport,
+        ctx,
+        result,
+        vault,
+        tool_name=resource,
+        action="call",
+    )
     return result
 
 
 def enforce_result(result: PolicyResult, env: Environment) -> None:
+    if result.is_compliance_block and result.decision == "DENY":
+        raise IrisViolationError(result, is_compliance_block=True)
     if result.decision == "DENY":
         if env in (Environment.DEV, Environment.TEST):
             for violation in result.violations:

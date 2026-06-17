@@ -14,7 +14,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from iris import IrisViolationError
+from iris_core.hitl.handler import enforce_policy_result, finalize_evaluation
 from iris_core.engine.cedar import CedarEngine, EvaluationContext
 from iris_core.rbac.context import UserContext
 from iris_core.evidence.vault import EvidenceVault
@@ -273,7 +273,14 @@ def evaluate_and_record(
     result = apply_no_policy_gate(engine, passport, env, result)
     result = merge_guardrail_violations(result, extra_violations or [])
     with _VAULT_LOCK:
-        event_id = vault.record(ctx, result)
+        finalize_evaluation(
+            passport,
+            ctx,
+            result,
+            vault,
+            tool_name=resource,
+            action=action,
+        )
     return result
 
 
@@ -328,22 +335,4 @@ def track_result(session: Optional[RunSession], result: PolicyResult) -> None:
 
 
 def enforce_result(result: PolicyResult, env: Environment) -> None:
-    if result.decision == "DENY":
-        if env in (Environment.DEV, Environment.TEST):
-            for violation in result.violations:
-                msg = (
-                    f"[IRIS WARNING] {violation.message} "
-                    f"Remediation: {violation.remediation}"
-                )
-                logger.warning(msg)
-                print(msg, file=sys.stderr)
-            return
-        raise IrisViolationError(result)
-    if result.decision == "PERMIT_WITH_WARNINGS":
-        for violation in result.violations:
-            msg = (
-                f"[IRIS WARNING] {violation.message} "
-                f"Remediation: {violation.remediation}"
-            )
-            logger.warning(msg)
-            print(msg, file=sys.stderr)
+    enforce_policy_result(result, env)

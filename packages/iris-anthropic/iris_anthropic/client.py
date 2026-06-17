@@ -102,6 +102,9 @@ class _GovernedMessagesBase:
 
         env = current_environment()
         call_user_context = kwargs.pop("user_context", None) or self._parent._user_context
+        require_hitl = bool(kwargs.pop("require_hitl", False))
+        require_hitl_reason = kwargs.pop("require_hitl_reason", None)
+        messages = kwargs.get("messages")
         model_id = kwargs.get("model")
         auto_fallback_applied = False
         if model_id and self._parent._auto_fallback:
@@ -157,6 +160,9 @@ class _GovernedMessagesBase:
             user_work_authorization=self._parent._user_work_authorization,
             hitl_approved=self._parent._hitl_approved,
             auto_fallback_applied=auto_fallback_applied,
+            require_hitl=require_hitl,
+            require_hitl_reason=require_hitl_reason,
+            messages=messages,
         )
         enforce_result(result, env)
 
