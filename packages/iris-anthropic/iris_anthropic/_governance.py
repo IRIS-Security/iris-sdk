@@ -21,7 +21,13 @@ _VAULT_LOCK = threading.Lock()
 
 
 def current_environment() -> Environment:
-    return Environment(os.environ.get("IRIS_ENV", "dev"))
+    from iris_core.models.context import environment_enum_from_name
+
+    return environment_enum_from_name(os.environ.get("IRIS_ENV", "dev"))
+
+
+def current_environment_name() -> str:
+    return os.environ.get("IRIS_ENV", "dev")
 
 
 def has_policy_loaded(engine: CedarEngine, passport: AgentPassport) -> bool:
@@ -134,6 +140,7 @@ def evaluate_api_call(
         resource="anthropic-api",
         resource_type="api",
         environment=env,
+        environment_name=current_environment_name(),
         data_classification=data_classification or passport.data_classification.value,
         dlp_prompt_findings=dlp_prompt_findings,
         model_id=model_context.get("model_id") or model_id,
