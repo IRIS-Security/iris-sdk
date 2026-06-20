@@ -73,8 +73,39 @@ def telemetry_opted_out() -> bool:
     return os.environ.get("IRIS_TELEMETRY_OPT_OUT", "").strip() in {"1", "true", "yes"}
 
 
+def _is_ci_environment() -> bool:
+    ci_markers = (
+        "CI",
+        "CONTINUOUS_INTEGRATION",
+        "GITHUB_ACTIONS",
+        "GITLAB_CI",
+        "JENKINS_URL",
+        "BUILDKITE",
+        "CIRCLECI",
+        "TRAVIS",
+        "TEAMCITY_VERSION",
+        "AZURE_HTTP_USER_AGENT",
+        "CODEBUILD_BUILD_ID",
+    )
+    return any(os.environ.get(name) for name in ci_markers)
+
+
+def _is_internal_install() -> bool:
+    if os.environ.get("IRIS_TELEMETRY_INTERNAL", "").strip() in {"1", "true", "yes"}:
+        return True
+
+    iris_path = shutil.which("iris") or ""
+    path_lower = iris_path.lower()
+    internal_markers = ("iris-sdk", "/packages/", "editable")
+    return any(marker in path_lower for marker in internal_markers)
+
+
 def telemetry_enabled() -> bool:
-    return TELEMETRY_ENABLED and not telemetry_opted_out()
+    if not TELEMETRY_ENABLED or telemetry_opted_out():
+        return False
+    if _is_ci_environment() or _is_internal_install():
+        return False
+    return True
 
 
 def _get_or_create_install_id() -> str:
@@ -106,6 +137,8 @@ def _build_payload(event: str) -> dict[str, str]:
         "platform": sys.platform,
         "iris_version": _get_iris_version(),
         "timestamp": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        "ci": "true" if _is_ci_environment() else "false",
+        "internal": "true" if _is_internal_install() else "false",
     }
 
 
