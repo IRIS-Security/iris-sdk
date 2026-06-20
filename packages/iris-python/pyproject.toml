@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "iris-security-sdk"
-version = "0.2.6"
+version = "0.2.7"
 description = "IRIS — AI Agent Governance SDK. Govern AI agents locally."
 readme = "README.md"
 license = { text = "Apache-2.0" }
@@ -26,7 +26,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-  "iris-security-core>=0.1.14",
+  "iris-security-core>=0.1.15",
   "pyyaml>=6.0",
   "pydantic>=2.0",
   "click>=8.1",
