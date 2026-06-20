@@ -9,8 +9,11 @@ from __future__ import annotations
 from typing import List, Optional
 
 from iris_core.errors import IrisError
+from iris_core.entitlements.capability_map import FEATURE_TO_CAPABILITY_MAP
 from iris_core.entitlements.features import FEATURE_TIERS, TIER_RANK, Feature, Tier
 from iris_core.entitlements.license import LicenseKey
+from iris_core.flags import launch_gate
+from iris_core.flags.launch_gate import CapabilityStatus
 
 _RELATED_PRO_BY_PREFIX = {
     "bundle_": [
@@ -147,10 +150,43 @@ class Entitlements:
         self._license_reason = reason
         self._tier = tier if valid else Tier.FREE
 
-    def has(self, feature: Feature) -> bool:
-        """Return True if the current license tier includes the feature."""
+    def _tier_permits(self, feature: Feature) -> bool:
         required = FEATURE_TIERS[feature]
         return _tier_includes(self._tier, required)
+
+    def has(self, feature: Feature) -> bool:
+        """Return True if tier permits the feature and it is shippable."""
+        tier_ok = self._tier_permits(feature)
+        if FEATURE_TIERS[feature] == Tier.FREE:
+            return tier_ok
+        capability_name = FEATURE_TO_CAPABILITY_MAP.get(feature)
+        if capability_name is None:
+            return tier_ok
+        return tier_ok and launch_gate.is_shippable(capability_name)
+
+    def upgrade_message(self, feature: Feature) -> str:
+        """Human-readable reason a feature is unavailable."""
+        capability_name = FEATURE_TO_CAPABILITY_MAP.get(feature)
+        if capability_name is not None:
+            status = launch_gate.CAPABILITY_FLAGS.get(
+                capability_name, CapabilityStatus.BACKLOG
+            )
+            if status == CapabilityStatus.BACKLOG:
+                return (
+                    f"{capability_name} is on the IRIS roadmap, not yet "
+                    f"available — even to Business/Enterprise customers. "
+                    f"Track it: github.com/gimartinb/iris-sdk/blob/main/BACKLOG.md"
+                )
+        required = FEATURE_TIERS[feature]
+        tier_label = {
+            Tier.FREE: "Community",
+            Tier.PRO: "Business",
+            Tier.ENTERPRISE: "Enterprise",
+        }[required]
+        return (
+            f"{feature.value} requires {tier_label}. "
+            f"Activate a license: iris license activate <your-key>"
+        )
 
     def require(self, feature: Feature, context: Optional[str] = None) -> None:
         """Raise EntitlementError if the feature is not available."""
@@ -158,6 +194,21 @@ class Entitlements:
             return
 
         required = FEATURE_TIERS[feature]
+        capability_name = FEATURE_TO_CAPABILITY_MAP.get(feature)
+        if capability_name is not None:
+            status = launch_gate.CAPABILITY_FLAGS.get(
+                capability_name, CapabilityStatus.BACKLOG
+            )
+            if status == CapabilityStatus.BACKLOG:
+                context_line = f" ({context})" if context else ""
+                message = self.upgrade_message(feature) + context_line
+                raise EntitlementError(
+                    feature=feature,
+                    current_tier=self._tier,
+                    required_tier=required,
+                    message=message,
+                )
+
         related = _related_pro_features(feature)
         message = _build_entitlement_message(feature, context, related)
         raise EntitlementError(
