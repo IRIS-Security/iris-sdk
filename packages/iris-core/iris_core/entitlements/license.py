@@ -2,6 +2,11 @@
 Validates and manages the IRIS license key.
 
 All validation is local — no network calls.
+
+Public git clones ship with no embedded salt and dev keys disabled.
+Production salt is injected at PyPI release build time only (see
+scripts/inject_license_salt.py). Maintainers may also set
+IRIS_LICENSE_SALT locally for key generation/testing.
 """
 
 from __future__ import annotations
@@ -16,9 +21,19 @@ from iris_core.entitlements.features import Tier
 
 KEY_PATTERN = re.compile(r"^IRIS-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$")
 ENV_LICENSE_KEY = "IRIS_LICENSE_KEY"
+ENV_LICENSE_SALT = "IRIS_LICENSE_SALT"
+ENV_ALLOW_DEV_LICENSE_KEYS = "IRIS_ALLOW_DEV_LICENSE_KEYS"
 
-# Must match tools/licensing/config.py SECRET_SALT. Rotate both together.
-SDK_SECRET_SALT = "CHANGE-THIS-TO-SOMETHING-ONLY-YOU-KNOW"
+# Injected at publish via scripts/inject_license_salt.py — never commit a real value.
+_LICENSE_SALT = ""
+
+KNOWN_INSECURE_SALTS = frozenset(
+    {
+        "",
+        "CHANGE-THIS-TO-SOMETHING-ONLY-YOU-KNOW",
+        "test-only-salt-not-published",
+    }
+)
 
 TIER_FROM_PREFIX = {
     "P": Tier.PRO,
@@ -28,22 +43,31 @@ TIER_FROM_PREFIX = {
     "F": Tier.FREE,
 }
 
+# Dev-only keys — rejected unless IRIS_ALLOW_DEV_LICENSE_KEYS=1 (CI/tests only).
 TEST_KEYS = {
     "IRIS-TEST-0000-0000-0001": Tier.PRO,
     "IRIS-TEST-0000-0000-0002": Tier.ENTERPRISE,
     "IRIS-DEMO-0000-0000-0001": Tier.PRO,
 }
 
-# Deterministic keys for unit tests (valid checksum with SDK_SECRET_SALT).
-SAMPLE_LICENSE_KEYS = {
-    "pro": "IRIS-P123-ABCD-EFGH-7EA1",
-    "enterprise": "IRIS-E123-ABCD-EFGH-FA7C",
-    "free": "IRIS-F123-ABCD-EFGH-D823",
-}
+
+def _effective_salt() -> str:
+    if _LICENSE_SALT and _LICENSE_SALT not in KNOWN_INSECURE_SALTS:
+        return _LICENSE_SALT
+    return os.environ.get(ENV_LICENSE_SALT, "").strip()
 
 
-def _compute_checksum(seg1: str, seg2: str, seg3: str) -> str:
-    payload = f"{seg1}{seg2}{seg3}{SDK_SECRET_SALT}"
+def _dev_keys_allowed() -> bool:
+    return os.environ.get(ENV_ALLOW_DEV_LICENSE_KEYS, "").lower() in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    )
+
+
+def _compute_checksum(seg1: str, seg2: str, seg3: str, salt: str) -> str:
+    payload = f"{seg1}{seg2}{seg3}{salt}"
     return hashlib.sha256(payload.encode()).hexdigest()[:4].upper()
 
 
@@ -66,11 +90,17 @@ class LicenseKey:
             return False, Tier.FREE, "invalid_format"
 
         if key in TEST_KEYS:
-            return True, TEST_KEYS[key], "valid"
+            if _dev_keys_allowed():
+                return True, TEST_KEYS[key], "valid"
+            return False, Tier.FREE, "dev_key_disabled"
+
+        salt = _effective_salt()
+        if not salt or salt in KNOWN_INSECURE_SALTS:
+            return False, Tier.FREE, "invalid_checksum"
 
         parts = key.split("-")
         seg1, seg2, seg3, checksum = parts[1], parts[2], parts[3], parts[4]
-        expected = _compute_checksum(seg1, seg2, seg3)
+        expected = _compute_checksum(seg1, seg2, seg3, salt)
         if checksum != expected:
             return False, Tier.FREE, "invalid_checksum"
 
