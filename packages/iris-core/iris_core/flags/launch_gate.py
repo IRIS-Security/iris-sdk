@@ -60,6 +60,10 @@ CAPABILITY_FLAGS: dict[str, CapabilityStatus] = {
 
 BACKLOG_MD_URL = "https://github.com/gimartinb/iris-sdk/blob/main/BACKLOG.md"
 
+# Related: packages/iris-cloud-console/src/components/featureFlags.jsx
+# controls UI nav/feature visibility. Reconcile via BACKLOG.md follow-up
+# "feature-flag-system-reconciliation" — do not merge prematurely.
+
 
 def is_shippable(capability: str) -> bool:
     """Return True only if the capability is SHIPPABLE or LIVE."""
