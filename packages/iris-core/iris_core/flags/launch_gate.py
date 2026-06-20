@@ -39,6 +39,9 @@ class CapabilityStatus(str, Enum):
 
 
 CAPABILITY_FLAGS: dict[str, CapabilityStatus] = {
+    # Demo / platform capabilities
+    "org_discovery_engine": CapabilityStatus.SHIPPABLE,
+    "ciso_coverage_trend": CapabilityStatus.BACKLOG,
     # Business
     "compliance_full_eval": CapabilityStatus.BACKLOG,
     "certify_export": CapabilityStatus.BACKLOG,
@@ -69,3 +72,13 @@ def is_shippable(capability: str) -> bool:
     """Return True only if the capability is SHIPPABLE or LIVE."""
     status = CAPABILITY_FLAGS.get(capability, CapabilityStatus.BACKLOG)
     return status in (CapabilityStatus.SHIPPABLE, CapabilityStatus.LIVE)
+
+
+def trend_chart_is_shippable(org_id: str) -> bool:
+    """
+    CISO trend chart ships only after 7 real daily snapshots for this org.
+    Per-org check — never borrow another customer's history.
+    """
+    from iris_core.discovery.coverage_snapshot import CoverageSnapshot
+
+    return CoverageSnapshot.count_for_org(org_id) >= 7
