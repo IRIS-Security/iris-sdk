@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "iris-security-mcp"
-version = "0.2.9"
+version = "0.2.10"
 description = "IRIS MCP Server — connect Claude to AI agent governance"
 readme = "README.md"
 license = { text = "Apache-2.0" }
@@ -22,8 +22,8 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-  "iris-security-sdk>=0.2.9",
-  "iris-security-cli>=0.2.9",
+  "iris-security-sdk>=0.2.10",
+  "iris-security-cli>=0.2.10",
   "mcp>=1.0.0",
   "anyio>=4.0",
 ]
