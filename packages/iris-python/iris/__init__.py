@@ -48,6 +48,10 @@ from iris_core.cost.tracker import CostSummary, CostTracker, CostEntry
 from iris_core.cost.pricing import PricingRegistry
 
 __version__ = "0.2.12"
+
+AARM_CONFORMANCE = "Core"  # R1-R6 satisfied
+AARM_VERSION = "1.0"
+AIUC1_ALIGNMENT = "Q1-2026"
 __all__ = [
     # Main classes
     "IrisAgent",
@@ -74,6 +78,10 @@ __all__ = [
     "CostSummary",
     "CostEntry",
     "PricingRegistry",
+    "AARM_CONFORMANCE",
+    "AARM_VERSION",
+    "AIUC1_ALIGNMENT",
+    "__version__",
     "IrisViolationError",
     "IrisCrisisDetectedError",
     "IrisHITLRequiredError",

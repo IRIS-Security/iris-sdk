@@ -43,8 +43,8 @@ CAPABILITY_FLAGS: dict[str, CapabilityStatus] = {
     "org_discovery_engine": CapabilityStatus.SHIPPABLE,
     "ciso_coverage_trend": CapabilityStatus.BACKLOG,
     # Business
-    "compliance_full_eval": CapabilityStatus.BACKLOG,
-    "certify_export": CapabilityStatus.BACKLOG,
+    "compliance_full_eval": CapabilityStatus.SHIPPABLE,
+    "certify_export": CapabilityStatus.SHIPPABLE,
     "hitl_notifications": CapabilityStatus.BACKLOG,
     "evidence_vault_cloud": CapabilityStatus.BACKLOG,
     "vault_siem_export": CapabilityStatus.BACKLOG,

@@ -222,4 +222,7 @@ BUNDLE_ID_TO_FEATURE: Dict[str, Feature] = {
     "nyc-ll144": Feature.BUNDLE_NYC_LL144,
     "aiuc-1": Feature.BUNDLE_AIUC1,
     "iso-42001": Feature.BUNDLE_ISO42001,
+    "aarm-core": Feature.BUNDLE_AIUC1,
+    "aarm-extended": Feature.BUNDLE_AIUC1,
+    "soc2-cc": Feature.BUNDLE_SOC2,
 }
