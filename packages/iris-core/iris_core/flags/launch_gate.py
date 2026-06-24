@@ -48,7 +48,7 @@ CAPABILITY_FLAGS: dict[str, CapabilityStatus] = {
     "hitl_notifications": CapabilityStatus.BACKLOG,
     "evidence_vault_cloud": CapabilityStatus.BACKLOG,
     "vault_siem_export": CapabilityStatus.BACKLOG,
-    "github_app_org": CapabilityStatus.BACKLOG,
+    "github_app_org": CapabilityStatus.SHIPPABLE,
     "mcp_pro_tools": CapabilityStatus.BACKLOG,
     "audit_log_export": CapabilityStatus.BACKLOG,
     # Enterprise
