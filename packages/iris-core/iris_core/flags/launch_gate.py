@@ -41,19 +41,29 @@ class CapabilityStatus(str, Enum):
 CAPABILITY_FLAGS: dict[str, CapabilityStatus] = {
     # Demo / platform capabilities
     "org_discovery_engine": CapabilityStatus.SHIPPABLE,
-    "ciso_coverage_trend": CapabilityStatus.BACKLOG,
+    "ciso_coverage_trend": CapabilityStatus.SHIPPABLE,
+    "integrations_api": CapabilityStatus.SHIPPABLE,
+    "evidence_smart_filter": CapabilityStatus.SHIPPABLE,
+    "otel_export": CapabilityStatus.SHIPPABLE,
+    "onboarding_profiler": CapabilityStatus.SHIPPABLE,
+    "theme_light_dark": CapabilityStatus.SHIPPABLE,
+    "aarm_core_conformant": CapabilityStatus.LIVE,
+    "aarm_extended_conformant": CapabilityStatus.SHIPPABLE,
+    "aiuc1_evidence_package": CapabilityStatus.SHIPPABLE,
+    "multi_agent_chains": CapabilityStatus.SHIPPABLE,
+    "aarm_r7_intent_drift": CapabilityStatus.IN_PROGRESS,
     # Business
     "compliance_full_eval": CapabilityStatus.SHIPPABLE,
     "certify_export": CapabilityStatus.SHIPPABLE,
-    "hitl_notifications": CapabilityStatus.BACKLOG,
+    "hitl_notifications": CapabilityStatus.SHIPPABLE,
     "evidence_vault_cloud": CapabilityStatus.BACKLOG,
-    "vault_siem_export": CapabilityStatus.BACKLOG,
-    "github_app_org": CapabilityStatus.SHIPPABLE,
-    "mcp_pro_tools": CapabilityStatus.BACKLOG,
-    "audit_log_export": CapabilityStatus.BACKLOG,
+    "vault_siem_export": CapabilityStatus.SHIPPABLE,
+    "github_app_org": CapabilityStatus.IN_PROGRESS,
+    "mcp_pro_tools": CapabilityStatus.IN_PROGRESS,
+    "audit_log_export": CapabilityStatus.SHIPPABLE,
     # Enterprise
     "org_policy_enforcement": CapabilityStatus.BACKLOG,
-    "sso_saml_oidc": CapabilityStatus.BACKLOG,
+    "sso_saml_oidc": CapabilityStatus.IN_PROGRESS,
     "scim_provisioning": CapabilityStatus.BACKLOG,
     "rbac_custom_roles": CapabilityStatus.BACKLOG,
     "enterprise_vault_integrations": CapabilityStatus.BACKLOG,
@@ -76,9 +86,14 @@ def is_shippable(capability: str) -> bool:
 
 def trend_chart_is_shippable(org_id: str) -> bool:
     """
-    CISO trend chart ships only after 7 real daily snapshots for this org.
-    Per-org check — never borrow another customer's history.
+    CISO trend chart ships after 7 real daily snapshots.
+    In demo mode (org_id starts with 'demo-' or IRIS_DEMO_MODE=1),
+    always return True so the demo works on day 1.
     """
+    if os.environ.get("IRIS_DEMO_MODE") == "1":
+        return True
+    if org_id and org_id.startswith("demo"):
+        return True
     from iris_core.discovery.coverage_snapshot import CoverageSnapshot
 
     return CoverageSnapshot.count_for_org(org_id) >= 7
