@@ -40,6 +40,7 @@ class CapabilityStatus(str, Enum):
 
 CAPABILITY_FLAGS: dict[str, CapabilityStatus] = {
     # Demo / platform capabilities
+    "identity_graph": CapabilityStatus.SHIPPABLE,
     "org_discovery_engine": CapabilityStatus.SHIPPABLE,
     "ciso_coverage_trend": CapabilityStatus.SHIPPABLE,
     "integrations_api": CapabilityStatus.SHIPPABLE,
