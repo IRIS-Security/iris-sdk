@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Getting Started — IRIS Docs</title>
+<meta name="description" content="Get your first AI agent governed with IRIS in five minutes.">
+<link rel="canonical" href="https://iris-security.github.io/iris-sdk/getting-started.html">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="assets/docs.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body data-page="getting-started">
+
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="site-logo">IR<span>I</span>S</a>
+    <div class="site-links">
+      <a href="index.html" class="hide-mobile">Home</a>
+      <a href="docs.html" class="active">Docs</a>
+      <div class="nav-actions">
+        <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20design%20partner" class="btn btn-ghost">Design partner</a>
+        <a href="getting-started.html" class="btn btn-primary">Install</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar"><div class="docs-sidebar-inner" id="docs-sidebar-inner"></div></aside>
+  <main class="docs-main">
+    <div class="docs-eyebrow">Getting started</div>
+    <h1>Get your first agent governed in 5 minutes</h1>
+    <p class="docs-lead">IRIS governs what runs — not what deploys. Discover, inventory, define policy, guard every call. Everything runs locally.</p>
+
+    <div class="step">
+      <div class="step-num">Step 1</div>
+      <h2>Install</h2>
+      <p>Requires Python 3.10+.</p>
+      <div class="code-block"><span class="cmd">pip install iris-security-sdk iris-security-cli</span><br>
+<span class="cmd">iris quickstart</span></div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">Step 2 — Discover</div>
+      <h2>Find what's running ungoverned</h2>
+      <div class="code-block"><span class="cmd">iris scan --discover --dir .</span></div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">Step 3 — Inventory</div>
+      <h2>Register your agent</h2>
+      <div class="code-block"><span class="cmd">iris register \</span><br>
+<span class="cmd">&nbsp;&nbsp;--name my-agent \</span><br>
+<span class="cmd">&nbsp;&nbsp;--owner you@company.com \</span><br>
+<span class="cmd">&nbsp;&nbsp;--team my-team \</span><br>
+<span class="cmd">&nbsp;&nbsp;--compliance colorado-ai-act \</span><br>
+<span class="cmd">&nbsp;&nbsp;--high-risk</span></div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">Step 4</div>
+      <h2>Run a compliance check</h2>
+      <div class="code-block"><span class="cmd">iris compliance check --framework colorado-ai-act</span></div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">Step 5 — Define</div>
+      <h2>Write policy in plain English</h2>
+      <p>Edit <code>governance/agents/my-agent/policy-intent.md</code></p>
+      <div class="code-block">This agent reads customer support tickets and suggests responses.<br>
+It must never access payment data.<br>
+It must never write to any external system without user consent.<br>
+All data must stay in US regions only.</div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">Step 6</div>
+      <h2>Compile to Cedar</h2>
+      <div class="code-block"><span class="cmd">export ANTHROPIC_API_KEY=your-key</span><br>
+<span class="cmd">iris policy compile --agent my-agent --dry-run</span><br>
+<span class="cmd">iris policy diff --agent my-agent</span><br>
+<span class="cmd">iris policy commit --agent my-agent</span></div>
+      <p>Use <code>iris policy status --agent my-agent</code> any time to see whether policy is bound and current.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-num">Step 7 — Guard</div>
+      <h2>Enforce in your agent code</h2>
+      <div class="code-block"><span class="cmd">from iris_anthropic import IrisAnthropic</span><br>
+client = IrisAnthropic(passport=passport)</div>
+      <p>See <a href="runtime-enforcement.html" style="color:var(--red)">Runtime Enforcement</a> for full examples.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-num">Step 8</div>
+      <h2>Verify compliance</h2>
+      <div class="code-block"><span class="cmd">iris compliance check --framework colorado-ai-act</span><br>
+<span class="cmd">iris list</span><br>
+<span class="cmd">iris status</span><br>
+<span class="cmd">iris evidence query --decision deny</span><br>
+<span class="cmd">iris witness --agent my-agent</span></div>
+      <p><code>iris list</code> inventories your fleet. <code>iris status</code> shows compliance scores and next actions. <code>iris evidence query</code> filters vault events to what needs attention. <code>iris witness</code> streams live policy decisions as your agent runs.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-num">Step 9</div>
+      <h2>Record CI evidence (optional)</h2>
+      <p>Add this to your GitHub Actions, GitLab, or Jenkins pipeline so every run writes a signed evidence event — even when the gate fails.</p>
+      <div class="code-block"><span class="cmd">iris evidence record-cicd \</span><br>
+<span class="cmd">&nbsp;&nbsp;--system github_actions \</span><br>
+<span class="cmd">&nbsp;&nbsp;--run-id "$GITHUB_RUN_ID" \</span><br>
+<span class="cmd">&nbsp;&nbsp;--outcome success</span></div>
+      <p>Templates for GitHub Actions, GitLab, Jenkins, Terraform, and ArgoCD: <a href="evidence-vault.html#cicd" style="color:var(--red)">Evidence Vault → CI/CD</a>.</p>
+    </div>
+
+    <h2>Go deeper</h2>
+    <div class="card-grid">
+      <a href="basics.html" class="doc-card"><h3>The Basics</h3><p>Runtime governance vocabulary.</p><div class="arrow">Read →</div></a>
+      <a href="policy-as-code.html" class="doc-card"><h3>Policy as Code</h3><p>Intent → Cedar workflow.</p><div class="arrow">Read →</div></a>
+      <a href="monitoring.html" class="doc-card"><h3>Monitoring</h3><p>Witness, drift, and cost tracking.</p><div class="arrow">Read →</div></a>
+      <a href="evidence-vault.html" class="doc-card"><h3>Evidence Vault</h3><p>Signed ledger, retention, CI/CD evidence.</p><div class="arrow">Read →</div></a>
+      <a href="cli-reference.html" class="doc-card"><h3>CLI Reference</h3><p>All iris commands.</p><div class="arrow">Read →</div></a>
+    </div>
+
+    <div class="help-box">
+      <h3>Need help?</h3>
+      <p>Become a design partner — try IRIS and help shape what ships.</p>
+      <div class="help-actions">
+        <a href="getting-started.html" class="btn btn-primary">Install</a>
+        <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20design%20partner" class="btn btn-ghost">Design partner</a>
+      </div>
+    </div>
+
+    <div class="docs-footer">
+      <a href="docs.html">← Documentation</a>
+      <a href="basics.html">The Basics →</a>
+    </div>
+  </main>
+</div>
+<script src="assets/docs.js"></script>
+</body>
+</html>

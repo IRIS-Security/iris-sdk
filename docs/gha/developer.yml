@@ -1,0 +1,62 @@
+# IRIS Governance — Developer workflow template
+# Copy into .github/workflows/iris-governance.yml
+
+name: IRIS Governance (Developer)
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  iris-governance:
+    name: IRIS Governance Check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install IRIS
+        run: pip install iris-security-sdk iris-security-cli
+
+      - name: Discover ungoverned agents
+        id: scan
+        env:
+          IRIS_ENV: ${{ vars.IRIS_ENVIRONMENT || 'ci' }}
+        run: |
+          iris scan --discover --dir . --format json \
+            > scan-results.json 2>&1 || true
+
+      - name: Check compliance
+        env:
+          IRIS_ENV: ${{ vars.IRIS_ENVIRONMENT || 'ci' }}
+        run: |
+          iris compliance check \
+            --format json \
+            > compliance-results.json 2>&1 || true
+
+      - name: Fail on critical findings
+        if: failure()
+        run: exit 1
+
+      - name: Record CI evidence to vault
+        if: always()
+        env:
+          IRIS_AGENT_ID: platform-governance
+          IRIS_ENV: ${{ vars.IRIS_ENVIRONMENT || 'ci' }}
+        run: |
+          iris evidence record-cicd \
+            --system github_actions \
+            --run-id "${{ github.run_id }}" \
+            --pipeline-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --triggered-by "${{ github.actor }}" \
+            --outcome "${{ job.status }}"

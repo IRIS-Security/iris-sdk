@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: iris-governed-agent
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/IRIS-Security/iris-sdk.git
+    targetRevision: main
+    path: governance/agents
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: iris
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: iris-evidence-record-
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  template:
+    spec:
+      containers:
+        - name: iris-evidence
+          image: ghcr.io/IRIS-Security/iris-cli:0.2.0
+          command:
+            - iris
+            - evidence
+            - record-cicd
+            - --system=argocd
+            - --run-id=$(ARGOCD_APP_REVISION)
+            - --outcome=synced
+          env:
+            - name: ARGOCD_APP_REVISION
+              value: "unknown"
+      restartPolicy: Never

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SCM Scanning — IRIS Docs</title>
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="assets/docs.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body data-page="scm-scanning">
+
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="site-logo">IR<span>I</span>S</a>
+    <div class="site-links">
+      <a href="docs.html" class="active">Docs</a>
+      <div class="nav-actions">
+        <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20design%20partner" class="btn btn-ghost">Design partner</a>
+        <a href="getting-started.html" class="btn btn-primary">Install</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar"><div class="docs-sidebar-inner" id="docs-sidebar-inner"></div></aside>
+  <main class="docs-main">
+    <div class="docs-eyebrow">Build &amp; integrate</div>
+    <h1>SCM Scanning</h1>
+    <p class="docs-lead">Discover AI agents across your org before they reach production. IRIS scans GitHub repositories locally or via API to inventory governed and ungoverned agents.</p>
+
+    <h2>Install SCM support</h2>
+    <div class="code-block"><span class="cmd">pip install iris-security-scm</span></div>
+
+    <h2>Scan a local repository</h2>
+    <div class="code-block"><span class="cmd">iris scm scan-local --path ./my-agent-repo</span></div>
+    <p>Detects LangChain, CrewAI, Anthropic, OpenAI, and custom agent patterns. Reports governed vs ungoverned findings.</p>
+
+    <h2>Scan a GitHub repository</h2>
+    <div class="code-block"><span class="cmd">export GITHUB_TOKEN=ghp_...</span><br>
+<span class="cmd">iris scm scan-repo --org my-org --repo agent-service</span></div>
+
+    <h2>Scan an entire organization</h2>
+    <div class="code-block"><span class="cmd">iris scm scan-org --org my-org</span></div>
+    <p>Inventory all repos with AI agent patterns — the <strong>Discover</strong> step at org scale.</p>
+
+    <h2>Webhook listener</h2>
+    <div class="code-block"><span class="cmd">iris scm webhook start --port 8080</span></div>
+    <p>Receive GitHub push events and re-scan on every commit.</p>
+
+    <h2>Setup helper</h2>
+    <div class="code-block"><span class="cmd">iris scm setup</span></div>
+    <p>Interactive guide for GitHub App or token configuration.</p>
+
+    <div class="docs-footer">
+      <a href="mcp-setup.html">← MCP Setup</a>
+      <a href="policy-as-code.html">Policy as Code →</a>
+    </div>
+  </main>
+</div>
+<script src="assets/docs.js"></script>
+</body>
+</html>

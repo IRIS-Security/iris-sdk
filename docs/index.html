@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IRIS — AI Governance at Developer Speed | Shift Left AI Governance</title>
+<meta name="description" content="AI governance at developer speed for the AI era. Write AI agent policy in plain English, compile to Cedar, and enforce before the AI acts. Open source runtime governance for LLMs and agents.">
+<meta name="keywords" content="AI governance, AI era, shift left AI governance, AI agent governance, LLM governance, AI compliance, policy as code, Cedar policy, Colorado AI Act, runtime AI governance, AI security">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://iris-security.github.io/iris-sdk/">
+<meta property="og:title" content="IRIS — AI Governance at Developer Speed">
+<meta property="og:description" content="Shift left AI governance for the AI era. Write policy in plain English. Enforce it before the AI acts.">
+<meta property="og:image" content="https://iris-security.github.io/iris-sdk/assets/og-image.png">
+<meta property="og:site_name" content="IRIS AI Governance">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="IRIS — AI Governance at Developer Speed">
+<meta name="twitter:description" content="AI governance for the AI era. Write policy in plain English. Enforce before the AI acts. Open source.">
+<link rel="canonical" href="https://iris-security.github.io/iris-sdk/">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "IRIS",
+  "alternateName": "IRIS AI Governance",
+  "description": "AI governance at developer speed for the AI era. Write AI agent policy in plain English. IRIS compiles to Cedar and enforces it before the AI acts.",
+  "applicationCategory": "SecurityApplication",
+  "applicationSubCategory": "AI Governance",
+  "operatingSystem": "Linux, macOS, Windows",
+  "keywords": "AI governance, AI era, shift left AI governance, AI agent governance, LLM governance, Cedar policy",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "url": "https://iris-security.github.io/iris-sdk/",
+  "downloadUrl": "https://pypi.org/project/iris-security-sdk/",
+  "softwareVersion": "0.2.0",
+  "license": "https://opensource.org/licenses/Apache-2.0"
+}
+</script>
+<style>
+:root{
+  --black:#0A0A0A;--black2:#111;--black3:#161616;--black4:#1C1C1C;
+  --white:#fff;--gray:#666;--gray2:#999;--gray3:#555;
+  --red:#CC0000;--red-dim:rgba(204,0,0,.12);
+  --green:#00C853;--border:#222;--border2:#2A2A2A;
+  --font:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  --mono:'IBM Plex Mono',monospace;--mono2:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--black);color:var(--white);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.container{max-width:1100px;margin:0 auto;padding:0 1.5rem}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:12px 24px;border-radius:2px;font-size:14px;font-weight:600;transition:all .15s;cursor:pointer;border:none}
+.btn-primary{background:var(--red);color:#fff}
+.btn-primary:hover{background:#E60000}
+.btn-ghost{border:1px solid var(--border2);color:var(--gray2);background:transparent}
+.btn-ghost:hover{border-color:var(--red);color:#fff}
+.eyebrow{font-family:var(--mono);font-size:11px;color:var(--red);text-transform:uppercase;letter-spacing:.12em;margin-bottom:1rem}
+.section{padding:5rem 0;border-top:1px solid var(--border)}
+.section-label{font-family:var(--mono);font-size:10px;color:var(--gray3);text-transform:uppercase;letter-spacing:.15em;margin-bottom:1.5rem}
+h2.section-title{font-size:clamp(28px,4vw,42px);font-weight:700;line-height:1.15;margin-bottom:1.25rem}
+h2.section-title em{font-style:normal;color:var(--red)}
+
+/* Nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:60px}
+.nav-logo{font-family:var(--mono);font-weight:700;font-size:18px;color:#fff}
+.nav-logo span{color:var(--red)}
+.nav-links{display:flex;align-items:center;gap:2rem}
+.nav-links a{font-size:13px;color:var(--gray2);transition:color .12s}
+.nav-links a:hover{color:#fff}
+.nav-cta{padding:8px 18px;font-size:13px}
+.nav-actions{display:flex;align-items:center;gap:.5rem}
+
+/* Hero */
+.hero{padding:9rem 0 5rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--red)}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center}
+.hero h1{font-size:clamp(36px,5vw,56px);font-weight:700;line-height:1.08;margin-bottom:1.5rem}
+.hero h1 em{font-style:normal;color:var(--red)}
+.hero-sub{font-size:18px;color:var(--gray2);line-height:1.75;margin-bottom:2rem;max-width:480px}
+.hero-sub strong{color:#fff;font-weight:600}
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2.5rem}
+.hero-install{font-family:var(--mono2);font-size:13px;color:var(--green);background:var(--black3);border:1px solid var(--border);padding:12px 16px;border-radius:2px}
+.hero-stats{display:flex;gap:2.5rem}
+.stat-num{font-family:var(--mono);font-size:22px;font-weight:600;color:#fff}
+.stat-label{font-size:12px;color:var(--gray);margin-top:2px}
+.hero-visual{background:var(--black3);border:1px solid var(--border);border-radius:2px;padding:1.5rem;font-family:var(--mono2);font-size:12px;line-height:1.8}
+.hv-line{color:var(--gray3)}.hv-kw{color:#C792EA}.hv-st{color:#C3E88D}.hv-cm{color:#546E7A}.hv-ok{color:var(--green)}
+
+/* Problem */
+.problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;margin-top:2rem}
+.problem-card{background:var(--black3);border:1px solid var(--border);padding:2rem;border-radius:2px}
+.problem-card.bad{border-color:rgba(204,0,0,.3)}
+.problem-card.good{border-color:rgba(0,200,83,.2)}
+.problem-tag{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:1rem}
+.problem-card.bad .problem-tag{color:var(--red)}
+.problem-card.good .problem-tag{color:var(--green)}
+.problem-card h3{font-size:18px;margin-bottom:.75rem}
+.problem-card p{font-size:14px;color:var(--gray2);line-height:1.7}
+.problem-list{list-style:none;margin-top:1rem}
+.problem-list li{font-size:13px;color:var(--gray2);padding:.4rem 0;border-bottom:1px solid var(--border);display:flex;gap:.5rem}
+.problem-list li::before{content:'×';color:var(--red);font-weight:700}
+.problem-card.good .problem-list li::before{content:'✓';color:var(--green)}
+
+/* How it works */
+.paths{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-top:2.5rem}
+.path-card{background:var(--black3);border:1px solid var(--border);padding:1.75rem;border-radius:2px;transition:border-color .15s}
+.path-card:hover{border-color:var(--border2)}
+.path-num{font-family:var(--mono);font-size:11px;color:var(--red);margin-bottom:1rem}
+.path-card h3{font-size:16px;margin-bottom:.6rem}
+.path-card p{font-size:13px;color:var(--gray2);line-height:1.65}
+.how-step{display:grid;grid-template-columns:auto 1fr auto;gap:1.25rem;align-items:start;padding:1.5rem;background:var(--black3);border:1px solid var(--border);border-radius:2px;margin-top:1.5rem}
+.how-n{font-family:var(--mono);font-size:18px;font-weight:600;min-width:2rem}
+.how-title{font-size:16px;font-weight:600;margin-bottom:.4rem}
+.how-desc{font-size:13px;color:var(--gray2);line-height:1.65}
+.how-cmd-wrap{align-self:center}
+.how-cmd{font-family:var(--mono2);font-size:11px;color:var(--green);background:var(--black4);border:1px solid var(--border2);padding:10px 14px;border-radius:2px;white-space:nowrap}
+.cmd-line{font-family:var(--mono2);font-size:12px;line-height:1.8}
+
+/* Code section */
+.code-layout{display:grid;grid-template-columns:1fr 1.4fr;gap:3rem;margin-top:2.5rem;align-items:start}
+.code-explain{display:flex;flex-direction:column;gap:1.5rem}
+.explain-item{padding:1.25rem;background:var(--black3);border:1px solid var(--border);border-radius:2px;cursor:pointer;transition:border-color .15s}
+.explain-item.active{border-color:var(--red)}
+.explain-num{font-family:var(--mono);font-size:10px;color:var(--gray3);margin-bottom:.4rem}
+.explain-title{font-size:14px;font-weight:600;margin-bottom:.4rem}
+.explain-desc{font-size:13px;color:var(--gray2);line-height:1.65}
+.code-file-bar{display:flex;align-items:center;gap:.5rem;padding:.6rem 1rem;background:var(--black4);border:1px solid var(--border2);border-bottom:none;font-family:var(--mono);font-size:11px;color:var(--gray2)}
+.term-dot{width:10px;height:10px;border-radius:50%}
+.code-body{padding:1.25rem;font-family:var(--mono2);font-size:12px;line-height:1.85;background:#080808;border:1px solid var(--border2)}
+.cm{color:#546E7A}.kw{color:#C792EA}.st{color:#C3E88D}.fn{color:#82AAFF}.nm{color:#F78C6C}
+
+/* Trust */
+.trust-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;margin-top:2.5rem;align-items:start}
+.trust-items{display:flex;flex-direction:column;gap:1.25rem}
+.trust-item{padding:1.25rem;background:var(--black3);border:1px solid var(--border);border-radius:2px}
+.trust-title{font-size:14px;font-weight:600;margin-bottom:.4rem}
+.trust-desc{font-size:13px;color:var(--gray2);line-height:1.65}
+.trust-desc code{font-family:var(--mono2);font-size:12px;background:var(--black4);padding:2px 6px;border-radius:2px;color:var(--green)}
+.trust-terminal{background:#080808;border:1px solid var(--border2);border-radius:2px;padding:1.25rem;font-family:var(--mono2);font-size:12px;line-height:1.9}
+.tt-comment{color:var(--gray3)}.tt-cmd{color:var(--green)}.tt-out{color:var(--gray2)}.tt-ok{color:var(--green)}
+
+/* FAQ */
+.faq-list{margin-top:2rem;display:flex;flex-direction:column;gap:.5rem}
+.faq-item{border:1px solid var(--border);border-radius:2px;overflow:hidden}
+.faq-q{padding:1.25rem 1.5rem;font-size:14px;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:var(--black3);transition:background .12s}
+.faq-q:hover{background:var(--black4)}
+.faq-q::after{content:'+';color:var(--gray);font-size:18px;transition:transform .2s}
+.faq-item.open .faq-q::after{transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.faq-a-inner{padding:0 1.5rem 1.25rem;font-size:13px;color:var(--gray2);line-height:1.7}
+
+/* Regulatory callout */
+.reg-callout{margin-top:2rem;padding:1.5rem 1.75rem;background:var(--red-dim);border:1px solid rgba(204,0,0,.35);border-left:3px solid var(--red);border-radius:2px}
+.reg-callout-title{font-family:var(--mono);font-size:11px;color:var(--red);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.6rem}
+.reg-callout p{font-size:14px;color:var(--gray2);line-height:1.7}
+.reg-callout p strong{color:#fff;font-weight:600}
+.dev-callout{margin-top:1.25rem;padding:1.5rem 1.75rem;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.35);border-left:3px solid #3B82F6;border-radius:2px}
+.dev-callout-title{font-family:var(--mono);font-size:11px;color:#3B82F6;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.6rem}
+.dev-callout p{font-size:14px;color:var(--gray2);line-height:1.7}
+.dev-callout p strong{color:#fff;font-weight:600}
+.dev-callout a{color:#3B82F6;text-decoration:underline;text-underline-offset:2px}
+
+/* Plans */
+.pricing-grid{display:grid;grid-template-columns:1fr;gap:1.5rem;margin-top:2.5rem;max-width:420px}
+.pricing-grid.three-col{grid-template-columns:repeat(3,1fr);max-width:1100px}
+.pricing-grid.two-col{grid-template-columns:1fr 1fr;max-width:800px}
+.price-card{background:var(--black3);border:1px solid var(--border);border-radius:2px;padding:2rem;display:flex;flex-direction:column}
+.price-card.featured{border-color:var(--red)}
+.price-tier{font-family:var(--mono);font-size:11px;color:var(--gray3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem}
+.price-card.featured .price-tier{color:var(--red)}
+.price-name{font-size:22px;font-weight:700;margin-bottom:.25rem}
+.price-tagline{font-size:13px;color:var(--gray2);line-height:1.6;margin:1rem 0;flex:1}
+.price-features{list-style:none;margin:1.25rem 0}
+.price-features li{font-size:13px;color:var(--gray2);padding:.35rem 0;display:flex;gap:.5rem}
+.price-features li::before{content:'✓';color:var(--green);font-size:12px}
+.price-note{font-size:12px;color:var(--gray3);margin-top:.75rem;font-style:italic}
+.btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:auto}
+.btn-row .btn{flex:1;justify-content:center;min-width:0}
+
+/* Pricing cards (Community live; Business/Enterprise hidden until built) */
+.pricing-cards{padding:5rem 0;border-top:1px solid var(--border)}
+.feature-card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:2rem}
+.feature-card{background:var(--black3);border:1px solid var(--border);border-radius:2px;padding:1.25rem}
+.feature-card-tier{font-family:var(--mono);font-size:10px;color:var(--gray3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem}
+.feature-card-name{font-size:15px;font-weight:600;margin-bottom:.35rem}
+.feature-card-desc{font-size:12px;color:var(--gray2);line-height:1.6}
+.roadmap-note{margin-top:2rem;padding:1.25rem 1.5rem;background:var(--black3);border:1px solid var(--border);border-radius:2px;font-size:14px;color:var(--gray2)}
+.roadmap-note a{color:var(--red);text-decoration:underline;text-underline-offset:2px}
+.pricing-cta-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:2rem}
+.pc-cta-card{background:var(--black3);border:1px solid var(--border);border-radius:2px;padding:1.5rem;text-align:center}
+.pc-cta-tier{font-family:var(--mono);font-size:11px;color:var(--gray3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem}
+.pc-cta-price{font-size:18px;font-weight:700;margin-bottom:1rem}
+.btn-red{display:inline-flex;align-items:center;justify-content:center;padding:12px 24px;border-radius:2px;font-size:14px;font-weight:600;background:var(--red);color:#fff;transition:background .15s}
+.btn-red:hover{background:#E60000}
+@media(max-width:768px){.feature-card-grid,.pricing-cta-row{grid-template-columns:1fr}}
+
+/* CTA */
+.cta{text-align:center;padding:6rem 0;background:var(--black3);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.cta h2{font-size:clamp(28px,4vw,40px);font-weight:700;line-height:1.2;margin-bottom:1.5rem}
+.cta-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:2rem}
+
+/* Footer */
+footer{padding:3rem 0;border-top:1px solid var(--border)}
+.footer-inner{display:flex;justify-content:space-between;align-items:flex-start;gap:2rem;flex-wrap:wrap}
+.footer-logo{font-family:var(--mono);font-weight:700;font-size:16px;margin-bottom:.75rem}
+.footer-tagline{font-size:13px;color:var(--gray);max-width:400px;line-height:1.65}
+.footer-links{display:flex;gap:2rem;flex-wrap:wrap}
+.footer-links a{font-size:13px;color:var(--gray2);transition:color .12s}
+.footer-links a:hover{color:#fff}
+.footer-bottom{margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border);font-size:12px;color:var(--gray3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+
+@media(max-width:1024px){
+  .paths{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  .hero-grid,.problem-grid,.paths,.code-layout,.trust-grid,.pricing-grid{grid-template-columns:1fr}
+  .paths{grid-template-columns:1fr}
+  .nav-links{display:none}
+  .hero{padding-top:7rem}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container nav-inner">
+    <a href="#" class="nav-logo">IR<span>I</span>S</a>
+    <div class="nav-links">
+      <a href="docs.html">Docs</a>
+      <a href="#how">How it works</a>
+      <a href="#code">Policy as Code</a>
+      <a href="#trust">Trust</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/IRIS-Security/iris-sdk" target="_blank">GitHub</a>
+      <div class="nav-actions">
+        <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20design%20partner" class="btn btn-ghost nav-cta">Design partner</a>
+        <a href="getting-started.html" class="btn btn-primary nav-cta">Install</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <div class="eyebrow">The AI Era · Shift Left AI Governance</div>
+      <h1>AI Governance at<br><em>Developer Speed.</em></h1>
+      <p class="hero-sub"><strong>Write AI policy in plain English.</strong><br>Enforce it before the AI acts.</p>
+      <div class="hero-actions">
+        <a href="getting-started.html" class="btn btn-primary">Install</a>
+        <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20design%20partner" class="btn btn-ghost">Design partner</a>
+      </div>
+      <div class="hero-install">$ pip install iris-security-sdk iris-security-cli && iris quickstart</div>
+      <div class="cmd-line" style="margin-top:6px;color:var(--gray3)"># Optional: Claude integration via MCP</div>
+      <div class="cmd-line" style="font-size:11px">pip install "iris-security-sdk[mcp]"</div>
+      <div class="hero-stats" style="margin-top:2rem">
+        <div><div class="stat-num">14</div><div class="stat-label">Compliance frameworks</div></div>
+        <div><div class="stat-num">&lt;5ms</div><div class="stat-label">Cedar evaluation</div></div>
+        <div><div class="stat-num">Apache 2.0</div><div class="stat-label">Open source</div></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hv-line"># iris policy compile --agent loan-processor</div>
+      <div class="hv-line"># Compiling policy-intent.md → Cedar...</div>
+      <br>
+      <div><span class="hv-kw">permit</span>(</div>
+      <div>&nbsp;&nbsp;principal == iris::Agent::<span class="hv-st">"loan-processor"</span>,</div>
+      <div>&nbsp;&nbsp;action == iris::Action::<span class="hv-st">"call"</span>,</div>
+      <div>&nbsp;&nbsp;resource == iris::API::<span class="hv-st">"credit-bureau-api"</span></div>
+      <div>) <span class="hv-kw">when</span> {</div>
+      <div>&nbsp;&nbsp;context.region <span class="hv-kw">in</span> [<span class="hv-st">"us-east-1"</span>] &&</div>
+      <div>&nbsp;&nbsp;context.user_consent_logged == <span class="hv-nm">true</span></div>
+      <div>};</div>
+      <br>
+      <div class="hv-ok">✓ Policy compiled. Enforcing at runtime.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="problem">
+  <div class="container">
+    <div class="section-label">The problem</div>
+    <h2 class="section-title">AI agents are deployed.<br>Governance is <em>not.</em></h2>
+    <p style="color:var(--gray2);font-size:16px;max-width:720px;line-height:1.75">Teams are shipping agents that call APIs, access customer data, and make decisions in employment, housing, credit, healthcare, and insurance — without knowing what systems they have running, what those agents are allowed to do, or how to prove they exercised reasonable care when a regulator asks.</p>
+    <div class="reg-callout">
+      <div class="reg-callout-title">Colorado AI Act — updated May 2026</div>
+      <p>The law changed. The old June 30 deadline no longer applies — the new effective date is <strong>January 1, 2027</strong>. Requirements were narrowed, but the obligations did not disappear. You still must tell people when AI makes decisions about them. Consumers still have the right to appeal. Violations carry civil penalties up to <strong>$20,000 each</strong>. The safe harbor still exists — but only for organizations that can demonstrate <strong>reasonable care</strong>. Six more months is not permission to wait. It is time to build real controls.</p>
+    </div>
+    <div class="dev-callout">
+      <div class="dev-callout-title">June 12, 2026 — Fable 5 and Mythos 5 suspended</div>
+      <p>On June 12, Anthropic received a US government export-control directive at <strong>5:21pm ET</strong> and had to disable Fable 5 and Mythos 5 for <strong>all customers</strong> — with no advance notice. If your agent hardcodes a model string, your production system breaks when the provider or government acts. IRIS treats models as governed resources: declare allowed tiers in your passport, define fallback chains in the registry, and flip a directive kill switch in Git — your agent routes to an approved baseline on the next call, no redeploy. <a href="https://www.anthropic.com/news/fable-mythos-access" target="_blank">Read Anthropic's statement ↗</a></p>
+    </div>
+    <div class="problem-grid">
+      <div class="problem-card bad">
+        <div class="problem-tag">Where most teams are today</div>
+        <h3>Ungoverned agents, no audit trail</h3>
+        <p>Developers ship agents fast. Security and compliance find out later — if at all. When the law asks what your agent did, you have screenshots and spreadsheets, not enforceable policy.</p>
+        <ul class="problem-list">
+          <li>No inventory of AI systems making consequential decisions</li>
+          <li>Model hardcoded in source — breaks when providers suspend access</li>
+          <li>No policy enforced before the agent acts</li>
+          <li>Nothing version-controlled that an auditor can verify</li>
+        </ul>
+      </div>
+      <div class="problem-card good">
+        <div class="problem-tag">What IRIS gives you</div>
+        <h3>Policy as Code — govern before execution</h3>
+        <p>Register every agent. Write what it is allowed to do in plain English. IRIS compiles to Cedar and enforces policy on every LLM call — with an evidence trail your compliance team can actually use.</p>
+        <ul class="problem-list">
+          <li>Agent inventory via AgentPassport — your first compliance step</li>
+          <li>Model registry + directive kill switches with auto-fallback</li>
+          <li>Plain English policy compiled to formally verified Cedar</li>
+          <li>Runtime enforcement before every call — fail closed in production</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="how">
+  <div class="container">
+    <div class="section-label">How it works</div>
+    <h2 class="section-title">Declare. Compile. Enforce. HITL. <em>Witness.</em></h2>
+    <p style="color:var(--gray2);font-size:16px;max-width:640px">IRIS is what comes after Terraform — runtime governance, not deployment management. Each command describes what IRIS does right now.</p>
+    <div class="paths">
+      <div class="path-card">
+        <div class="path-num">01</div>
+        <h3><code style="font-family:var(--mono2);font-size:12px;color:var(--red)">iris declare</code></h3>
+        <p>Declare what the agent is allowed to do. Creates the AgentPassport — owner, team, compliance scope, data classification.</p>
+      </div>
+      <div class="path-card">
+        <div class="path-num">02</div>
+        <h3><code style="font-family:var(--mono2);font-size:12px;color:var(--red)">iris compile</code></h3>
+        <p>Write <code style="font-family:var(--mono2);font-size:11px;color:var(--green)">policy-intent.md</code> in plain English. IRIS compiles to Cedar — formally verified policy in Git.</p>
+      </div>
+      <div class="path-card">
+        <div class="path-num">03</div>
+        <h3><code style="font-family:var(--mono2);font-size:12px;color:var(--red)">iris enforce</code></h3>
+        <p>Verify runtime enforcement is active — Cedar evaluated on every call, not just at deploy time.</p>
+      </div>
+      <div class="path-card">
+        <div class="path-num">04</div>
+        <h3><code style="font-family:var(--mono2);font-size:12px;color:var(--red)">iris hitl</code></h3>
+        <p>Human-in-the-loop approval for high-risk actions — queue, review, approve or reject before execution proceeds.</p>
+      </div>
+      <div class="path-card">
+        <div class="path-num">05</div>
+        <h3><code style="font-family:var(--mono2);font-size:12px;color:var(--red)">iris witness</code></h3>
+        <p>Live attested feed of every policy decision — who acted, what was permitted, evidence logged.</p>
+      </div>
+      <div class="path-card">
+        <div class="path-num">06</div>
+        <h3><code style="font-family:var(--mono2);font-size:12px;color:var(--red)">iris certify</code></h3>
+        <p>Prove compliance readiness to Colorado AI Act, HIPAA, SOC 2, AIUC-1, ISO 42001, or any bundled framework.</p>
+      </div>
+      <div class="path-card">
+        <div class="path-num">07</div>
+        <h3><code style="font-family:var(--mono2);font-size:12px;color:var(--red)">iris sentinel</code></h3>
+        <p>Continuous monitoring — drift, score degradation, cost anomalies, and ungoverned agents.</p>
+      </div>
+    </div>
+    <div class="how-step" style="border-top:2px solid var(--red)">
+      <div class="how-n" style="color:var(--red)">✦</div>
+      <div class="how-content">
+        <div class="how-title">Ask Claude to govern your agents</div>
+        <div class="how-desc">
+          IRIS connects to Claude Desktop and Cursor via MCP.
+          Ask Claude "which regulations apply to my agent?" and
+          Claude scans your codebase, checks your compliance, and
+          shows you exactly what to do — no CLI required.
+        </div>
+      </div>
+      <div class="how-cmd-wrap">
+        <div class="how-cmd">pip install iris-security-mcp</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="integrations">
+  <div class="container">
+    <div class="section-label">Integrations</div>
+    <h2 class="section-title">Govern everywhere<br>your agents <em>run.</em></h2>
+    <div class="paths" style="grid-template-columns:repeat(3,1fr)">
+      <div class="path-card">
+        <div class="path-num">GH</div>
+        <h3>GitHub App</h3>
+        <p>Install <a href="https://github.com/apps/iris-governance" style="color:var(--red)">IRIS Governance</a> from the GitHub Marketplace. Every PR automatically scanned. Critical findings block merge. No CLI required.</p>
+      </div>
+      <div class="path-card">
+        <div class="path-num">MCP</div>
+        <h3>Claude &amp; Cursor</h3>
+        <p>Connect via MCP. Ask Claude in plain English: "scan my codebase for ungoverned agents" or "which regulations apply to my hiring AI?"</p>
+      </div>
+      <div class="path-card">
+        <div class="path-num">CI</div>
+        <h3>GitHub Actions</h3>
+        <p>Use the reusable <code style="font-family:var(--mono2);font-size:11px">iris-governance.yml</code> workflow when you prefer CI over the GitHub App.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="code">
+  <div class="container">
+    <div class="section-label">Policy as Code</div>
+    <h2 class="section-title">Write policy in plain English.<br>Enforce it <em>everywhere.</em></h2>
+    <div class="code-layout">
+      <div class="code-explain">
+        <div class="explain-item active">
+          <div class="explain-num">01</div>
+          <div class="explain-title">Discover — find what's running ungoverned</div>
+          <div class="explain-desc"><code style="font-family:var(--mono2);font-size:12px;color:var(--green)">iris scan --discover</code> surfaces LLM clients and agent patterns in your codebase that lack a passport or policy. See what actually runs before you govern it.</div>
+        </div>
+        <div class="explain-item">
+          <div class="explain-num">02</div>
+          <div class="explain-title">Inventory — register agents in your fleet</div>
+          <div class="explain-desc"><code style="font-family:var(--mono2);font-size:12px;color:var(--green)">iris register</code> creates an AgentPassport — owner, team, compliance scope, allowed models. The inventory regulators ask for. Not a deployment manifest — a record of what runs.</div>
+        </div>
+        <div class="explain-item">
+          <div class="explain-num">03</div>
+          <div class="explain-title">Define &amp; guard — policy enforced at runtime</div>
+          <div class="explain-desc">Write <code style="font-family:var(--mono2);font-size:12px;color:var(--green)">policy-intent.md</code>, run <code style="font-family:var(--mono2);font-size:12px;color:var(--green)">iris policy compile</code>, then guard every call with <code style="font-family:var(--mono2);font-size:12px;color:var(--green)">IrisAnthropic</code> or <code style="font-family:var(--mono2);font-size:12px;color:var(--green)">@agent.guard()</code>. Cedar evaluates before execution — not after.</div>
+        </div>
+      </div>
+      <div>
+        <div class="code-file-bar">
+          <div class="term-dot" style="background:#FF5F57"></div>
+          <div class="term-dot" style="background:#FEBC2E"></div>
+          <div class="term-dot" style="background:#28C840"></div>
+          governance/agents/loan-processor/policy-intent.md
+        </div>
+        <div class="code-body">
+          <span class="cm"># Source of truth — plain English policy intent</span><br>
+          <br>
+          This agent processes loan applications.<br>
+          It may call the credit bureau API in US regions only.<br>
+          User consent must be logged before any loan decision.<br>
+          It must never call any API not listed here.<br>
+          <br>
+          <span class="cm"># Compile to Cedar:</span><br>
+          <span class="cm"># iris policy compile --agent loan-processor</span>
+        </div>
+        <div style="margin-top:1.5rem">
+          <div class="code-file-bar">
+            <div class="term-dot" style="background:#333"></div>
+            governance/agents/loan-processor/policy.cedar — compiled by IRIS
+          </div>
+          <div class="code-body" style="border:1px solid var(--border2);background:#080808">
+            <span class="cm"># Generated by IRIS from plain English intent</span><br>
+            <span class="cm"># iris policy compile --agent loan-processor</span><br>
+            <br>
+            <span class="kw">permit</span>(<br>
+            &nbsp;&nbsp;principal == iris::Agent::<span class="st">"loan-processor"</span>,<br>
+            &nbsp;&nbsp;action == iris::Action::<span class="st">"call"</span>,<br>
+            &nbsp;&nbsp;resource == iris::API::<span class="st">"credit-bureau-api"</span><br>
+            ) <span class="kw">when</span> {<br>
+            &nbsp;&nbsp;context.region <span class="kw">in</span> [<span class="st">"us-east-1"</span>, <span class="st">"us-west-2"</span>] &&<br>
+            &nbsp;&nbsp;context.user_consent_logged == <span class="nm">true</span><br>
+            };<br>
+            <br>
+            <span class="kw">forbid</span>(<br>
+            &nbsp;&nbsp;principal == iris::Agent::<span class="st">"loan-processor"</span>,<br>
+            &nbsp;&nbsp;action, resource<br>
+            ) <span class="kw">unless</span> {<br>
+            &nbsp;&nbsp;resource <span class="kw">in</span> [<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;iris::API::<span class="st">"credit-bureau-api"</span>,<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;iris::API::<span class="st">"anthropic-api"</span><br>
+            &nbsp;&nbsp;]<br>
+            };<br>
+            <br>
+            <span class="cm"># Committed to Git. Reviewed. Auditable. Enforced.</span>
+          </div>
+          <div style="padding:.75rem 1.25rem;background:var(--black3);border:1px solid var(--border);border-top:none;font-size:12px;color:var(--gray);display:flex;justify-content:space-between;align-items:center">
+            <span>Formally verified · Evaluates in &lt;5ms · Human readable</span>
+            <a href="https://github.com/cedar-policy/cedar" style="color:var(--red);text-decoration:none;font-size:11px" target="_blank">Cedar by AWS ↗</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="trust">
+  <div class="container">
+    <div class="section-label">Trust model</div>
+    <h2 class="section-title">Policy in Git.<br>Enforcement in code.<br><em>Trust verified.</em></h2>
+    <div class="trust-grid">
+      <div class="trust-items">
+        <div class="trust-item">
+          <div class="trust-title">SLSA Level 3 provenance on every release</div>
+          <div class="trust-desc">Every IRIS release is built by GitHub Actions and attested
+            with SLSA Level 3 provenance via Sigstore. The attestation
+            is recorded in the public Rekor transparency log. Run
+            <code>pip audit signatures</code> after installing IRIS
+            to verify the package was built from the exact commit
+            you see on GitHub. Zero trust required.</div>
+        </div>
+        <div class="trust-item">
+          <div class="trust-title">Policy in Git — not in our cloud</div>
+          <div class="trust-desc">Your policies live in your repository. IRIS never holds your policy data, agent configs, or prompts. The SDK runs fully local with zero network required for enforcement.</div>
+        </div>
+        <div class="trust-item">
+          <div class="trust-title">Open source — verify the engine yourself</div>
+          <div class="trust-desc">The Cedar evaluation engine, policy compiler, and CLI are all open source under Apache 2.0. Read the code. Run the tests. Audit the compliance bundles.</div>
+        </div>
+        <div class="trust-item">
+          <div class="trust-title">Human in the loop — when it matters</div>
+          <div class="trust-desc">When a governed agent attempts a
+            high-risk action, IRIS pauses the call and notifies your
+            team via Slack, email, or PagerDuty. One click to approve
+            or reject. The agent waits. The full decision — who approved,
+            when, and why — is recorded in the Evidence Vault with a
+            tamper-evident approval token.</div>
+        </div>
+        <div class="trust-item">
+          <div class="trust-title">AIUC-1 evidence export + ISO 42001 mapping</div>
+          <div class="trust-desc">AIUC-1 evidence export (B006-format) and ISO 42001 coverage mapping — derived from AIUC-1's published crosswalk, not independent interpretation. Export auditor-ready JSON keyed by AIUC-1 sub-control IDs (B006.1, B006.2, B006.3). All exports query the same ControlMapping index in the Evidence Vault.</div>
+        </div>
+        <div class="trust-item">
+          <div class="trust-title">Evidence Vault — append-only system of record</div>
+          <div class="trust-desc">Every policy evaluation, HITL decision, and CI/CD run is an immutable, HMAC-signed, hash-chained event. One write path, many read paths — tamper-evidence by architecture. Query any control (CO-004, AIUC-B006, HIPAA-001) from a single store. Record pipeline evidence with <code style="font-family:var(--mono2);font-size:12px">iris evidence record-cicd</code>.</div>
+        </div>
+      </div>
+      <div>
+        <div class="trust-terminal">
+          <div class="tt-comment"># Verify the package signature</div>
+          <div class="tt-cmd">$ pip install iris-security-sdk</div>
+          <div class="tt-cmd">$ pip audit signatures</div>
+          <div class="tt-out">iris-security-sdk-0.1.8-py3-none-any.whl</div>
+          <div class="tt-ok">  ✓ Signed by GitHub Actions (OIDC)</div>
+          <div class="tt-ok">  ✓ SLSA Level 3 provenance verified</div>
+          <div class="tt-ok">  ✓ Commit: a3f8c2d · Workflow: publish.yml</div>
+          <br>
+          <div class="tt-comment"># Verify policy enforcement locally</div>
+          <div class="tt-cmd">$ iris compliance check --framework colorado-ai-act</div>
+          <div class="tt-ok">  ✓ Agent: loan-processor — PASS</div>
+          <div class="tt-ok">  ✓ All 6 Colorado AI Act rules satisfied</div>
+        </div>
+        <div style="margin-top:1rem;background:var(--black3);border:1px solid var(--border);padding:1.25rem">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--gray3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.9rem">Verify it yourself</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.9">
+            <div style="color:var(--gray3)"># Verify SLSA Level 3 provenance</div>
+            <div style="color:var(--gray3)"># Links the package to the exact commit and</div>
+            <div style="color:var(--gray3)"># workflow run that built it via Sigstore</div>
+            <div style="color:var(--green);margin-top:8px">pip install iris-security-sdk</div>
+            <div style="color:var(--green)">pip audit signatures</div>
+            <div style="color:var(--gray3);margin-top:8px"># Or verify the full provenance chain:</div>
+            <div style="color:var(--green)">slsa-verifier verify-artifact \</div>
+            <div style="color:var(--green)">&nbsp;&nbsp;iris_security_sdk-*.whl \</div>
+            <div style="color:var(--green)">&nbsp;&nbsp;--provenance-path *.intoto.jsonl \</div>
+            <div style="color:var(--green)">&nbsp;&nbsp;--source-uri github.com/IRIS-Security/iris-sdk</div>
+            <div style="color:#00C853;margin-top:12px">PASSED: SLSA Level 3</div>
+            <div style="color:var(--gray3)">Verified: commit · workflow · build inputs · Sigstore</div>
+          </div>
+        </div>
+        <div style="margin-top:.75rem;display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+          <a href="https://github.com/IRIS-Security/iris-sdk/actions" target="_blank"
+             style="text-align:center;padding:8px;background:var(--black3);border:1px solid var(--border);color:var(--gray2);text-decoration:none;font-size:12px;border-radius:2px;transition:border-color .12s">
+            View workflow runs ↗
+          </a>
+          <a href="https://rekor.sigstore.dev" target="_blank"
+             style="text-align:center;padding:8px;background:var(--black3);border:1px solid var(--border);color:var(--gray2);text-decoration:none;font-size:12px;border-radius:2px;transition:border-color .12s">
+            Rekor transparency log ↗
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="faq">
+  <div class="container">
+    <div class="section-label">FAQ</div>
+    <h2 class="section-title">Common <em>questions.</em></h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q">Is IRIS like Terraform for AI agents?</div>
+        <div class="faq-a"><div class="faq-a-inner">No. Terraform governs what gets deployed — infrastructure, configs, resources standing up in an environment. IRIS governs what <em>runs</em> after deploy: which APIs an agent calls, which models it uses, whether each LLM request passes policy. Think of IRIS as what comes after Terraform — the runtime governance layer. <code style="font-family:var(--mono2);font-size:12px">iris scan</code> discovers what's running, <code style="font-family:var(--mono2);font-size:12px">iris register</code> inventories your fleet, and <code style="font-family:var(--mono2);font-size:12px">@agent.guard()</code> enforces policy on every call.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Does IRIS require cloud infrastructure?</div>
+        <div class="faq-a"><div class="faq-a-inner">No. IRIS runs fully local. Cedar policy evaluation happens in-process with zero network required. You can govern agents on your laptop, in CI, or in production without any IRIS-hosted service.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What is Cedar and why does IRIS use it?</div>
+        <div class="faq-a"><div class="faq-a-inner">Cedar is a formally verified policy language from AWS, designed for authorization at scale. It evaluates in microseconds, is human-readable, and has mathematical proofs of correctness. IRIS compiles your plain English intent to Cedar so you never write policy syntax yourself.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How is IRIS different from LLM output monitoring tools?</div>
+        <div class="faq-a"><div class="faq-a-inner">Monitoring tools scan outputs after the fact. IRIS governs the full agent lifecycle — declaring what is allowed before execution, blocking violations at runtime, and maintaining an auditable policy history in Git. Detection tells you what happened. Governance determines what is allowed to happen.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How does Policy as Code help with a regulatory audit?</div>
+        <div class="faq-a"><div class="faq-a-inner">Policy as Code means your AI governance is version-controlled,
+            reviewable, and auditable in the same way your infrastructure
+            code is. When a regulator asks what your agent is allowed to do,
+            you show them the Cedar policy in Git — a document with a
+            reviewer, a timestamp, and a commit hash. Not a screenshot. Not
+            a PDF someone generated. The actual policy that is actually
+            enforced at runtime on every call.<br><br>
+            IRIS also generates the evidence package: the audit trail,
+            impact assessments, compliance check results, and certification
+            readiness score. The auditor reviews it and signs off. We are
+            honest about what IRIS handles and what your team handles.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What happens when a provider or government suspends a model my agent uses?</div>
+        <div class="faq-a"><div class="faq-a-inner">It already happened. On June 12, 2026, Anthropic disabled Fable 5 and Mythos 5 for all users after a US government export-control directive — received at 5:21pm with no advance warning. Agents with hardcoded model strings broke. IRIS governs models separately from APIs: define tiers and fallback chains in <code style="font-family:var(--mono2);font-size:12px">governance/models/registry.yaml</code>, suspend models via directive kill switches in <code style="font-family:var(--mono2);font-size:12px">governance/directives/active.yaml</code>, and <code style="font-family:var(--mono2);font-size:12px">IrisAnthropic</code> auto-routes to your approved baseline on the next call. The event is logged to the Evidence Vault.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Did the Colorado AI Act change? What do I need to do now?</div>
+        <div class="faq-a"><div class="faq-a-inner">Yes. Governor Polis signed a replacement law on May 14, 2026. The effective date moved to January 1, 2027, and some requirements were scaled back — but notice, transparency, consumer appeal rights, and the reasonable-care safe harbor remain. Start by inventorying every AI system that touches employment, housing, credit, healthcare, or insurance decisions. IRIS gives you that inventory (AgentPassport), enforced policy (Cedar), and the evidence package auditors expect — locally, with no cloud required.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Do you cover AI in hiring and recruiting?</div>
+        <div class="faq-a"><div class="faq-a-inner">Yes. IRIS covers NYC Local Law 144 (the most actively enforced AI hiring law in the US), the Illinois AI Video Interview Act, and the employment-domain provisions of CCPA/CPRA ADMT and the EU AI Act. These are available in IRIS Pro. The free tier shows you the rules and your top gaps — Pro unlocks the full evidence package and certification report that an auditor or the NYC DCWP will ask for.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Does IRIS work inside Claude?</div>
+        <div class="faq-a"><div class="faq-a-inner">Yes. Install <code style="font-family:var(--mono2);font-size:12px">iris-security-mcp</code> or <code style="font-family:var(--mono2);font-size:12px">pip install "iris-security-sdk[mcp]"</code> and connect IRIS to Claude Desktop. Ask Claude in plain English: "scan my codebase for ungoverned agents" or "which regulations apply to my hiring AI?" Claude uses IRIS tools to answer with real data from your actual codebase.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can we install IRIS from GitHub Marketplace?</div>
+        <div class="faq-a"><div class="faq-a-inner">Yes. Install the <a href="https://github.com/apps/iris-governance" style="color:var(--red)">IRIS Governance GitHub App</a> and every PR in your organization is automatically scanned for ungoverned AI agents. Critical findings block the merge. The developer gets a comment with the exact one-line fix. No CLI required.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can we have different compliance requirements per environment?</div>
+        <div class="faq-a"><div class="faq-a-inner">Yes. IRIS uses a dynamic environment model where your security team defines environments in <code style="font-family:var(--mono2);font-size:12px">iris-security.yaml</code> and attaches compliance frameworks and enforcement levels to each one. <code style="font-family:var(--mono2);font-size:12px">dev</code> might have no frameworks enforced. <code style="font-family:var(--mono2);font-size:12px">production-eu</code> enforces GDPR and EU AI Act. <code style="font-family:var(--mono2);font-size:12px">production-fedramp</code> enforces FedRAMP Moderate. Set <code style="font-family:var(--mono2);font-size:12px">IRIS_ENV</code> in your deployment config and IRIS applies the right policy automatically.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What is the Evidence Vault and how is it different from a log file?</div>
+        <div class="faq-a"><div class="faq-a-inner">The Evidence Vault is an append-only, signed ledger — not a rotating log. Each event is HMAC-signed and hash-chained to the previous one; tampering with any event breaks the chain for everything after it. Events are mapped to compliance controls (Colorado CO-004, AIUC-B006, HIPAA-001, …) so one collection satisfies every framework report. CI/CD pipelines record evidence with <code style="font-family:var(--mono2);font-size:12px">iris evidence record-cicd</code> — even when the governance gate fails. See the <a href="evidence-vault.html" style="color:var(--red)">Evidence Vault guide</a>.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Does IRIS help with AIUC-1 certification?</div>
+        <div class="faq-a"><div class="faq-a-inner">Yes. AIUC-1 is a third-party certifiable AI agent standard — Schellman is the first accredited auditor. IRIS generates technical evidence in AIUC-1's own evidence-ID format (B006.1, B006.2, etc.) for the controls IRIS's runtime enforcement directly produces evidence for — agent access restrictions, HITL review records, activity logs, PII leakage prevention. IRIS does not replace the accredited auditor or AIUC-1's required third-party adversarial and hallucination testing — those remain separate engagements.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Do you have paid tiers?</div>
+        <div class="faq-a"><div class="faq-a-inner">Not yet, by design. Community is free, open source, and fully real today — Cedar policy engine, HITL, the built-in encrypted vault, Evidence Vault, GitHub integration, all of it. We are building Business and Enterprise capabilities in the open and will turn pricing on once they are real, tested, and something we'd stand behind in a customer conversation — not before. Track progress at <a href="https://github.com/IRIS-Security/iris-sdk/blob/main/BACKLOG.md" style="color:var(--red)">BACKLOG.md</a>.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-a"><div class="faq-a-inner"><strong>14 compliance frameworks</strong> — Colorado AI Act (SB 26-189) is available in Community today. NIST AI RMF, SOC 2, GDPR, HIPAA, EU AI Act, FedRAMP, CCPA/CPRA ADMT (<code>ccpa-admt</code>), China PIPL (<code>china-pipl</code>), NYC LL 144 (<code>nyc-ll144</code>), Illinois AI Video (<code>illinois-ai-video</code>), AIUC-1 (<code>aiuc-1</code>), and ISO/IEC 42001 (<code>iso-42001</code>) are on the Business roadmap — see <a href="https://github.com/IRIS-Security/iris-sdk/blob/main/BACKLOG.md" style="color:var(--red)">BACKLOG.md</a>. Run <code style="font-family:var(--mono2);font-size:12px">iris framework suggest</code> to see which apply to your agents.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing-cards" id="pricing">
+  <div class="container">
+    <div class="section-label">Start with Community</div>
+    <h2 class="section-title">Free, open source, and built for real use.<br>More tiers are coming as we build them in the open.</h2>
+
+    <div class="feature-card-grid">
+      <div class="feature-card">
+        <div class="feature-card-tier">Community</div>
+        <div class="feature-card-name">Cedar policy engine</div>
+        <div class="feature-card-desc">Compile plain-English intent to formally verified Cedar. Enforce before every LLM call.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Community</div>
+        <div class="feature-card-name">Policy compile &amp; diff</div>
+        <div class="feature-card-desc">GitOps policy workflow — intent in Git, Cedar compiled in CI, drift detected automatically.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Community</div>
+        <div class="feature-card-name">All LLM client integrations</div>
+        <div class="feature-card-desc">Anthropic, OpenAI, Gemini, Vertex, LangChain — governed with the same Cedar engine.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Community</div>
+        <div class="feature-card-name">HITL (local)</div>
+        <div class="feature-card-desc">Human-in-the-loop approval queue via CLI — pause, review, approve or reject high-risk actions.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Community</div>
+        <div class="feature-card-name">Built-in encrypted vault</div>
+        <div class="feature-card-desc">Local secrets storage with AES-256 — no cloud required for credential governance.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Community</div>
+        <div class="feature-card-name">Evidence Vault (local)</div>
+        <div class="feature-card-desc">Append-only signed ledger with hash chain, control mappings, retention lifecycle, and CI/CD evidence recording.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Community</div>
+        <div class="feature-card-name">CI/CD recording</div>
+        <div class="feature-card-desc">GitHub Actions workflow and compliance checks in your pipeline.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Community</div>
+        <div class="feature-card-name">GitHub App (personal)</div>
+        <div class="feature-card-desc">PR comments with inline findings and one-line fix commands on your repos.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Community</div>
+        <div class="feature-card-name">MCP free tools</div>
+        <div class="feature-card-desc">Connect IRIS to Claude Desktop and Cursor — scan, check compliance, list HITL reviews.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Community</div>
+        <div class="feature-card-name">SLSA Level 3 provenance</div>
+        <div class="feature-card-desc">Every PyPI release signed and attested — verify with <code style="font-family:var(--mono2);font-size:11px">pip audit signatures</code>.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Community</div>
+        <div class="feature-card-name">Org policy validate</div>
+        <div class="feature-card-desc">Validate <code style="font-family:var(--mono2);font-size:11px">.iris-security</code> org policy files locally before merge.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Community</div>
+        <div class="feature-card-name">RBAC (basic)</div>
+        <div class="feature-card-desc">Role-based access in the CLI and local SDK — viewer, engineer, admin roles.</div>
+      </div>
+    </div>
+
+    <div class="feature-card-grid paid-tier-preview" data-show-paid="false" style="display:none">
+      <div class="feature-card">
+        <div class="feature-card-tier">Business</div>
+        <div class="feature-card-name">Compliance full eval</div>
+        <div class="feature-card-desc">All 14 frameworks — HIPAA, SOC 2, GDPR, EU AI Act, AIUC-1, ISO 42001, and more.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Business</div>
+        <div class="feature-card-name">Certify export</div>
+        <div class="feature-card-desc">PDF, JSON, OSCAL, and AIUC-1 evidence packages for auditors.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Business</div>
+        <div class="feature-card-name">Audit log export</div>
+        <div class="feature-card-desc">Export Evidence Vault records for security questionnaires and SOC 2 reviews.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Business</div>
+        <div class="feature-card-name">HITL notifications</div>
+        <div class="feature-card-desc">Slack, email, and PagerDuty alerts when a governed action needs human approval.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Business</div>
+        <div class="feature-card-name">GitHub App (org-wide)</div>
+        <div class="feature-card-desc">Org-wide install with merge gate — block PRs with critical ungoverned agent findings.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Business</div>
+        <div class="feature-card-name">MCP Pro tools</div>
+        <div class="feature-card-desc">Full compliance eval, certify, and org-wide scan tools in Claude and Cursor.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Business</div>
+        <div class="feature-card-name">Evidence Vault cloud sync</div>
+        <div class="feature-card-desc">Cross-repo evidence aggregation with cloud-backed retention policies.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Business</div>
+        <div class="feature-card-name">Vault SIEM export</div>
+        <div class="feature-card-desc">Stream policy decisions to Splunk, Datadog, or your SIEM of choice.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Enterprise</div>
+        <div class="feature-card-name">SSO (SAML/OIDC)</div>
+        <div class="feature-card-desc">WorkOS AuthKit integration — Okta, Azure AD, Google Workspace.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Enterprise</div>
+        <div class="feature-card-name">Org policy enforcement</div>
+        <div class="feature-card-desc">Block merges that violate org-wide <code style="font-family:var(--mono2);font-size:11px">.iris-security</code> policy.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Enterprise</div>
+        <div class="feature-card-name">RBAC custom roles</div>
+        <div class="feature-card-desc">Define custom roles and permissions in the IRIS Cloud Console.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Enterprise</div>
+        <div class="feature-card-name">Enterprise vault integrations</div>
+        <div class="feature-card-desc">AWS Secrets Manager, HashiCorp Vault, Azure Key Vault, GCP Secret Manager.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Enterprise</div>
+        <div class="feature-card-name">FedRAMP region enforcement</div>
+        <div class="feature-card-desc">Hard block on data transfers outside approved FedRAMP regions.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Enterprise</div>
+        <div class="feature-card-name">BYOK encryption</div>
+        <div class="feature-card-desc">Bring your own KMS key for Evidence Vault and secrets at rest.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-tier">Enterprise</div>
+        <div class="feature-card-name">SCIM provisioning</div>
+        <div class="feature-card-desc">Automated user and group sync from your identity provider.</div>
+      </div>
+    </div>
+
+    <div class="roadmap-note">
+      <p>Building Business and Enterprise capabilities in the open. Follow progress:
+      <a href="https://github.com/IRIS-Security/iris-sdk/blob/main/BACKLOG.md">BACKLOG.md</a></p>
+    </div>
+
+    <div class="pricing-cta-row">
+      <div class="pc-cta-card">
+        <div class="pc-cta-tier">Community</div>
+        <div class="pc-cta-price">$0 — available now</div>
+        <a href="https://github.com/IRIS-Security/iris-sdk" class="btn-red">Install free →</a>
+      </div>
+      <div class="pc-cta-card paid-tier-preview" data-show-paid="false" style="display:none">
+        <div class="pc-cta-tier">Business</div>
+        <div class="pc-cta-price">Coming soon</div>
+        <a href="https://github.com/IRIS-Security/iris-sdk/blob/main/BACKLOG.md" class="btn btn-ghost">Track on BACKLOG.md</a>
+      </div>
+      <div class="pc-cta-card paid-tier-preview" data-show-paid="false" style="display:none">
+        <div class="pc-cta-tier">Enterprise</div>
+        <div class="pc-cta-price">Talk to sales</div>
+        <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20Enterprise" class="btn btn-ghost">Contact sales</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="container">
+    <h2>January 1, 2027 is closer than it looks.<br>Inventory your agents. Write the policy.<br>IRIS enforces the rest.</h2>
+    <p style="color:var(--gray2);font-size:16px">Open source. Five-minute install. Zero cloud required. Start building reasonable care now — not in December.</p>
+    <div class="cta-actions">
+      <a href="getting-started.html" class="btn btn-primary">Install</a>
+      <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20design%20partner" class="btn btn-ghost">Design partner</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-logo">IRIS</div>
+        <p class="footer-tagline">AI governance at developer speed for the AI era.
+            Write AI policy in plain English. Enforce before the AI acts. Open source. Apache 2.0.</p>
+      </div>
+      <div class="footer-links">
+        <a href="docs.html">Docs</a>
+        <a href="https://github.com/IRIS-Security/iris-sdk" target="_blank">GitHub</a>
+        <a href="https://pypi.org/project/iris-security-sdk/" target="_blank">PyPI</a>
+        <a href="https://github.com/cedar-policy/cedar" target="_blank">Cedar</a>
+        <a href="mailto:irisgovernance@gmail.com">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 IRIS. Apache 2.0 License.</span>
+      <span>AI Governance for the AI Era</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll('.faq-q').forEach(q=>{
+  q.addEventListener('click',()=>{
+    const item=q.parentElement;
+    const open=item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i=>{
+      i.classList.remove('open');
+      i.querySelector('.faq-a').style.maxHeight='0';
+    });
+    if(!open){
+      item.classList.add('open');
+      const a=item.querySelector('.faq-a');
+      a.style.maxHeight=a.scrollHeight+'px';
+    }
+  });
+});
+document.querySelectorAll('.explain-item').forEach((item,i)=>{
+  item.addEventListener('click',()=>{
+    document.querySelectorAll('.explain-item').forEach(e=>e.classList.remove('active'));
+    item.classList.add('active');
+  });
+});
+// SHOW_PAID_TIERS mirrors the Python flag — hardcoded false on static GitHub Pages.
+const SHOW_PAID_TIERS = false;
+if (SHOW_PAID_TIERS) {
+  document.querySelectorAll('[data-show-paid]').forEach(el => {
+    el.style.display = '';
+  });
+}
+</script>
+</body>
+</html>

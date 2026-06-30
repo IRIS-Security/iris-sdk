@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Model Governance — IRIS Docs</title>
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="assets/docs.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body data-page="model-governance">
+
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="site-logo">IR<span>I</span>S</a>
+    <div class="site-links">
+      <a href="docs.html" class="active">Docs</a>
+      <div class="nav-actions">
+        <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20design%20partner" class="btn btn-ghost">Design partner</a>
+        <a href="getting-started.html" class="btn btn-primary">Install</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar"><div class="docs-sidebar-inner" id="docs-sidebar-inner"></div></aside>
+  <main class="docs-main">
+    <div class="docs-eyebrow">Policy &amp; compliance</div>
+    <h1>Model Governance</h1>
+    <p class="docs-lead">Govern <strong>which models</strong> an agent may call — not just which APIs. Handle export controls, frontier model restrictions, and emergency suspensions without redeploying.</p>
+
+    <h2>When you need this</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Scenario</th><th>IRIS control</th></tr>
+        <tr><td>Standard models only</td><td>Default registry</td></tr>
+        <tr><td>Frontier / cyber-capable models</td><td>Tier + export-control + HITL gates</td></tr>
+        <tr><td>Government or provider suspends a model</td><td>Directive kill switch + auto-fallback</td></tr>
+        <tr><td>Audit trail required</td><td>Evidence Vault</td></tr>
+      </table>
+    </div>
+
+    <h2>Cedar model rules</h2>
+    <p>IRIS enforces model governance via Cedar rules evaluated at every inference call:</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Rule</th><th>Severity</th><th>Trigger</th></tr>
+        <tr><td><code>IRIS-MODEL-001</code></td><td>CRITICAL</td><td>Active suspension directive (no fallback)</td></tr>
+        <tr><td><code>IRIS-MODEL-002</code></td><td>HIGH</td><td>Model not in passport <code>allowed_models</code></td></tr>
+        <tr><td><code>IRIS-MODEL-003</code></td><td>HIGH</td><td>Model tier not in <code>allowed_model_tiers</code></td></tr>
+        <tr><td><code>IRIS-MODEL-004</code></td><td>CRITICAL</td><td>Export-control: invalid work authorization</td></tr>
+        <tr><td><code>IRIS-MODEL-005</code></td><td>HIGH</td><td>Frontier model requires HITL in staging/production</td></tr>
+      </table>
+    </div>
+
+    <h2>Passport allowlists</h2>
+    <p>Set <code>allowed_models</code> and <code>allowed_model_tiers</code> in <code>passport.yaml</code> to restrict which models an agent may call. The registry provides tier metadata; the passport is the per-agent allowlist.</p>
+
+    <h2>Model registry</h2>
+    <p>Edit <code>governance/models/registry.yaml</code> to declare tiers, export-control status, HITL requirements, and fallback chains.</p>
+    <div class="code-block"><span class="cmd">iris models list</span><br>
+<span class="cmd">iris models reload</span></div>
+
+    <h2>Directive kill switches</h2>
+    <p>When a model must be suspended org-wide (e.g. government export-control directive), edit <code>governance/directives/active.yaml</code> and merge via PR:</p>
+    <div class="code-block">- directive_id: bis-2026-0612-fable<br>
+&nbsp;&nbsp;model_id: claude-fable-5<br>
+&nbsp;&nbsp;status: suspended<br>
+&nbsp;&nbsp;fallback_model: claude-sonnet-4-6</div>
+    <p>IRIS hot-reloads on the next inference call. No application redeploy.</p>
+    <div class="code-block"><span class="cmd">iris models directives</span></div>
+
+    <h2>IrisAnthropic with auto-fallback</h2>
+    <div class="code-block"><span class="cmd">from iris_anthropic import IrisAnthropic</span><br>
+<br>
+client = IrisAnthropic(<br>
+&nbsp;&nbsp;passport=passport,<br>
+&nbsp;&nbsp;user_work_authorization="us-citizen",<br>
+&nbsp;&nbsp;auto_fallback=True,<br>
+)</div>
+
+    <h2>Full guide on GitHub</h2>
+    <p>For the complete reference including passport allowlists and tier definitions:</p>
+    <p><a href="https://github.com/IRIS-Security/iris-sdk/blob/main/docs/MODEL_GOVERNANCE.md" style="color:var(--red)">MODEL_GOVERNANCE.md on GitHub ↗</a></p>
+
+    <div class="docs-footer">
+      <a href="compliance.html">← Compliance Bundles</a>
+      <a href="regulatory.html">Regulatory Intelligence →</a>
+    </div>
+  </main>
+</div>
+<script src="assets/docs.js"></script>
+</body>
+</html>

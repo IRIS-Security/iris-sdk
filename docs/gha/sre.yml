@@ -1,0 +1,32 @@
+# IRIS Governance — SRE workflow template
+
+name: IRIS Governance (SRE)
+
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 1"
+
+jobs:
+  iris-governance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install iris-security-sdk iris-security-cli
+      - name: Drift and sentinel checks
+        run: |
+          iris drift check --dir . || true
+          iris sentinel monitor --dir . || true
+      - name: Record CI evidence to vault
+        if: always()
+        run: |
+          iris evidence record-cicd \
+            --system github_actions \
+            --run-id "${{ github.run_id }}" \
+            --pipeline-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --triggered-by "${{ github.actor }}" \
+            --outcome "${{ job.status }}"

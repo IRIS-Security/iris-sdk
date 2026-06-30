@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HITL &amp; Delegation — IRIS Docs</title>
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="assets/docs.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body data-page="hitl-delegation">
+
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="site-logo">IR<span>I</span>S</a>
+    <div class="site-links">
+      <a href="docs.html" class="active">Docs</a>
+      <div class="nav-actions">
+        <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20design%20partner" class="btn btn-ghost">Design partner</a>
+        <a href="getting-started.html" class="btn btn-primary">Install</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar"><div class="docs-sidebar-inner" id="docs-sidebar-inner"></div></aside>
+  <main class="docs-main">
+    <div class="docs-eyebrow">Operations</div>
+    <h1>HITL &amp; Delegation</h1>
+    <p class="docs-lead">Human-in-the-loop review for high-risk actions, plus user delegation so agents act on behalf of authenticated users — both enforced by Cedar at runtime.</p>
+
+    <h2>iris hitl — human-in-the-loop review</h2>
+    <p>When a policy or condition rule requires human approval, IRIS queues the request until a reviewer acts. Approved calls proceed; rejected calls raise <code>IrisViolationError</code>. Every decision is logged to the Evidence Vault.</p>
+
+    <h3>Setup and configuration</h3>
+    <div class="code-block"><span class="cmd">iris hitl setup --agent loan-processor</span><br>
+<span class="cmd">iris hitl config --agent loan-processor</span><br>
+<span class="cmd">iris hitl rules --agent loan-processor</span><br>
+<span class="cmd">iris hitl test --agent loan-processor</span></div>
+    <p><code>setup</code> is an interactive wizard: enable HITL, set timeout policy, and declare condition rules (e.g. <code>loan_amount &gt; 50000</code>). HITL fires only when a declared rule matches.</p>
+
+    <h3>Review queue</h3>
+    <div class="code-block"><span class="cmd">iris hitl list</span><br>
+<span class="cmd">iris hitl list --agent loan-processor</span><br>
+<span class="cmd">iris hitl list --status all</span><br>
+<span class="cmd">iris hitl show &lt;review-id&gt;</span></div>
+
+    <h3>Approve, reject, escalate</h3>
+    <div class="code-block"><span class="cmd">iris hitl approve &lt;review-id&gt; --note "Verified by compliance"</span><br>
+<span class="cmd">iris hitl reject &lt;review-id&gt; --reason "Insufficient documentation"</span><br>
+<span class="cmd">iris hitl escalate &lt;review-id&gt; --to senior@company.com</span></div>
+    <p>Set <code>IRIS_USER_EMAIL</code> to identify the reviewer. In <code>staging</code> and <code>production</code>, frontier models and high-risk actions may require HITL per rule <code>IRIS-MODEL-005</code>.</p>
+
+    <h3>All HITL commands</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Command</th><th>Description</th></tr>
+        <tr><td><code>iris hitl setup --agent &lt;name&gt;</code></td><td>Interactive HITL configuration wizard</td></tr>
+        <tr><td><code>iris hitl list [--agent &lt;name&gt;]</code></td><td>List pending reviews</td></tr>
+        <tr><td><code>iris hitl show &lt;review-id&gt;</code></td><td>Full review detail</td></tr>
+        <tr><td><code>iris hitl approve &lt;review-id&gt;</code></td><td>Approve — call proceeds</td></tr>
+        <tr><td><code>iris hitl reject &lt;review-id&gt;</code></td><td>Reject — call blocked</td></tr>
+        <tr><td><code>iris hitl escalate &lt;review-id&gt;</code></td><td>Escalate to senior reviewer</td></tr>
+        <tr><td><code>iris hitl config --agent &lt;name&gt;</code></td><td>Show current HITL config</td></tr>
+        <tr><td><code>iris hitl rules --agent &lt;name&gt;</code></td><td>Show trigger conditions</td></tr>
+        <tr><td><code>iris hitl test --agent &lt;name&gt;</code></td><td>Simulate review flow</td></tr>
+      </table>
+    </div>
+
+    <h2>SDK integration</h2>
+    <p>After <code>iris hitl approve</code>, pass the approval to drop-in clients:</p>
+    <div class="code-block"><span class="cmd">from iris_anthropic import IrisAnthropic</span><br>
+<br>
+client = IrisAnthropic(<br>
+&nbsp;&nbsp;passport=passport,<br>
+&nbsp;&nbsp;hitl_approved=True,<br>
+)</div>
+
+    <h2>iris delegation — user delegation</h2>
+    <p>Agents act on behalf of users. Cedar policies evaluate <code>acting_for_user</code>, consent, and scope at runtime.</p>
+    <div class="code-block"><span class="cmd">iris delegation status --agent loan-processor</span><br>
+<span class="cmd">iris delegation test --agent loan-processor --user alice@company.com</span><br>
+<span class="cmd">iris delegation log --agent loan-processor</span></div>
+
+    <h2>iris users — reviewer management</h2>
+    <div class="code-block"><span class="cmd">iris users add --email alice@company.com --role reviewer</span><br>
+<span class="cmd">iris users list</span><br>
+<span class="cmd">iris users remove --email alice@company.com</span></div>
+
+    <h2>iris dlp — content inspection</h2>
+    <p>Scan files and test prompts against data-loss-prevention rules before they reach an LLM.</p>
+    <div class="code-block"><span class="cmd">iris dlp scan --file customer-data.txt</span><br>
+<span class="cmd">iris dlp test --agent loan-processor --prompt "..."</span></div>
+
+    <div class="docs-footer">
+      <a href="evidence-vault.html">← Evidence Vault</a>
+      <a href="cli-reference.html">CLI Reference →</a>
+    </div>
+  </main>
+</div>
+<script src="assets/docs.js"></script>
+</body>
+</html>

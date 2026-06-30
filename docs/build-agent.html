@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Build an Agent — IRIS Docs</title>
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="assets/docs.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body data-page="build-agent">
+
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="site-logo">IR<span>I</span>S</a>
+    <div class="site-links">
+      <a href="docs.html" class="active">Docs</a>
+      <div class="nav-actions">
+        <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20design%20partner" class="btn btn-ghost">Design partner</a>
+        <a href="getting-started.html" class="btn btn-primary">Install</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar"><div class="docs-sidebar-inner" id="docs-sidebar-inner"></div></aside>
+  <main class="docs-main">
+    <div class="docs-eyebrow">Build &amp; integrate</div>
+    <h1>Build an Agent with IRIS</h1>
+    <p class="docs-lead">Follow these steps to register an agent, set up governance files, and prepare for runtime enforcement.</p>
+
+    <h2>1. Install IRIS</h2>
+    <div class="code-block"><span class="cmd">pip install iris-security-sdk iris-security-cli</span><br>
+<span class="cmd">iris quickstart</span></div>
+    <p>Requires Python 3.10+. No cloud account. Runs fully local.</p>
+
+    <h2>2. Discover existing agents (optional)</h2>
+    <p>Before registering, scan your repo for ungoverned LLM calls and agent patterns.</p>
+    <div class="code-block"><span class="cmd">iris scan --discover --dir .</span><br>
+<span class="cmd">iris scan --discover --govern</span>  <span class="cm"># show one-line fixes</span></div>
+
+    <h2>3. Register your agent</h2>
+    <p>Registration creates an <strong>AgentPassport</strong> — the inventory record regulators and security teams expect. Primary command: <code>iris declare</code> (<code>iris register</code> is an alias).</p>
+    <div class="code-block"><span class="cmd">iris register \</span><br>
+<span class="cmd">&nbsp;&nbsp;--name loan-processor \</span><br>
+<span class="cmd">&nbsp;&nbsp;--owner you@company.com \</span><br>
+<span class="cmd">&nbsp;&nbsp;--team platform \</span><br>
+<span class="cmd">&nbsp;&nbsp;--compliance colorado-ai-act \</span><br>
+<span class="cmd">&nbsp;&nbsp;--high-risk</span></div>
+    <p>Creates <code>governance/agents/loan-processor/passport.yaml</code>.</p>
+
+    <h2>4. Check compliance posture</h2>
+    <div class="code-block"><span class="cmd">iris framework suggest --agent loan-processor</span><br>
+<span class="cmd">iris compliance check --framework colorado-ai-act</span></div>
+    <p>IRIS shows which rules you violate and how to fix each one in plain English.</p>
+
+    <h2>5. Write policy intent</h2>
+    <p>Edit <code>governance/agents/loan-processor/policy-intent.md</code>:</p>
+    <div class="code-block">This agent processes loan applications.<br>
+It may call the credit bureau API in US regions only.<br>
+User consent must be logged before any loan decision.<br>
+It must never call any API not listed here.</div>
+
+    <h2>6. Compile to Cedar</h2>
+    <div class="code-block"><span class="cmd">export ANTHROPIC_API_KEY=your-key</span><br>
+<span class="cmd">iris compile --agent loan-processor</span><br>
+<span class="cmd">iris policy diff --agent loan-processor</span>  <span class="cm"># preview drift</span><br>
+<span class="cmd">iris preview --agent loan-processor</span>       <span class="cm"># risk impact</span></div>
+    <p>Commit both <code>policy-intent.md</code> and <code>policy.cedar</code> to Git. Review in a PR.</p>
+
+    <h2>7. Wire runtime enforcement</h2>
+    <p>See <a href="runtime-enforcement.html" style="color:var(--red)">Runtime Enforcement</a> for drop-in LLM clients and <code>@agent.guard()</code> decorators.</p>
+
+    <div class="callout">
+      <p><strong>Tip:</strong> Check <code>governance/</code> into your repo. Validate on every PR with <code>iris scan --fail-on critical</code> and <code>iris compliance check</code>.</p>
+    </div>
+
+    <div class="docs-footer">
+      <a href="basics.html">← The Basics</a>
+      <a href="runtime-enforcement.html">Runtime Enforcement →</a>
+    </div>
+  </main>
+</div>
+<script src="assets/docs.js"></script>
+</body>
+</html>

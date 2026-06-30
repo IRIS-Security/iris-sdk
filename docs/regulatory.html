@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Regulatory Intelligence — IRIS Docs</title>
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="assets/docs.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body data-page="regulatory">
+
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="site-logo">IR<span>I</span>S</a>
+    <div class="site-links">
+      <a href="docs.html" class="active">Docs</a>
+      <div class="nav-actions">
+        <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20design%20partner" class="btn btn-ghost">Design partner</a>
+        <a href="getting-started.html" class="btn btn-primary">Install</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar"><div class="docs-sidebar-inner" id="docs-sidebar-inner"></div></aside>
+  <main class="docs-main">
+    <div class="docs-eyebrow">Policy &amp; compliance</div>
+    <h1>Regulatory Intelligence</h1>
+    <p class="docs-lead">IRIS tracks AI law changes that affect your agents — including Colorado SB 26-189 updates — and tells you when your compliance posture needs attention.</p>
+
+    <h2>Check for updates</h2>
+    <div class="code-block"><span class="cmd">iris regulatory check</span><br>
+<span class="cmd">iris regulatory check --framework colorado-ai-act</span></div>
+    <p>Compares bundled regulatory knowledge against your active frameworks and flags changes that may require policy or assessment updates.</p>
+
+    <h2>List tracked frameworks</h2>
+    <div class="code-block"><span class="cmd">iris regulatory list</span></div>
+
+    <h2>CI-friendly watch mode</h2>
+    <div class="code-block"><span class="cmd">iris regulatory watch</span><br>
+<span class="cmd">iris regulatory watch --fail-on-change</span></div>
+    <p>Exit non-zero when regulatory changes affect your agents — useful in scheduled CI jobs.</p>
+
+    <h2>History and apply</h2>
+    <div class="code-block"><span class="cmd">iris regulatory history</span><br>
+<span class="cmd">iris regulatory apply --update-id &lt;id&gt;</span></div>
+
+    <div class="callout">
+      <p><strong>Colorado AI Act (SB 26-189):</strong> Effective January 1, 2027. IRIS bundles track obligation changes so <code>iris regulatory check</code> surfaces what matters for your registered agents.</p>
+    </div>
+
+    <div class="callout">
+      <p><strong>California CCPA/CPRA ADMT:</strong> Regulations effective January 1, 2026. Significant-decision ADMT requirements from January 1, 2027. Risk assessment filing due April 1, 2028. Bundle ID: <code>ccpa-admt</code>.</p>
+    </div>
+
+    <div class="callout">
+      <p><strong>China PIPL:</strong> In effect since November 1, 2021. Compliance Audit Management Measures effective May 1, 2025. Bundle ID: <code>china-pipl</code>. Cross-border transfer restrictions are among the strictest globally — involve China counsel.</p>
+    </div>
+
+    <div class="callout">
+      <p><strong>HIPAA 2025 NPRM:</strong> Proposed Security Rule update (January 2025) explicitly requires AI tools in risk analysis. Section 1557 non-discrimination for AI in patient care effective May 1, 2025.</p>
+    </div>
+
+    <div class="callout">
+      <p><strong>NYC Local Law 144 (AEDTs):</strong> Effective July 5, 2023. DCWP is actively fining HR tech companies — $375–$1,500 per violation per day. Requires annual independent bias audit, public disclosure, and candidate notice before AEDT use. Bundle ID: <code>nyc-ll144</code>. Run <code>iris regulatory check --framework nyc-ll144</code>.</p>
+    </div>
+
+    <div class="callout">
+      <p><strong>Illinois AI Video Interview Act:</strong> Effective January 1, 2020 (820 ILCS 42). First US state law regulating AI video interviews. Consent before recording is the most enforced provision. Bundle ID: <code>illinois-ai-video</code>. Run <code>iris regulatory check --framework illinois-ai-video</code>.</p>
+    </div>
+
+    <div class="callout">
+      <p><strong>AIUC-1:</strong> Voluntary third-party certifiable standard for AI agents (Schellman is the first accredited auditor). IRIS tracks AIUC-1 control updates and surfaces changes that affect evidence export mappings. Bundle ID: <code>aiuc-1</code>. Run <code>iris regulatory check --framework aiuc-1</code> quarterly — AIUC-1 publishes changelog updates that may affect B006 sub-control evidence requirements.</p>
+    </div>
+
+    <div class="callout">
+      <p><strong>ISO/IEC 42001:2023:</strong> IRIS's ISO 42001 mapping is derived from AIUC-1's published crosswalk (dated 2025-09-18), not independent ISO interpretation. When AIUC-1 updates its crosswalk, ISO coverage tiers may shift. Bundle ID: <code>iso-42001</code>. Run <code>iris regulatory check --framework iso-42001</code> to verify the crosswalk is still current — IRIS warns if the crosswalk is older than 100 days.</p>
+    </div>
+
+    <div class="docs-footer">
+      <a href="model-governance.html">← Model Governance</a>
+      <a href="monitoring.html">Monitoring →</a>
+    </div>
+  </main>
+</div>
+<script src="assets/docs.js"></script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Compliance Bundles — IRIS Docs</title>
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="assets/docs.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body data-page="compliance">
+
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="site-logo">IR<span>I</span>S</a>
+    <div class="site-links">
+      <a href="docs.html" class="active">Docs</a>
+      <div class="nav-actions">
+        <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20design%20partner" class="btn btn-ghost">Design partner</a>
+        <a href="getting-started.html" class="btn btn-primary">Install</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar"><div class="docs-sidebar-inner" id="docs-sidebar-inner"></div></aside>
+  <main class="docs-main">
+    <div class="docs-eyebrow">Policy &amp; compliance</div>
+    <h1>Compliance Bundles</h1>
+    <p class="docs-lead">IRIS ships compliance bundles that compile to Cedar rules and enforce at runtime — not just checklists.</p>
+
+    <h2>Run a compliance check</h2>
+    <div class="code-block"><span class="cmd">iris compliance check --framework colorado-ai-act</span><br>
+<span class="cmd">iris compliance check --framework ccpa-admt</span><br>
+<span class="cmd">iris compliance check --framework china-pipl</span><br>
+<span class="cmd">iris compliance check --framework nyc-ll144</span><br>
+<span class="cmd">iris compliance check --framework illinois-ai-video</span><br>
+<span class="cmd">iris compliance check --framework aiuc-1</span><br>
+<span class="cmd">iris compliance check --agent my-agent --framework hipaa</span></div>
+
+    <h2>Suggest applicable frameworks</h2>
+    <div class="code-block"><span class="cmd">iris framework suggest --agent my-agent</span></div>
+    <p>IRIS asks plain-English questions and recommends which frameworks apply and why — including California ADMT for employment/credit decisions, NYC LL 144 for ATS and hiring AI in New York City, Illinois AI Video for video interview analysis, China PIPL for users in China, and AIUC-1 for high-risk customer-facing agents (customer service, candidate scoring, interviewer agents).</p>
+
+    <h2>Impact assessment &amp; risk filing</h2>
+    <div class="code-block"><span class="cmd">iris compliance assess --agent my-agent</span></div>
+    <p>Generates a structured impact assessment stored in the Evidence Vault. Satisfies Colorado best practice (CO-002), CCPA ADMT risk assessment (CCPA-005), and PIPL PIPIA (PIPL-004). Export via <code>iris evidence report</code> for regulator submissions. See <a href="evidence-vault.html" style="color:var(--red)">Evidence Vault</a> for retention periods and the append-only data model.</p>
+
+    <h2>Certify readiness</h2>
+    <div class="code-block"><span class="cmd">iris certify --agent my-agent --framework colorado-ai-act</span><br>
+<span class="cmd">iris certify --agent my-agent --framework china-pipl --format markdown</span><br>
+<span class="cmd">iris certify --agent my-agent --framework nyc-ll144 --format pdf</span><br>
+<span class="cmd">iris certify --agent my-agent --framework nist-ai-rmf --format markdown</span><br>
+<span class="cmd">iris certify --agent my-agent --framework aiuc-1 --format aiuc1-export</span><br>
+<span class="cmd">iris certify --agent my-agent --framework iso-42001</span></div>
+    <p>Produces a certification score with control pass/fail breakdown. For AIUC-1, <code>--format aiuc1-export</code> outputs JSON keyed by AIUC-1 sub-control IDs (B006.1, B006.2, etc.) for accredited auditors. For ISO 42001, IRIS shows a three-tier coverage breakdown (FULL / PARTIAL / NOT APPLICABLE) derived from AIUC-1's published crosswalk — not independent ISO interpretation. Pair with <code>iris evidence report</code> for auditor packages. Alias: <code>iris test</code>.</p>
+
+    <h2>Free vs Pro bundles</h2>
+    <p>Colorado bundles are free and ship with the open-source CLI. All other compliance bundles require an <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20Pro%20license" style="color:var(--red)">IRIS Pro license</a> (<code>iris license activate &lt;key&gt;</code>). Free tier shows a 3-control preview for Pro frameworks.</p>
+
+    <h3>Free tier</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Bundle ID</th><th>Framework</th><th>Status</th></tr>
+        <tr><td><code>colorado-ai-act</code></td><td>Colorado AI Act (SB 26-189)</td><td>Available</td></tr>
+        <tr><td><code>colorado-chatbot</code></td><td>Colorado Chatbot Safety (HB 26-1263)</td><td>Available</td></tr>
+        <tr><td><code>colorado-health-ai</code></td><td>Colorado AI in Health Insurance</td><td>Available</td></tr>
+        <tr><td><code>colorado-mental-health-ai</code></td><td>Colorado Mental Health AI (HB 26-1195)</td><td>Available</td></tr>
+      </table>
+    </div>
+
+    <h3>Pro tier</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Bundle ID</th><th>Framework</th><th>Status</th></tr>
+        <tr><td><code>ccpa-admt</code></td><td>California CCPA/CPRA ADMT Regulations</td><td>Available</td></tr>
+        <tr><td><code>china-pipl</code></td><td>China Personal Information Protection Law (PIPL)</td><td>Available</td></tr>
+        <tr><td><code>hipaa</code></td><td>HIPAA for AI Agents (2025 NPRM + Section 1557)</td><td>Available</td></tr>
+        <tr><td><code>soc2</code></td><td>SOC 2 Trust Services Criteria (AI agent context)</td><td>Available</td></tr>
+        <tr><td><code>gdpr</code></td><td>GDPR</td><td>Available</td></tr>
+        <tr><td><code>nist-ai-rmf</code></td><td>NIST AI Risk Management Framework</td><td>Available</td></tr>
+        <tr><td><code>eu-ai-act</code></td><td>EU Artificial Intelligence Act</td><td>Available</td></tr>
+        <tr><td><code>fedramp</code></td><td>FedRAMP Moderate</td><td>Available</td></tr>
+        <tr><td><code>nyc-ll144</code></td><td>NYC Local Law 144 — Automated Employment Decision Tools</td><td>Available</td></tr>
+        <tr><td><code>illinois-ai-video</code></td><td>Illinois AI Video Interview Act (820 ILCS 42)</td><td>Available</td></tr>
+        <tr><td><code>aiuc-1</code></td><td>AIUC-1 — AI Agent Security, Safety and Reliability</td><td>Available</td></tr>
+        <tr><td><code>iso-42001</code></td><td>ISO/IEC 42001:2023 (derived from AIUC-1 crosswalk)</td><td>Available</td></tr>
+      </table>
+    </div>
+
+    <div class="callout">
+      <p><strong>SOC 2 accuracy note:</strong> The AICPA Trust Services Criteria do not include AI-specific controls. IRIS maps existing TSC controls (CC6, CC7, CC8, CC9.2) to AI agent governance evidence that auditors increasingly request. For AI-specific controls, use NIST AI RMF, AIUC-1, or ISO 42001 (IRIS's ISO mapping is derived from AIUC-1's published crosswalk).</p>
+    </div>
+
+    <h2>AIUC-1 (voluntary certification standard)</h2>
+    <p>AIUC-1 is a third-party certifiable standard for AI agents — Schellman is the first accredited auditor. IRIS does not issue AIUC-1 certificates; it generates technical evidence in AIUC-1's own evidence-ID format for controls IRIS enforces at runtime.</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Control</th><th>Obligation</th><th>IRIS coverage</th></tr>
+        <tr><td>B006</td><td>Prevent unauthorized AI agent actions</td><td><code>tool_permissions</code> + Cedar pre-execution hooks + Evidence Vault (FULL)</td></tr>
+        <tr><td>B007</td><td>Enforce user access privileges</td><td>User delegation + Evidence Vault audit trail (FULL)</td></tr>
+        <tr><td>C007</td><td>Flag high-risk outputs for human review</td><td>HITL gate + review records (FULL)</td></tr>
+        <tr><td>E015</td><td>Log AI system activity</td><td>Evidence Vault (FULL)</td></tr>
+        <tr><td>A006</td><td>Prevent PII leakage</td><td>DLP scanner (FULL)</td></tr>
+        <tr><td>E006</td><td>Vendor due diligence</td><td>OUT OF SCOPE — legal/procurement process</td></tr>
+        <tr><td>C010–C012, D002, D004</td><td>Third-party adversarial/hallucination testing</td><td>OUT OF SCOPE — separate testing engagement</td></tr>
+      </table>
+    </div>
+    <div class="code-block"><span class="cmd">iris certify --agent my-agent --framework aiuc-1 --format aiuc1-export</span></div>
+
+    <h2>ISO/IEC 42001:2023 (derived from AIUC-1)</h2>
+    <p>IRIS's ISO 42001 coverage is composed from AIUC-1's official ISO crosswalk (dated 2025-09-18) plus IRIS's own AIUC-1 evidence map. IRIS does not independently interpret ISO 42001 clause language. Certification output shows FULL, PARTIAL, and NOT_APPLICABLE tiers — organizational clauses (leadership commitment, training, management review) are listed honestly, not hidden.</p>
+    <div class="code-block"><span class="cmd">iris certify --agent my-agent --framework iso-42001</span></div>
+    <p>Run <code>iris regulatory check --framework iso-42001</code> quarterly to verify the AIUC-1 crosswalk is still current.</p>
+
+    <h2>California CCPA/CPRA ADMT (effective Jan 1, 2026)</h2>
+    <p>CPPA finalized automated decision-making technology (ADMT) regulations in September 2025. Significant-decision requirements apply from January 1, 2027; risk assessment filing due April 1, 2028.</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Rule</th><th>Obligation</th><th>IRIS control</th></tr>
+        <tr><td>CCPA-001</td><td>ADMT inventory</td><td>AgentPassport registration</td></tr>
+        <tr><td>CCPA-002</td><td>Pre-use consumer notice</td><td><code>policy-intent.md</code> + app UI</td></tr>
+        <tr><td>CCPA-003</td><td>Opt-out for significant decisions</td><td><code>user_consent_logged</code> + HITL</td></tr>
+        <tr><td>CCPA-005</td><td>Privacy risk assessment</td><td><code>iris compliance assess</code></td></tr>
+        <tr><td>CCPA-006</td><td>3-year record retention</td><td>Evidence Vault Pro (1095 days)</td></tr>
+      </table>
+    </div>
+
+    <h2>China PIPL (effective Nov 1, 2021)</h2>
+    <p>Applies to any organization processing personal information of individuals in China — including US companies with Chinese users. Compliance Audit Management Measures effective May 1, 2025.</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Rule</th><th>Obligation</th><th>IRIS control</th></tr>
+        <tr><td>PIPL-001</td><td>Lawful basis and explicit consent</td><td><code>user_consent_logged</code> (blocks in prod)</td></tr>
+        <tr><td>PIPL-002</td><td>Automated decision transparency</td><td><code>policy-intent.md</code></td></tr>
+        <tr><td>PIPL-003</td><td>Right to refuse automated decisions</td><td>HITL gate</td></tr>
+        <tr><td>PIPL-004</td><td>Impact assessment (PIPIA)</td><td><code>iris compliance assess</code></td></tr>
+        <tr><td>PIPL-005</td><td>Cross-border transfer restriction</td><td><code>allowed_regions</code> + RegionPolicy</td></tr>
+        <tr><td>PIPL-006</td><td>3-year record retention</td><td>Evidence Vault Pro</td></tr>
+      </table>
+    </div>
+
+    <h2>HIPAA for AI Agents (2025 updates)</h2>
+    <p>The January 2025 HHS NPRM proposes requiring AI tools in HIPAA risk analysis for the first time. Section 1557 (effective May 1, 2025) requires non-discrimination evaluation for AI in patient care decisions.</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Rule</th><th>Obligation</th><th>IRIS control</th></tr>
+        <tr><td>HIPAA-008</td><td>AI tool inventory and risk analysis</td><td>AgentPassport + <code>iris certify</code></td></tr>
+        <tr><td>HIPAA-009</td><td>AI non-discrimination in patient care</td><td><code>iris red-team</code> + compliance assess</td></tr>
+      </table>
+    </div>
+    <p>IRIS does not generate BAAs — obtain one from your LLM provider before processing PHI in production.</p>
+
+    <h2>NYC Local Law 144 — AEDTs (effective July 5, 2023)</h2>
+    <p>The most actively enforced AI hiring law in the US. Applies to employers and employment agencies using Automated Employment Decision Tools (AEDTs) for candidates or promotions based in NYC. DCWP fines are $375–$1,500 per violation per day.</p>
+    <p>Free tier shows a 3-rule preview (bias audit, public disclosure, candidate notice). Pro unlocks accommodation routing (HITL) and 2-year audit retention.</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Rule</th><th>Obligation</th><th>IRIS control</th></tr>
+        <tr><td>LL144-001</td><td>Annual independent bias audit</td><td><code>bias_audit_date</code> on passport + Evidence Vault; <code>iris certify --framework nyc-ll144</code></td></tr>
+        <tr><td>LL144-002</td><td>Public disclosure of audit results</td><td>Certification PDF for legal review before publishing</td></tr>
+        <tr><td>LL144-003</td><td>Candidate notice before AEDT use</td><td><code>policy-intent.md</code> + <code>user_consent_logged</code></td></tr>
+        <tr><td>LL144-004</td><td>Accommodation request mechanism</td><td>HITL gate (Pro) — bypass AEDT for alternative review</td></tr>
+        <tr><td>LL144-005</td><td>2-year audit documentation retention</td><td>Evidence Vault Pro (730 days)</td></tr>
+      </table>
+    </div>
+    <div class="callout">
+      <p><strong>Bias audit note:</strong> IRIS provides the technical governance documentation an independent auditor reviews. IRIS does not conduct the bias audit — the auditor must be a third party (e.g. Holistic AI, BABL AI, Pymetrics).</p>
+    </div>
+
+    <h2>Illinois AI Video Interview Act (effective January 1, 2020)</h2>
+    <p>Applies when AI analyzes video interviews for applicants for Illinois-based positions. Covers facial expression analysis, tone of voice, word choice, behavioral scoring, and any ML-based candidate scoring from video.</p>
+    <p>Free tier shows ILVI-001 through ILVI-003. Pro unlocks deletion workflow tracking and HITL human-review accommodation.</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Rule</th><th>Obligation</th><th>IRIS control</th></tr>
+        <tr><td>ILVI-001</td><td>Applicant notification before AI analysis</td><td><code>policy-intent.md</code> + app notification UI</td></tr>
+        <tr><td>ILVI-002</td><td>Written consent before recording</td><td><code>user_consent_logged</code> with <code>consent_type=ai_video_interview</code> — <strong>blocks in production</strong></td></tr>
+        <tr><td>ILVI-003</td><td>Third-party sharing restriction</td><td>Declared <code>tool_permissions</code> — undeclared vendors blocked</td></tr>
+        <tr><td>ILVI-004</td><td>Delete recordings within 30 days of request</td><td><code>iris vault redact</code> + deletion deadline tracking (Pro)</td></tr>
+        <tr><td>ILVI-005</td><td>Human review on request</td><td>HITL gate for accommodation (Pro)</td></tr>
+      </table>
+    </div>
+    <div class="callout">
+      <p><strong>Consent is critical:</strong> ILVI-002 is the most frequently cited provision in enforcement. IRIS makes it technically impossible to run video analysis without logged consent in production.</p>
+    </div>
+
+    <h2>Colorado AI Act — what IRIS covers</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Obligation</th><th>IRIS control</th></tr>
+        <tr><td>High-risk AI inventory</td><td>AgentPassport + <code>iris scan</code></td></tr>
+        <tr><td>Impact assessment (CO-002)</td><td><code>iris compliance assess</code></td></tr>
+        <tr><td>Transparency (CO-003)</td><td><code>policy-intent.md</code></td></tr>
+        <tr><td>Consumer opt-out (CO-004)</td><td><code>user_consent_logged</code> context field</td></tr>
+        <tr><td>Annual review (CO-006)</td><td>Evidence Vault</td></tr>
+      </table>
+    </div>
+
+    <h2>Evidence Vault and retention</h2>
+    <p>Every compliance check, Cedar decision, and HITL action writes to the Evidence Vault as a signed, hash-chained event. Control mappings link each event to the frameworks it satisfies — one query powers Colorado, AIUC-1, ISO 42001, and HIPAA reports without re-collection.</p>
+    <div class="code-block"><span class="cmd">iris evidence report --agent my-agent</span><br>
+<span class="cmd">iris evidence export --agent my-agent --format aiuc1 --output evidence.json</span><br>
+<span class="cmd">iris evidence record-cicd --system github_actions --run-id $GITHUB_RUN_ID --outcome success</span></div>
+    <p>Retention takes the <em>longest</em> period among attached controls (e.g. HIPAA 6 years beats Colorado 3 years). Full details: <a href="evidence-vault.html" style="color:var(--red)">Evidence Vault guide</a>.</p>
+
+    <h2>Regulatory intelligence</h2>
+    <div class="code-block"><span class="cmd">iris regulatory check</span><br>
+<span class="cmd">iris regulatory list</span><br>
+<span class="cmd">iris regulatory watch</span>  <span class="cm"># CI-friendly</span></div>
+    <p>See <a href="regulatory.html" style="color:var(--red)">Regulatory Intelligence</a> for full workflow.</p>
+
+    <div class="docs-footer">
+      <a href="policy-as-code.html">← Policy as Code</a>
+      <a href="model-governance.html">Model Governance →</a>
+    </div>
+  </main>
+</div>
+<script src="assets/docs.js"></script>
+</body>
+</html>
