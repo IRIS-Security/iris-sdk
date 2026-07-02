@@ -1,29 +1,28 @@
-name: Deploy docs to GitHub Pages
+name: Deploy IRIS Website to GitHub Pages
 
 on:
   push:
     branches: [main]
     paths:
-      - "docs/**"
-      - ".github/workflows/pages.yml"
+      - 'docs/**'
   workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
+  attestations: write
 
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    name: Deploy to GitHub Pages
+  build:
+    name: Build website artifact
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      artifact-hash: ${{ steps.hash.outputs.artifact-hash }}
 
     steps:
       - name: Checkout
@@ -33,10 +32,46 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Upload Pages artifact
+        id: upload
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs
+          path: docs/
 
+      - name: Generate artifact hash
+        id: hash
+        run: |
+          HASH=$(find docs/ -type f | sort | xargs sha256sum | \
+            sha256sum | awk '{print $1}')
+          echo "artifact-hash=$HASH" >> "$GITHUB_OUTPUT"
+          echo "Docs artifact hash: $HASH"
+
+  attest:
+    name: Attest build provenance
+    needs: [build]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      attestations: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate SLSA provenance attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-name: iris-sdk-website
+          subject-digest: sha256:${{ needs.build.outputs.artifact-hash }}
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: [build, attest]
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
