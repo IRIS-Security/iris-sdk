@@ -31,7 +31,16 @@
   <main class="docs-main">
     <div class="docs-eyebrow">Getting started</div>
     <h1>Get your first agent governed in 5 minutes</h1>
-    <p class="docs-lead">IRIS governs what runs — not what deploys. Discover, inventory, define policy, guard every call. Everything runs locally.</p>
+    <p class="docs-lead">IRIS governs what runs — not what deploys. Start with a five-minute compliance scan, then discover agents, define policy, and guard every call. Everything runs locally.</p>
+
+    <div class="step">
+      <div class="step-num">Step 0 — First five minutes</div>
+      <h2>Scan what you're building</h2>
+      <p>Offline, zero network — see which regulations apply to your codebase before you register a single agent.</p>
+      <div class="code-block"><span class="cmd">pip install iris-security-cli</span><br>
+<span class="cmd">iris compliance scan</span></div>
+      <p>IRIS detects AI providers, frameworks, models, and sensitive data patterns, then maps applicable frameworks with <code>triggered_by</code> reasoning and top recommended actions. See <a href="compliance-intelligence.html" style="color:var(--red)">Compliance Intelligence</a> for the full loop. Add <code>--push</code> after <code>iris cloud connect</code> for continuous monitoring in IRIS Cloud.</p>
+    </div>
 
     <div class="step">
       <div class="step-num">Step 1</div>
@@ -116,6 +125,7 @@ client = IrisAnthropic(passport=passport)</div>
 
     <h2>Go deeper</h2>
     <div class="card-grid">
+      <a href="compliance-intelligence.html" class="doc-card"><h3>Compliance Intelligence</h3><p>Profile → obligations → next actions.</p><div class="arrow">Read →</div></a>
       <a href="basics.html" class="doc-card"><h3>The Basics</h3><p>Runtime governance vocabulary.</p><div class="arrow">Read →</div></a>
       <a href="policy-as-code.html" class="doc-card"><h3>Policy as Code</h3><p>Intent → Cedar workflow.</p><div class="arrow">Read →</div></a>
       <a href="monitoring.html" class="doc-card"><h3>Monitoring</h3><p>Witness, drift, and cost tracking.</p><div class="arrow">Read →</div></a>
