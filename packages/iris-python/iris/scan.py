@@ -37,6 +37,25 @@ _MODEL_PATTERNS = [
     re.compile(r"text-embedding-[a-z0-9.-]+", re.I),
 ]
 
+_MODEL_PROVIDER_PREFIXES: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(r"^gpt-", re.I), "openai"),
+    (re.compile(r"^o[134]-", re.I), "openai"),
+    (re.compile(r"^text-embedding-", re.I), "openai"),
+    (re.compile(r"^claude-", re.I), "anthropic"),
+    (re.compile(r"^gemini-", re.I), "google"),
+    (re.compile(r"^gemini/", re.I), "google"),
+    (re.compile(r"^text-bison", re.I), "google"),
+    (re.compile(r"^command", re.I), "cohere"),
+    (re.compile(r"^mistral", re.I), "mistral"),
+    (re.compile(r"^llama", re.I), "meta"),
+    (re.compile(r"^amazon\.", re.I), "aws"),
+    (re.compile(r"^anthropic\.", re.I), "anthropic"),
+    (re.compile(r"^azure/", re.I), "azure"),
+    (re.compile(r"^vertex_ai/", re.I), "google"),
+    (re.compile(r"^openai/", re.I), "openai"),
+    (re.compile(r"^bedrock/", re.I), "aws"),
+]
+
 _DATA_CATEGORY_PATTERNS = {
     "pii": re.compile(
         r"\b(ssn|social_security|date_of_birth|dob|passport|email_address|phone_number|"
@@ -111,6 +130,32 @@ def _scan_data_categories(text: str) -> set[str]:
         if pattern.search(text):
             categories.add(category)
     return categories
+
+
+def infer_provider_from_model(model: str) -> str | None:
+    """Infer provider slug from a model identifier (shared by observability adapters)."""
+    if not model:
+        return None
+    normalized = model.strip()
+    for pattern, provider in _MODEL_PROVIDER_PREFIXES:
+        if pattern.search(normalized):
+            return provider
+    return None
+
+
+def infer_providers_from_models(models: list[str]) -> list[str]:
+    """Return sorted unique providers inferred from model names."""
+    providers: set[str] = set()
+    for model in models:
+        provider = infer_provider_from_model(model)
+        if provider:
+            providers.add(provider)
+    return sorted(providers)
+
+
+def scan_data_categories_from_text(text: str) -> list[str]:
+    """Scan arbitrary metadata/tags text for sensitive data category hints."""
+    return sorted(_scan_data_categories(text))
 
 
 def _scan_requirements(root: Path) -> tuple[set[str], set[str]]:

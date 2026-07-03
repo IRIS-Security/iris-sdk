@@ -3,29 +3,31 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "iris-security-openai"
-version = "0.2.0"
-description = "IRIS governance for OpenAI — Cedar policy on every API call"
+name = "iris-litellm"
+version = "0.1.0"
+description = "IRIS compliance intelligence from LiteLLM config and proxy — keep your router, add governance"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 authors = [{ name = "IRIS Platform", email = "sdk@iris.ai" }]
 dependencies = [
-  "iris-security-core>=0.1.16",
   "iris-security-sdk>=0.2.16",
+  "httpx>=0.27",
+  "pyyaml>=6.0",
 ]
 
 [project.optional-dependencies]
-openai = ["openai>=1.30"]
+live = ["litellm>=1.40,<2"]
 dev = [
   "pytest>=8.0",
-  "pytest-asyncio>=0.23",
   "ruff>=0.4",
 ]
 
 [project.urls]
-Homepage = "https://github.com/gimartinb/iris-sdk"
-Repository = "https://github.com/gimartinb/iris-sdk"
+Homepage = "https://iris-security.github.io/iris-sdk/"
+Repository = "https://github.com/IRIS-Security/iris-sdk"
+Documentation = "https://iris-security.github.io/iris-sdk/getting-started.html"
+Issues = "https://github.com/IRIS-Security/iris-sdk/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -36,4 +38,3 @@ target-version = "py310"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-asyncio_mode = "auto"
