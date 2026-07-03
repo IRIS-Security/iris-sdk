@@ -5,7 +5,7 @@ IRIS — AI Agent Governance SDK. Govern AI agents locally.
 Discover, register, and govern AI agents with Cedar policy evaluation,
 compliance bundles, and local-first governance.
 
-Part of the [IRIS SDK](https://github.com/gimartinb/iris-sdk).
+Part of the [IRIS SDK](https://github.com/IRIS-Security/iris-sdk).
 
 ## Install
 

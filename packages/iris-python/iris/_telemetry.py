@@ -1,10 +1,12 @@
 """First-run telemetry for IRIS SDK installs. Opt-out via IRIS_TELEMETRY_OPT_OUT=1.
 
 Each event includes an ISO 8601 UTC timestamp for server-side DoD/WoW/MoM aggregation.
+Daily CLI usage is aggregated locally and sent once per UTC day (previous day's totals).
 """
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import sys
@@ -13,6 +15,7 @@ import uuid
 from datetime import datetime, timezone
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
+from typing import Any
 
 from iris._telemetry_config import TELEMETRY_ENABLED, TELEMETRY_ENDPOINT
 
@@ -20,6 +23,8 @@ _IRIS_DIR = Path.home() / ".iris"
 _INSTALL_ID_FILE = _IRIS_DIR / "install_id"
 _FIRST_RUN_SENTINEL = _IRIS_DIR / ".telemetry_sent"
 _FIRST_POLICY_SENTINEL = _IRIS_DIR / ".first_policy_sent"
+_RUN_STATS_FILE = _IRIS_DIR / "run_stats.json"
+_SKIPPED_COMMANDS = frozenset({"ping"})
 
 
 def detect_country() -> str:
@@ -127,6 +132,10 @@ def _get_iris_version() -> str:
         return "unknown"
 
 
+def _utc_today() -> str:
+    return datetime.now(timezone.utc).date().isoformat()
+
+
 def _build_payload(event: str) -> dict[str, str]:
     return {
         "event": event,
@@ -142,13 +151,54 @@ def _build_payload(event: str) -> dict[str, str]:
     }
 
 
-def _send_event(event: str) -> None:
+def _build_daily_payload(stats: dict[str, Any]) -> dict[str, str]:
+    payload = _build_payload("daily_usage")
+    payload["usage_date"] = str(stats["date"])
+    payload["run_count"] = str(stats["run_count"])
+    payload["commands"] = json.dumps(stats.get("commands", {}), sort_keys=True)
+    return payload
+
+
+def _empty_day_stats(day: str) -> dict[str, Any]:
+    return {"date": day, "run_count": 0, "commands": {}}
+
+
+def _load_run_stats() -> dict[str, Any]:
+    if not _RUN_STATS_FILE.exists():
+        return _empty_day_stats(_utc_today())
+    try:
+        data = json.loads(_RUN_STATS_FILE.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            return _empty_day_stats(_utc_today())
+        data.setdefault("commands", {})
+        return data
+    except (OSError, json.JSONDecodeError):
+        return _empty_day_stats(_utc_today())
+
+
+def _save_run_stats(stats: dict[str, Any]) -> None:
+    _RUN_STATS_FILE.write_text(json.dumps(stats, indent=2, sort_keys=True), encoding="utf-8")
+
+
+def _send_payload(payload: dict[str, str]) -> None:
     try:
         import httpx
 
-        httpx.post(TELEMETRY_ENDPOINT, json=_build_payload(event), timeout=2.0)
+        httpx.post(TELEMETRY_ENDPOINT, json=payload, timeout=2.0)
     except Exception:
         pass
+
+
+def _send_event(event: str) -> None:
+    _send_payload(_build_payload(event))
+
+
+def _flush_daily_usage(stats: dict[str, Any]) -> None:
+    if int(stats.get("run_count", 0)) <= 0:
+        return
+    payload = _build_daily_payload(stats)
+    thread = threading.Thread(target=_send_payload, args=(payload,), daemon=True)
+    thread.start()
 
 
 def _maybe_fire_once(event: str, sentinel: Path) -> None:
@@ -176,6 +226,34 @@ def maybe_fire_first_run() -> None:
 def maybe_fire_first_policy_run() -> None:
     """Fire a one-time telemetry event after the first policy evaluation."""
     _maybe_fire_once("first_policy_run", _FIRST_POLICY_SENTINEL)
+
+
+def maybe_record_cli_usage(command: str) -> None:
+    """Increment local run counters; send one daily_usage event per UTC day on rollover."""
+    if not telemetry_enabled() or not command or command in _SKIPPED_COMMANDS:
+        return
+
+    today = _utc_today()
+    try:
+        _IRIS_DIR.mkdir(parents=True, exist_ok=True)
+        stats = _load_run_stats()
+    except OSError:
+        return
+
+    stored_date = stats.get("date")
+    if stored_date != today:
+        if stored_date and int(stats.get("run_count", 0)) > 0:
+            _flush_daily_usage(stats)
+        stats = _empty_day_stats(today)
+
+    commands = stats.setdefault("commands", {})
+    commands[command] = int(commands.get(command, 0)) + 1
+    stats["run_count"] = int(stats.get("run_count", 0)) + 1
+
+    try:
+        _save_run_stats(stats)
+    except OSError:
+        pass
 
 
 def send_ping() -> None:
