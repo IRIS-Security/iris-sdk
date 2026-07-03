@@ -10,8 +10,8 @@ license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 authors = [{ name = "IRIS Platform", email = "sdk@iris.ai" }]
 dependencies = [
-  "iris-security-core>=0.1.16",
-  "iris-security-sdk>=0.2.16",
+  "iris-security-core>=0.1.17",
+  "iris-security-sdk>=0.2.17",
 ]
 
 [project.optional-dependencies]
