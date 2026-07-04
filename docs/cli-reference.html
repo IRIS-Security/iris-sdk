@@ -28,7 +28,7 @@
   <main class="docs-main">
     <div class="docs-eyebrow">Reference</div>
     <h1>CLI Reference</h1>
-    <p class="docs-lead">All <code>iris</code> commands (v0.2.12), organized by phase. Run <code>iris --help</code> for the live command tree.</p>
+    <p class="docs-lead">All <code>iris</code> commands (v0.2.16), organized by phase. Run <code>iris --help</code> for the live command tree.</p>
 
     <h2>Discover</h2>
     <div class="table-wrap">
@@ -115,6 +115,11 @@
       <table>
         <tr><th>Command</th><th>Description</th></tr>
         <tr><td><code>iris compliance check --framework &lt;id&gt;</code></td><td>Run compliance check (<code>colorado-ai-act</code>, <code>ccpa-admt</code>, <code>china-pipl</code>, <code>hipaa</code>, <code>soc2</code>, <code>aiuc-1</code>, …)</td></tr>
+        <tr><td><code>iris compliance scan</code></td><td>Offline workload detection from local code (default)</td></tr>
+        <tr><td><code>iris compliance scan --from langfuse</code></td><td>Derive profile from Langfuse trace metadata (<code>pip install "iris-langfuse[live]"</code>)</td></tr>
+        <tr><td><code>iris compliance scan --from litellm --config ./litellm.config.yaml</code></td><td>Derive profile from LiteLLM static config</td></tr>
+        <tr><td><code>iris compliance scan --from litellm --proxy &lt;url&gt;</code></td><td>Derive profile from live LiteLLM proxy</td></tr>
+        <tr><td><code>iris compliance scan --push</code></td><td>POST profile to IRIS Cloud when <code>IRIS_API_KEY</code> is set</td></tr>
         <tr><td><code>iris compliance assess</code></td><td>Impact assessment (Colorado, CCPA ADMT, PIPL PIPIA)</td></tr>
         <tr><td><code>iris certify --framework colorado-ai-act</code></td><td>Certification readiness score (alias: <code>iris test</code>)</td></tr>
         <tr><td><code>iris certify --framework aiuc-1 --format aiuc1-export</code></td><td>AIUC-1 evidence JSON keyed by sub-control IDs (B006.1, B006.2, …)</td></tr>
@@ -127,7 +132,7 @@
         <tr><td><code>iris evidence export --agent &lt;name&gt;</code></td><td>Export for auditors (JSON, CSV, AIUC-1, OTel)</td></tr>
         <tr><td><code>iris evidence stats</code></td><td>Aggregate stats across all agents</td></tr>
         <tr><td><code>iris evidence record-cicd</code></td><td>Write signed <code>cicd_run</code> event from CI/CD (<code>github_actions</code>, <code>gitlab</code>, <code>jenkins</code>, <code>terraform</code>, <code>argocd</code>)</td></tr>
-        <tr><td><code>iris evidence export --format aiuc1</code></td><td>Export via ControlMapping table (same path as AIUC-1 certify)</td></tr>
+        <tr><td><code>iris evidence export --format aiuc1</code></td><td>AIUC-1 B006 export from passport + vault events (same path as AIUC-1 certify)</td></tr>
         <tr><td><code>iris vault redact</code></td><td>GDPR erasure — tombstone + payload scrub, mappings preserved</td></tr>
       </table>
     </div>

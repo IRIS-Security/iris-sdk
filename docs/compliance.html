@@ -199,7 +199,7 @@
     </div>
 
     <h2>Evidence Vault and retention</h2>
-    <p>Every compliance check, Cedar decision, and HITL action writes to the Evidence Vault as a signed, hash-chained event. Control mappings link each event to the frameworks it satisfies — one query powers Colorado, AIUC-1, ISO 42001, and HIPAA reports without re-collection.</p>
+    <p>Compliance checks, Cedar decisions, and HITL actions write to the Evidence Vault. Vault v2 signed mode provides HMAC-signed, hash-chained events; ControlMapping (v2) links indexed events to frameworks for cross-control queries. The AIUC-1 export reads passport configuration and vault events directly.</p>
     <div class="code-block"><span class="cmd">iris evidence report --agent my-agent</span><br>
 <span class="cmd">iris evidence export --agent my-agent --format aiuc1 --output evidence.json</span><br>
 <span class="cmd">iris evidence record-cicd --system github_actions --run-id $GITHUB_RUN_ID --outcome success</span></div>
