@@ -85,6 +85,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,.92
 .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center}
 .hero h1{font-size:clamp(36px,5vw,56px);font-weight:700;line-height:1.08;margin-bottom:1.5rem}
 .hero h1 em{font-style:normal;color:var(--red)}
+.hero-ticker{display:block;margin-top:.15em}
+.hero-ticker-slot{display:inline-flex;align-items:baseline;min-width:17.5ch;white-space:nowrap}
+.hero-ticker-bracket{color:var(--red);font-style:normal}
+.hero-ticker-word{display:inline-block;min-width:15ch;text-align:center;overflow:hidden;vertical-align:baseline}
+.hero-ticker-current{color:var(--red);font-style:normal;display:inline-block;transition:opacity .35s ease,transform .35s ease}
+.hero-ticker-current.is-exiting{opacity:0;transform:translateY(-.25em)}
+.hero-ticker-current.is-entering{opacity:0;transform:translateY(.25em)}
+@media(prefers-reduced-motion:reduce){
+  .hero-ticker-current{transition:none}
+}
 .hero-sub{font-size:18px;color:var(--gray2);line-height:1.75;margin-bottom:2rem;max-width:480px}
 .hero-sub strong{color:#fff;font-weight:600}
 .hero-actions{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2.5rem}
@@ -254,7 +264,7 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
   <div class="container hero-grid">
     <div>
       <div class="eyebrow">AI Governance Intelligence Platform</div>
-      <h1>Know what regulations<br><em>apply to what you build.</em></h1>
+      <h1>Know your obligations under<br><span class="hero-ticker" aria-live="polite"><span class="hero-ticker-slot"><span class="hero-ticker-bracket">[ </span><span class="hero-ticker-word"><span class="hero-ticker-current">EU AI Act</span></span><span class="hero-ticker-bracket"> ]</span></span></span></h1>
       <p class="hero-sub">IRIS continuously understands what you're building, maps it to your regulatory obligations, and tells you what to do next. Plugs into your existing observability stack — Langfuse, LiteLLM, and more.</p>
       <div class="hero-actions">
         <a href="getting-started.html" class="btn btn-primary">Install</a>
@@ -525,11 +535,11 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
         </div>
         <div class="trust-item">
           <div class="trust-title">AIUC-1 evidence export + ISO 42001 mapping</div>
-          <div class="trust-desc">AIUC-1 evidence export (B006-format) and ISO 42001 coverage mapping — derived from AIUC-1's published crosswalk, not independent interpretation. Export auditor-ready JSON keyed by AIUC-1 sub-control IDs (B006.1, B006.2, B006.3). The AIUC-1 export reads passport configuration and vault events; Evidence Vault v2 control-indexed exports use ControlMapping for cross-framework lookup.</div>
+          <div class="trust-desc">AIUC-1 evidence export (B006-format) and ISO 42001 coverage mapping — derived from AIUC-1's published crosswalk, not independent interpretation. Export auditor-ready JSON keyed by AIUC-1 sub-control IDs (B006.1, B006.2, B006.3). All exports query the same ControlMapping index in the Evidence Vault.</div>
         </div>
         <div class="trust-item">
           <div class="trust-title">Evidence Vault — append-only system of record</div>
-          <div class="trust-desc">Evidence Vault v2 provides HMAC-signed, hash-chained tamper-evident receipts (enable signed vault mode). The lightweight default logs unsigned JSONL for local dev — still append-only, but not cryptographically signed. Record signed pipeline evidence with <code style="font-family:var(--mono2);font-size:12px">iris evidence record-cicd</code>.</div>
+          <div class="trust-desc">Every policy evaluation, HITL decision, and CI/CD run is an immutable, HMAC-signed, hash-chained event. One write path, many read paths — tamper-evidence by architecture. Query any control (CO-004, AIUC-B006, HIPAA-001) from a single store. Record pipeline evidence with <code style="font-family:var(--mono2);font-size:12px">iris evidence record-cicd</code>.</div>
         </div>
       </div>
       <div>
@@ -640,7 +650,7 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
       </div>
       <div class="faq-item">
         <div class="faq-q">What is the Evidence Vault and how is it different from a log file?</div>
-        <div class="faq-a"><div class="faq-a-inner">The Evidence Vault is an append-only ledger — not a rotating log. Evidence Vault v2 provides HMAC-signed, hash-chained tamper-evident receipts when signed mode is enabled; the default SDK path writes unsigned JSONL for local development. Events can be mapped to compliance controls (Colorado CO-004, AIUC-B006, HIPAA-001, …) for framework reports. CI/CD pipelines record signed evidence with <code style="font-family:var(--mono2);font-size:12px">iris evidence record-cicd</code> — even when the governance gate fails. See the <a href="evidence-vault.html" style="color:var(--red)">Evidence Vault guide</a>.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">The Evidence Vault is an append-only, signed ledger — not a rotating log. Each event is HMAC-signed and hash-chained to the previous one; tampering with any event breaks the chain for everything after it. Events are mapped to compliance controls (Colorado CO-004, AIUC-B006, HIPAA-001, …) so one collection satisfies every framework report. CI/CD pipelines record evidence with <code style="font-family:var(--mono2);font-size:12px">iris evidence record-cicd</code> — even when the governance gate fails. See the <a href="evidence-vault.html" style="color:var(--red)">Evidence Vault guide</a>.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q">Does IRIS help with AIUC-1 certification?</div>
@@ -651,7 +661,7 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
         <div class="faq-a"><div class="faq-a-inner">Not yet, by design. Community is free, open source, and fully real today — Cedar policy engine, HITL, the built-in encrypted vault, Evidence Vault, GitHub integration, all of it. We are building Business and Enterprise capabilities in the open and will turn pricing on once they are real, tested, and something we'd stand behind in a customer conversation — not before. Track progress at <a href="https://github.com/IRIS-Security/iris-sdk/blob/main/BACKLOG.md" style="color:var(--red)">BACKLOG.md</a>.</div></div>
       </div>
       <div class="faq-item">
-        <div class="faq-a"><div class="faq-a-inner"><strong>14 compliance frameworks</strong> — Colorado AI Act (SB 26-189) is available in Community today. AIUC-1 (<code>aiuc-1</code>) B006 evidence export ships today with an <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20Pro%20license" style="color:var(--red)">IRIS Pro license</a> — not a future roadmap item. NIST AI RMF, SOC 2, GDPR, HIPAA, EU AI Act, FedRAMP, CCPA/CPRA ADMT (<code>ccpa-admt</code>), China PIPL (<code>china-pipl</code>), NYC LL 144 (<code>nyc-ll144</code>), Illinois AI Video (<code>illinois-ai-video</code>), and ISO/IEC 42001 (<code>iso-42001</code>) require Pro — see <a href="https://github.com/IRIS-Security/iris-sdk/blob/main/BACKLOG.md" style="color:var(--red)">BACKLOG.md</a>. Run <code style="font-family:var(--mono2);font-size:12px">iris framework suggest</code> to see which apply to your agents.</div></div>
+        <div class="faq-a"><div class="faq-a-inner"><strong>14 compliance frameworks</strong> — Colorado AI Act (SB 26-189) is available in Community today. NIST AI RMF, SOC 2, GDPR, HIPAA, EU AI Act, FedRAMP, CCPA/CPRA ADMT (<code>ccpa-admt</code>), China PIPL (<code>china-pipl</code>), NYC LL 144 (<code>nyc-ll144</code>), Illinois AI Video (<code>illinois-ai-video</code>), AIUC-1 (<code>aiuc-1</code>), and ISO/IEC 42001 (<code>iso-42001</code>) are on the Business roadmap — see <a href="https://github.com/IRIS-Security/iris-sdk/blob/main/BACKLOG.md" style="color:var(--red)">BACKLOG.md</a>. Run <code style="font-family:var(--mono2);font-size:12px">iris framework suggest</code> to see which apply to your agents.</div></div>
       </div>
     </div>
   </div>
@@ -691,7 +701,7 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
       <div class="feature-card">
         <div class="feature-card-tier">Community</div>
         <div class="feature-card-name">Evidence Vault (local)</div>
-        <div class="feature-card-desc">Append-only ledger; Vault v2 adds HMAC-signed hash chains when signed mode is enabled.</div>
+        <div class="feature-card-desc">Append-only signed ledger with hash chain, control mappings, retention lifecycle, and CI/CD evidence recording.</div>
       </div>
       <div class="feature-card">
         <div class="feature-card-tier">Community</div>
@@ -884,6 +894,31 @@ document.querySelectorAll('.explain-item').forEach((item,i)=>{
     item.classList.add('active');
   });
 });
+(function(){
+  var FRAMEWORKS=['EU AI Act','SOC 2','ISO 42001','NIST AI RMF','Colorado AI Act','HIPAA','GDPR','FedRAMP','AIUC-1','AARM'];
+  var INTERVAL=2000;
+  var el=document.querySelector('.hero-ticker-current');
+  if(!el||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  var idx=0,timer=null;
+  function tick(){
+    el.classList.add('is-exiting');
+    setTimeout(function(){
+      idx=(idx+1)%FRAMEWORKS.length;
+      el.textContent=FRAMEWORKS[idx];
+      el.classList.remove('is-exiting');
+      el.classList.add('is-entering');
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){el.classList.remove('is-entering');});
+      });
+    },350);
+  }
+  function start(){if(!timer)timer=setInterval(tick,INTERVAL);}
+  function stop(){if(timer){clearInterval(timer);timer=null;}}
+  document.addEventListener('visibilitychange',function(){
+    document.hidden?stop():start();
+  });
+  start();
+})();
 // SHOW_PAID_TIERS mirrors the Python flag — hardcoded false on static GitHub Pages.
 const SHOW_PAID_TIERS = false;
 if (SHOW_PAID_TIERS) {
