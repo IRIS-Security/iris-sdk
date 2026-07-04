@@ -225,8 +225,8 @@ class Entitlements:
     def tier_name(self) -> str:
         """Return human-readable tier name."""
         return {
-            Tier.FREE: "Free",
-            Tier.PRO: "Pro",
+            Tier.FREE: "Community",
+            Tier.PRO: "Business",
             Tier.ENTERPRISE: "Enterprise",
         }[self._tier]
 
