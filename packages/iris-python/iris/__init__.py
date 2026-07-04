@@ -49,7 +49,7 @@ from iris_core.cost.pricing import PricingRegistry
 
 __version__ = "0.2.16"
 
-AARM_CONFORMANCE = "Core"  # R1-R6 satisfied
+AARM_ALIGNMENT = "designed-toward"  # AARM R1–R9 partial; not Core conformant
 AARM_VERSION = "1.0"
 AIUC1_ALIGNMENT = "Q1-2026"
 __all__ = [
@@ -78,7 +78,7 @@ __all__ = [
     "CostSummary",
     "CostEntry",
     "PricingRegistry",
-    "AARM_CONFORMANCE",
+    "AARM_ALIGNMENT",
     "AARM_VERSION",
     "AIUC1_ALIGNMENT",
     "__version__",
