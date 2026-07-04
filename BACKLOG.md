@@ -102,8 +102,8 @@ Track A requires no new frontend and is not blocked by this.
 | onboarding_profiler | Shippable | 5-question industry intake |
 | otel_export | Shippable | AARM R8 OTLP export |
 | aiuc1_evidence_package | Shippable | PDF + HTML Schellman-ready |
-| aarm_core_conformant | Live | AARM R1–R6 alignment assessment (not CSA-certified) |
-| aarm_extended_conformant | Shippable | AARM R7–R9 extended alignment |
+| aarm_core_conformant | In progress | R1–R9 partial; CSA TWG review pending |
+| aarm_extended_conformant | Backlog | R7–R9 not complete |
 | multi_agent_chains | Shippable | session_id chain grouping |
 | feature-flag-system-reconciliation | Backlog | Merge `featureFlags.jsx` (UI visibility) with `launch_gate.py` CAPABILITY_FLAGS (API/CLI enforcement) once RBAC lands — keep layers distinct until then. |
 | analyzeRuntimeBehavior backend | Backlog | `RuntimeSecurityPanel` and Interceptor behavior tab call `iris.functions.invoke('analyzeRuntimeBehavior')` — needs real serverless/backend implementation (confirmed needed by two pages). |
