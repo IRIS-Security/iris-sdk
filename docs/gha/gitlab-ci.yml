@@ -7,8 +7,8 @@ record_evidence:
   stage: governance
   image: python:3.12
   script:
-    - pip install iris-security-sdk iris-security-cli
-    - iris compliance check --format json || true
+    - pip install iris-security-cli
+    - iris compliance check --framework colorado-ai-act || true
     - iris evidence record-cicd
         --system gitlab
         --run-id "$CI_PIPELINE_ID"

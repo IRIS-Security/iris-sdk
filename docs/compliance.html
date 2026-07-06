@@ -29,9 +29,11 @@
     <div class="docs-eyebrow">Policy &amp; compliance</div>
     <h1>Compliance Bundles</h1>
     <p class="docs-lead">IRIS ships compliance bundles that compile to Cedar rules and enforce at runtime — not just checklists.</p>
+    <p>Install: <code>pip install iris-security-cli</code>.</p>
 
     <h2>Run a compliance check</h2>
     <div class="code-block"><span class="cmd">iris compliance check --framework colorado-ai-act</span><br>
+<span class="cmd">iris compliance check --framework soc2</span><br>
 <span class="cmd">iris compliance check --framework ccpa-admt</span><br>
 <span class="cmd">iris compliance check --framework china-pipl</span><br>
 <span class="cmd">iris compliance check --framework nyc-ll144</span><br>
@@ -70,14 +72,14 @@
       </table>
     </div>
 
-    <h3>Pro tier</h3>
+    <h3>Business tier</h3>
     <div class="table-wrap">
       <table>
         <tr><th>Bundle ID</th><th>Framework</th><th>Status</th></tr>
         <tr><td><code>ccpa-admt</code></td><td>California CCPA/CPRA ADMT Regulations</td><td>Available</td></tr>
         <tr><td><code>china-pipl</code></td><td>China Personal Information Protection Law (PIPL)</td><td>Available</td></tr>
         <tr><td><code>hipaa</code></td><td>HIPAA for AI Agents (2025 NPRM + Section 1557)</td><td>Available</td></tr>
-        <tr><td><code>soc2</code></td><td>SOC 2 Trust Services Criteria (AI agent context)</td><td>Available</td></tr>
+        <tr><td><code>soc2</code></td><td>SOC 2 Trust Services Criteria (AI agent context)</td><td>Community — offline <code>compliance check</code> preview (8 TSC-mapped controls, PASS/FAIL); full certification scoring + auditor export = Business+</td></tr>
         <tr><td><code>gdpr</code></td><td>GDPR</td><td>Available</td></tr>
         <tr><td><code>nist-ai-rmf</code></td><td>NIST AI Risk Management Framework</td><td>Available</td></tr>
         <tr><td><code>eu-ai-act</code></td><td>EU Artificial Intelligence Act</td><td>Available</td></tr>
@@ -90,7 +92,7 @@
     </div>
 
     <div class="callout">
-      <p><strong>SOC 2 accuracy note:</strong> The AICPA Trust Services Criteria do not include AI-specific controls. IRIS maps existing TSC controls (CC6, CC7, CC8, CC9.2) to AI agent governance evidence that auditors increasingly request. For AI-specific controls, use NIST AI RMF, AIUC-1, or ISO 42001 (IRIS's ISO mapping is derived from AIUC-1's published crosswalk).</p>
+      <p><strong>SOC 2 accuracy note:</strong> The AICPA Trust Services Criteria do not include AI-specific controls. IRIS maps existing TSC controls (CC6, CC7, CC8, CC9.2) to AI agent governance evidence that auditors increasingly request. Run <code>iris compliance check --framework soc2</code> for an offline PASS/FAIL check — <code>iris compliance scan</code> maps workload attributes but does not reliably surface SOC 2 obligations on typical AI codebases. For AI-specific controls, use NIST AI RMF, AIUC-1, or ISO 42001 (IRIS's ISO mapping is derived from AIUC-1's published crosswalk).</p>
     </div>
 
     <h2>AIUC-1 (voluntary certification standard)</h2>
@@ -199,7 +201,7 @@
     </div>
 
     <h2>Evidence Vault and retention</h2>
-    <p>Compliance checks, Cedar decisions, and HITL actions write to the Evidence Vault. Vault v2 signed mode provides HMAC-signed, hash-chained events; ControlMapping (v2) links indexed events to frameworks for cross-control queries. The AIUC-1 export reads passport configuration and vault events directly.</p>
+    <p>Every compliance check, Cedar decision, and HITL action writes to the Evidence Vault as a signed, hash-chained event. Control mappings link each event to the frameworks it satisfies — one query powers Colorado, AIUC-1, ISO 42001, and HIPAA reports without re-collection.</p>
     <div class="code-block"><span class="cmd">iris evidence report --agent my-agent</span><br>
 <span class="cmd">iris evidence export --agent my-agent --format aiuc1 --output evidence.json</span><br>
 <span class="cmd">iris evidence record-cicd --system github_actions --run-id $GITHUB_RUN_ID --outcome success</span></div>

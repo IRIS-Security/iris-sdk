@@ -30,7 +30,8 @@
   <main class="docs-main">
     <div class="docs-eyebrow">Operations</div>
     <h1>Evidence Vault</h1>
-    <p class="docs-lead">The system of record for compliance evidence. Vault v2 captures policy decisions, HITL approvals, DLP findings, and CI/CD runs as HMAC-signed, hash-chained events when signed mode is enabled. The default SDK path writes unsigned JSONL for local development — still append-only, queryable, no cloud required.</p>
+    <p class="docs-lead">The system of record for compliance evidence. Every policy decision, HITL approval, DLP finding, and CI/CD run is captured as an immutable, signed, hash-chained event — queryable across all frameworks from a single store. No cloud required.</p>
+    <p>Install: <code>pip install iris-security-cli</code>.</p>
 
     <div class="callout">
       <p><strong>Core principle:</strong> the vault has exactly <strong>one write path</strong> (append a new <code>EvidenceEvent</code>) and <strong>many read paths</strong>. There is no update or delete on an event. Current state — like whether a HITL request is still pending — is always <em>computed</em> by reading the append-only log.</p>
@@ -41,7 +42,7 @@
     <ul>
       <li><strong>EvidenceEvent</strong> — one immutable fact (Cedar decision, HITL action, DLP scan, CI/CD run, …). Signed with HMAC-SHA256 and linked to the previous event via <code>prev_event_hash</code>.</li>
       <li><strong>EvidenceChain</strong> — computed grouping (e.g. HITL lifecycle from <code>hitl_requested</code> → <code>hitl_resolved</code>). Rebuildable from raw events if the index is lost.</li>
-      <li><strong>ControlMapping</strong> — (Vault v2) links indexed events to N compliance controls (CO-004, AIUC-B006, ISO-A.6.2.8, …). Powers control-filtered queries and cross-framework reports for signed vault events.</li>
+      <li><strong>ControlMapping</strong> — links each event to N compliance controls (CO-004, AIUC-B006, ISO-A.6.2.8, …). One indexed lookup powers every framework report.</li>
       <li><strong>RetentionPolicy</strong> — computed at write time from attached controls. The <em>longest</em> retention requirement wins — never the shortest.</li>
     </ul>
 
@@ -103,7 +104,7 @@
 <span class="cmd">iris evidence export --agent loan-processor --output audit.json</span><br>
 <span class="cmd">iris evidence export --agent loan-processor --output aiuc1.json --format aiuc1</span><br>
 <span class="cmd">iris evidence stats</span></div>
-    <p><code>evidence query</code> is the signal command — filter by agent, decision, regulation, date range, and risk instead of scrolling the full vault. Export formats: <code>json</code>, <code>csv</code>, <code>aiuc1</code>, <code>pdf</code>, <code>oscal</code>. The <code>aiuc1</code> format uses the same <code>AIUC1EvidenceExporter</code> code path as <code>iris certify --format aiuc1-export</code> — reading passport fields and vault events, not the ControlMapping index.</p>
+    <p><code>evidence query</code> is the signal command — filter by agent, decision, regulation, date range, and risk instead of scrolling the full vault. Export formats: <code>json</code>, <code>csv</code>, <code>aiuc1</code>, <code>pdf</code>, <code>oscal</code>. The <code>aiuc1</code> format pulls from the same <code>ControlMapping</code> table as <code>iris certify --format aiuc1-export</code> — one code path, not a separate scan.</p>
 
     <h3>GDPR erasure</h3>
     <div class="code-block"><span class="cmd">iris vault redact --agent loan-processor --user-id &lt;id&gt;</span></div>
@@ -136,7 +137,7 @@
     <p>Free tier prunes legacy <code>events.jsonl</code> after 30 days. Pro unlocks unlimited retention for long-horizon controls like HIPAA and Colorado's 3-year requirement.</p>
 
     <h2 id="integrity">Integrity verification</h2>
-    <p>In Vault v2 signed mode, each event is HMAC-signed over <code>event_id + sequence_number + payload_hash + prev_event_hash</code>. Tampering with event N breaks the chain for every subsequent event. The default unsigned JSONL path does not provide this guarantee.</p>
+    <p>Every event is HMAC-signed over <code>event_id + sequence_number + payload_hash + prev_event_hash</code>. Tampering with event N breaks the chain for every subsequent event.</p>
     <div class="code-block"><span class="cmd">iris evidence report --agent loan-processor</span><br>
 <span class="cm"># Integrity section shows hash chain status</span><br><br>
 <span class="cm"># Programmatic check (Evidence Vault API):</span><br>
@@ -198,7 +199,7 @@
     <div class="code-block"><span class="cmd">iris certify --agent loan-processor --framework colorado-ai-act</span><br>
 <span class="cmd">iris certify --agent loan-processor --framework aiuc-1 --format aiuc1-export</span><br>
 <span class="cmd">iris evidence export --agent loan-processor --format aiuc1 --output auditor-package.json</span></div>
-    <p>Certification readiness scores plus Evidence Vault exports form the auditor package. AIUC-1 B006 export reads passport and vault events; Vault v2 control-indexed exports use ControlMapping for cross-framework control lookup.</p>
+    <p>Certification readiness scores plus Evidence Vault exports form the auditor package. All framework reports query the same <code>ControlMapping</code> index — generate evidence once, satisfy many frameworks.</p>
 
     <h2 id="env">Environment variables</h2>
     <div class="table-wrap">

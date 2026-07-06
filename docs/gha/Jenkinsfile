@@ -5,8 +5,8 @@ pipeline {
   stages {
     stage('IRIS Governance') {
       steps {
-        sh 'pip install iris-security-sdk iris-security-cli'
-        sh 'iris compliance check --format json || true'
+        sh 'pip install iris-security-cli'
+        sh 'iris compliance check --framework colorado-ai-act || true'
       }
     }
   }

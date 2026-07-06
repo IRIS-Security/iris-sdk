@@ -7,7 +7,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/IRIS-Security/iris-sdk.git
+    repoURL: https://github.com/gimartinb/iris-sdk.git
     targetRevision: main
     path: governance/agents
   destination:
@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
         - name: iris-evidence
-          image: ghcr.io/IRIS-Security/iris-cli:0.2.0
+          image: ghcr.io/gimartinb/iris-cli:0.2.0
           command:
             - iris
             - evidence

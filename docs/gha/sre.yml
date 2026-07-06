@@ -16,11 +16,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install iris-security-sdk iris-security-cli
+      - run: pip install iris-security-cli
       - name: Drift and sentinel checks
         run: |
           iris drift check --dir . || true
-          iris sentinel monitor --dir . || true
+          iris sentinel --dir . || true
       - name: Record CI evidence to vault
         if: always()
         run: |
