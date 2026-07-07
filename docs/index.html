@@ -85,6 +85,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,.92
 .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center}
 .hero h1{font-size:clamp(36px,5vw,56px);font-weight:700;line-height:1.08;margin-bottom:1.5rem}
 .hero h1 em{font-style:normal;color:var(--red)}
+.hero-framework-line{display:block;margin-top:.2em}
+.hero-framework-bracket{color:var(--gray2);font-weight:400}
+.hero-framework-slot{display:inline-block;min-width:20ch;text-align:center;vertical-align:baseline}
+.hero-framework{color:var(--red);font-style:normal;font-weight:700;white-space:nowrap}
+.hero-framework.is-changing{opacity:.35;transition:opacity .2s ease}
+@media (prefers-reduced-motion:reduce){.hero-framework.is-changing{opacity:1;transition:none}}
 .hero-sub{font-size:18px;color:var(--gray2);line-height:1.75;margin-bottom:2rem;max-width:480px}
 .hero-sub strong{color:#fff;font-weight:600}
 .hero-actions{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2.5rem}
@@ -230,7 +236,6 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
 </style>
 </head>
 <body>
-<!-- CANARY 7f3a diagnostic -->
 
 <nav>
   <div class="container nav-inner">
@@ -255,7 +260,7 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
   <div class="container hero-grid">
     <div>
       <div class="eyebrow">AI Governance Intelligence Platform</div>
-      <h1>Know what regulations<br><em>apply to what you build.</em></h1>
+      <h1>Know your obligations under<br><span class="hero-framework-line"><span class="hero-framework-bracket">[</span> <span class="hero-framework-slot"><span class="hero-framework" id="hero-framework">Colorado AI Act</span></span> <span class="hero-framework-bracket">]</span></span></h1>
       <p class="hero-sub">IRIS continuously understands what you're building, maps it to your regulatory obligations, and tells you what to do next. Plugs into your existing observability stack — Langfuse, LiteLLM, and more.</p>
       <div class="hero-actions">
         <a href="getting-started.html" class="btn btn-primary">Install</a>
@@ -522,7 +527,7 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
         </div>
         <div class="trust-item">
           <div class="trust-title">AIUC-1 evidence export + ISO 42001 mapping</div>
-          <div class="trust-desc">AIUC-1 evidence export (B006-format) and ISO 42001 coverage mapping — derived from AIUC-1's published crosswalk, not independent interpretation. Export auditor-ready JSON keyed by AIUC-1 sub-control IDs (B006.1, B006.2, B006.3). The B006 export reads AgentPassport fields and Evidence Vault event samples directly — not a separate control-mapping index.</div>
+          <div class="trust-desc">AIUC-1 evidence export (B006-format) and ISO 42001 coverage mapping — derived from AIUC-1's published crosswalk, not independent interpretation. Export auditor-ready JSON keyed by AIUC-1 sub-control IDs (B006.1, B006.2, B006.3). The B006 export assembles AgentPassport configuration and Evidence Vault event samples directly.</div>
         </div>
         <div class="trust-item">
           <div class="trust-title">Evidence Vault — append-only system of record</div>
@@ -889,6 +894,26 @@ if (SHOW_PAID_TIERS) {
     el.style.display = '';
   });
 }
+// Rotating framework hero — 14 mapped in regulatory/registry.json; Colorado AI Act + SOC 2 free today
+(function(){
+  const el=document.getElementById('hero-framework');
+  if(!el)return;
+  const frameworks=[
+    'Colorado AI Act','SOC 2','HIPAA','EU AI Act','GDPR','NIST AI RMF',
+    'AIUC-1','ISO 42001','FedRAMP','CCPA/CPRA','China PIPL','NYC LL 144',
+    'Illinois AI Video','Colorado Chatbot Safety'
+  ];
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  let i=0;
+  setInterval(()=>{
+    i=(i+1)%frameworks.length;
+    el.classList.add('is-changing');
+    setTimeout(()=>{
+      el.textContent=frameworks[i];
+      el.classList.remove('is-changing');
+    },200);
+  },2000);
+})();
 </script>
 </body>
 </html>
