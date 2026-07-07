@@ -236,7 +236,7 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
 </style>
 </head>
 <body>
-<!-- CANARY 9b2e -->
+<!-- CANARY 3d5f -->
 
 <nav>
   <div class="container nav-inner">
@@ -303,6 +303,10 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
       <div class="reg-callout-title">Colorado AI Act — updated May 2026</div>
       <p>The law changed. The old June 30 deadline no longer applies — the new effective date is <strong>January 1, 2027</strong>. Requirements were narrowed, but the obligations did not disappear. You still must tell people when AI makes decisions about them. Consumers still have the right to appeal. Violations carry civil penalties up to <strong>$20,000 each</strong>. The safe harbor still exists — but only for organizations that can demonstrate <strong>reasonable care</strong>. Six more months is not permission to wait. It is time to build real controls.</p>
     </div>
+    <div class="dev-callout">
+      <div class="dev-callout-title">Models can be restricted with no warning</div>
+      <p>In June 2026, a US government export-control action briefly restricted Fable 5 and Mythos 5; access was later restored. Governments and providers can change model availability without notice. If your agent hardcodes a model string, that breaks your production system. IRIS treats models as governed resources — declare allowed tiers, define fallback chains, flip a directive kill switch in Git, and your agent routes to an approved baseline on the next call. <a href="https://www.anthropic.com/news/fable-mythos-access" target="_blank">Read Anthropic's statement ↗</a></p>
+    </div>
     <div class="problem-grid">
       <div class="problem-card bad">
         <div class="problem-tag">Where most teams are today</div>
@@ -364,7 +368,7 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
       <div class="path-card">
         <div class="path-num">06</div>
         <h3><code style="font-family:var(--mono2);font-size:12px;color:var(--red)">iris certify</code></h3>
-        <p>Prove compliance readiness — Colorado AI Act (free); HIPAA, AIUC-1, ISO 42001 are Business+. Use <code style="font-family:var(--mono2);font-size:11px">iris compliance check --framework soc2</code> for the free offline SOC 2 scan.</p>
+        <p>Prove compliance readiness — Colorado AI Act (free in Community); HIPAA, AIUC-1, ISO 42001 and auditor export are Business+. Free SOC 2 via <code style="font-family:var(--mono2);font-size:11px">iris compliance check --framework soc2</code>.</p>
       </div>
       <div class="path-card">
         <div class="path-num">07</div>
@@ -618,8 +622,8 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
             honest about what IRIS handles and what your team handles.</div></div>
       </div>
       <div class="faq-item">
-        <div class="faq-q">What happens when a provider or government restricts a model my agent uses?</div>
-        <div class="faq-a"><div class="faq-a-inner">Agents that hardcode model strings break when provider or regulatory policy changes. IRIS governs models separately from APIs: define tiers and fallback chains in <code style="font-family:var(--mono2);font-size:12px">governance/models/registry.yaml</code>, block models via directive kill switches in <code style="font-family:var(--mono2);font-size:12px">governance/directives/active.yaml</code>, and <code style="font-family:var(--mono2);font-size:12px">IrisAnthropic</code> auto-routes to your approved baseline on the next call — no redeploy. The event is logged to the Evidence Vault.</div></div>
+        <div class="faq-q">What happens when a provider or government suspends a model my agent uses?</div>
+        <div class="faq-a"><div class="faq-a-inner">In June 2026, a US government export-control action briefly restricted Fable 5 and Mythos 5; access was later restored. Governments and providers can change model availability without notice. If your agent hardcodes a model string, that breaks your production system. IRIS governs models separately from APIs: define tiers and fallback chains in <code style="font-family:var(--mono2);font-size:12px">governance/models/registry.yaml</code>, block models via directive kill switches in <code style="font-family:var(--mono2);font-size:12px">governance/directives/active.yaml</code>, and <code style="font-family:var(--mono2);font-size:12px">IrisAnthropic</code> auto-routes to your approved baseline on the next call — no redeploy. The event is logged to the Evidence Vault.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q">Did the Colorado AI Act change? What do I need to do now?</div>
