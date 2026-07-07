@@ -39,8 +39,7 @@
 <span class="cmd">profile = profile_from_langfuse(lookback_days=30)</span></div>
     <p><strong>Profile data IRIS derives:</strong> models and providers actually used, frameworks inferred from tags/metadata, call volume signals, autonomy heuristics from tool-call observations.</p>
     <p><strong>Privacy:</strong> IRIS scans trace <em>names, tags, and metadata only</em> — never prompt or output content.</p>
-    <div class="code-block"><span class="cmd">pip install iris-security-cli</span><br>
-<span class="cmd">iris compliance scan --from langfuse</span><br>
+    <div class="code-block"><span class="cmd">iris compliance scan --from langfuse</span><br>
 <span class="cmd">iris compliance scan --from langfuse --push</span></div>
 
     <h2>LiteLLM</h2>
@@ -49,8 +48,7 @@
 <span class="cmd">from iris_litellm import profile_from_litellm_config</span><br>
 <span class="cmd">profile = profile_from_litellm_config("./litellm.config.yaml")</span></div>
     <p><strong>Profile data IRIS derives:</strong> configured and invoked models, inferred providers, LiteLLM as framework signal, agent count from model list size.</p>
-    <div class="code-block"><span class="cmd">pip install iris-security-cli</span><br>
-<span class="cmd">iris compliance scan --from litellm --config ./litellm.config.yaml</span><br>
+    <div class="code-block"><span class="cmd">iris compliance scan --from litellm --config ./litellm.config.yaml</span><br>
 <span class="cmd">iris compliance scan --from litellm --proxy https://litellm.internal</span></div>
 
     <div class="callout">

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Evidence Vault — IRIS Docs</title>
 <meta name="description" content="IRIS Evidence Vault: append-only, signed, hash-chained audit ledger for compliance. CLI, API, retention lifecycle, and CI/CD evidence recording.">
-<link rel="canonical" href="https://iris-security.github.io/iris-sdk/evidence-vault.html">
+<link rel="canonical" href="https://gimartinb.github.io/iris-sdk/evidence-vault.html">
 <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
 <link rel="stylesheet" href="assets/docs.css">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -31,7 +31,6 @@
     <div class="docs-eyebrow">Operations</div>
     <h1>Evidence Vault</h1>
     <p class="docs-lead">The system of record for compliance evidence. Every policy decision, HITL approval, DLP finding, and CI/CD run is captured as an immutable, signed, hash-chained event — queryable across all frameworks from a single store. No cloud required.</p>
-    <p>Install: <code>pip install iris-security-cli</code>.</p>
 
     <div class="callout">
       <p><strong>Core principle:</strong> the vault has exactly <strong>one write path</strong> (append a new <code>EvidenceEvent</code>) and <strong>many read paths</strong>. There is no update or delete on an event. Current state — like whether a HITL request is still pending — is always <em>computed</em> by reading the append-only log.</p>

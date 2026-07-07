@@ -26,7 +26,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install IRIS
-        run: pip install iris-security-cli
+        run: pip install iris-security-sdk iris-security-cli
 
       - name: Discover ungoverned agents
         id: scan
@@ -40,7 +40,8 @@ jobs:
         env:
           IRIS_ENV: ${{ vars.IRIS_ENVIRONMENT || 'ci' }}
         run: |
-          iris compliance check --framework colorado-ai-act \
+          iris compliance check \
+            --format json \
             > compliance-results.json 2>&1 || true
 
       - name: Fail on critical findings

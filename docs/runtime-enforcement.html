@@ -60,8 +60,7 @@ client = IrisOpenAI(passport=passport)</div>
 <span class="cm"># CrewAI agents use IrisAgent.guard on tool calls</span></div>
 
     <h2>Verify enforcement is wired</h2>
-    <div class="code-block"><span class="cmd">pip install iris-security-cli</span><br>
-<span class="cmd">iris enforce --agent support-agent --dir .</span><br>
+    <div class="code-block"><span class="cmd">iris enforce --agent support-agent --dir .</span><br>
 <span class="cmd">iris explain</span>  <span class="cm"># how the proxy works</span></div>
     <p>Use <code>@agent.guard()</code> to evaluate non-LLM API calls against Cedar policy.</p>
     <div class="code-block"><span class="cmd">from iris import IrisAgent</span><br>

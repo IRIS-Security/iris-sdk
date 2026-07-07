@@ -29,11 +29,9 @@
     <div class="docs-eyebrow">Policy &amp; compliance</div>
     <h1>Compliance Bundles</h1>
     <p class="docs-lead">IRIS ships compliance bundles that compile to Cedar rules and enforce at runtime — not just checklists.</p>
-    <p>Install: <code>pip install iris-security-cli</code>.</p>
 
     <h2>Run a compliance check</h2>
     <div class="code-block"><span class="cmd">iris compliance check --framework colorado-ai-act</span><br>
-<span class="cmd">iris compliance check --framework soc2</span><br>
 <span class="cmd">iris compliance check --framework ccpa-admt</span><br>
 <span class="cmd">iris compliance check --framework china-pipl</span><br>
 <span class="cmd">iris compliance check --framework nyc-ll144</span><br>
@@ -79,7 +77,7 @@
         <tr><td><code>ccpa-admt</code></td><td>California CCPA/CPRA ADMT Regulations</td><td>Available</td></tr>
         <tr><td><code>china-pipl</code></td><td>China Personal Information Protection Law (PIPL)</td><td>Available</td></tr>
         <tr><td><code>hipaa</code></td><td>HIPAA for AI Agents (2025 NPRM + Section 1557)</td><td>Available</td></tr>
-        <tr><td><code>soc2</code></td><td>SOC 2 Trust Services Criteria (AI agent context)</td><td>Community — offline <code>compliance check</code> preview (8 TSC-mapped controls, PASS/FAIL); full certification scoring + auditor export = Business+</td></tr>
+        <tr><td><code>soc2</code></td><td>SOC 2 Trust Services Criteria (AI agent context)</td><td>Community — point-in-time local scan (8 controls); continuous monitoring + auditor export = Business+</td></tr>
         <tr><td><code>gdpr</code></td><td>GDPR</td><td>Available</td></tr>
         <tr><td><code>nist-ai-rmf</code></td><td>NIST AI Risk Management Framework</td><td>Available</td></tr>
         <tr><td><code>eu-ai-act</code></td><td>EU Artificial Intelligence Act</td><td>Available</td></tr>
@@ -92,7 +90,7 @@
     </div>
 
     <div class="callout">
-      <p><strong>SOC 2 accuracy note:</strong> The AICPA Trust Services Criteria do not include AI-specific controls. IRIS maps existing TSC controls (CC6, CC7, CC8, CC9.2) to AI agent governance evidence that auditors increasingly request. Run <code>iris compliance check --framework soc2</code> for an offline PASS/FAIL check — <code>iris compliance scan</code> maps workload attributes but does not reliably surface SOC 2 obligations on typical AI codebases. For AI-specific controls, use NIST AI RMF, AIUC-1, or ISO 42001 (IRIS's ISO mapping is derived from AIUC-1's published crosswalk).</p>
+      <p><strong>SOC 2 accuracy note:</strong> The AICPA Trust Services Criteria do not include AI-specific controls. IRIS maps existing TSC controls (CC6, CC7, CC8, CC9.2) to AI agent governance evidence that auditors increasingly request. For AI-specific controls, use NIST AI RMF, AIUC-1, or ISO 42001 (IRIS's ISO mapping is derived from AIUC-1's published crosswalk).</p>
     </div>
 
     <h2>AIUC-1 (voluntary certification standard)</h2>

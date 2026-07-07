@@ -29,7 +29,6 @@
     <div class="docs-eyebrow">Reference</div>
     <h1>CLI Reference</h1>
     <p class="docs-lead">All <code>iris</code> commands (v0.2.16), organized by phase. Run <code>iris --help</code> for the live command tree.</p>
-    <p>Install: <code>pip install iris-security-cli</code> (ships the <code>iris</code> binary). Add <code>iris-security-sdk</code> for runtime guards in application code.</p>
 
     <h2>Discover</h2>
     <div class="table-wrap">
@@ -117,8 +116,6 @@
         <tr><th>Command</th><th>Description</th></tr>
         <tr><td><code>iris compliance check --framework &lt;id&gt;</code></td><td>Run compliance check (<code>colorado-ai-act</code>, <code>ccpa-admt</code>, <code>china-pipl</code>, <code>hipaa</code>, <code>soc2</code>, <code>aiuc-1</code>, …)</td></tr>
         <tr><td><code>iris compliance scan</code></td><td>Offline workload detection from local code (default)</td></tr>
-        <tr><td><code>iris compliance scan --path &lt;dir&gt;</code></td><td>Scan a specific project path</td></tr>
-        <tr><td><code>iris compliance scan --json</code></td><td>Machine-readable JSON output</td></tr>
         <tr><td><code>iris compliance scan --from langfuse</code></td><td>Derive profile from Langfuse trace metadata (<code>pip install "iris-langfuse[live]"</code>)</td></tr>
         <tr><td><code>iris compliance scan --from litellm --config ./litellm.config.yaml</code></td><td>Derive profile from LiteLLM static config</td></tr>
         <tr><td><code>iris compliance scan --from litellm --proxy &lt;url&gt;</code></td><td>Derive profile from live LiteLLM proxy</td></tr>
