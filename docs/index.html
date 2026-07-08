@@ -508,7 +508,7 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
           <div class="trust-desc">Every IRIS release is built by GitHub Actions and attested
             with SLSA Level 3 provenance via Sigstore. The attestation
             is recorded in the public Rekor transparency log. Run
-            <code>pip audit signatures</code> after installing IRIS
+            <code>slsa-verifier verify-artifact</code> after installing IRIS
             to verify the package was built from the exact commit
             you see on GitHub. Zero trust required.</div>
         </div>
@@ -542,8 +542,8 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
         <div class="trust-terminal">
           <div class="tt-comment"># Verify the package signature</div>
           <div class="tt-cmd">$ pip install iris-security-sdk</div>
-          <div class="tt-cmd">$ pip audit signatures</div>
-          <div class="tt-out">iris-security-sdk-0.2.17-py3-none-any.whl</div>
+          <div class="tt-cmd">$ slsa-verifier verify-artifact iris_security_sdk-0.2.17-py3-none-any.whl \</div>
+          <div class="tt-cmd">&nbsp;&nbsp;--provenance-path *.intoto.jsonl --source-uri github.com/IRIS-Security/iris-sdk</div>
           <div class="tt-ok">  ✓ Signed by GitHub Actions (OIDC)</div>
           <div class="tt-ok">  ✓ SLSA Level 3 provenance verified</div>
           <div class="tt-ok">  ✓ Commit: a3f8c2d · Workflow: publish.yml</div>
@@ -560,8 +560,7 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
             <div style="color:var(--gray3)"># Links the package to the exact commit and</div>
             <div style="color:var(--gray3)"># workflow run that built it via Sigstore</div>
             <div style="color:var(--green);margin-top:8px">pip install iris-security-sdk</div>
-            <div style="color:var(--green)">pip audit signatures</div>
-            <div style="color:var(--gray3);margin-top:8px"># Or verify the full provenance chain:</div>
+            <div style="color:var(--gray3);margin-top:8px"># Verify provenance with slsa-verifier:</div>
             <div style="color:var(--green)">slsa-verifier verify-artifact \</div>
             <div style="color:var(--green)">&nbsp;&nbsp;iris_security_sdk-*.whl \</div>
             <div style="color:var(--green)">&nbsp;&nbsp;--provenance-path *.intoto.jsonl \</div>
@@ -630,7 +629,7 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
       </div>
       <div class="faq-item">
         <div class="faq-q">Do you cover AI in hiring and recruiting?</div>
-        <div class="faq-a"><div class="faq-a-inner">Yes. IRIS covers NYC Local Law 144 (the most actively enforced AI hiring law in the US), the Illinois AI Video Interview Act, and the employment-domain provisions of CCPA/CPRA ADMT and the EU AI Act. These are available in IRIS Pro. The free tier shows you the rules and your top gaps — Pro unlocks the full evidence package and certification report that an auditor or the NYC DCWP will ask for.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">Yes. IRIS covers NYC Local Law 144 (the most actively enforced AI hiring law in the US), the Illinois AI Video Interview Act, and the employment-domain provisions of CCPA/CPRA ADMT and the EU AI Act. These are available in Business. The free tier shows you the rules and your top gaps — Business unlocks the full evidence package and certification report that an auditor or the NYC DCWP will ask for.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q">Does IRIS work inside Claude?</div>
@@ -658,7 +657,7 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
       </div>
       <div class="faq-item">
         <div class="faq-q">Which compliance frameworks does IRIS support?</div>
-        <div class="faq-a"><div class="faq-a-inner"><strong>14 compliance frameworks</strong> — Colorado AI Act (SB 26-189) and a <strong>SOC 2 point-in-time scan teaser</strong> (applicable rules + top gaps + local verdict) are available in Community today — no account required for local CLI use. <strong>AIUC-1 B006 evidence export</strong> (<code>aiuc-1</code>) and <strong>ISO/IEC 42001</strong> (<code>iso-42001</code>) ship today as Business capabilities — not roadmap items. NIST AI RMF, GDPR, HIPAA, EU AI Act, FedRAMP, CCPA/CPRA ADMT (<code>ccpa-admt</code>), China PIPL (<code>china-pipl</code>), NYC LL 144 (<code>nyc-ll144</code>), and Illinois AI Video (<code>illinois-ai-video</code>) full eval, continuous monitoring, and auditor-grade export packages are Business+. See <a href="https://github.com/IRIS-Security/iris-sdk/blob/main/BACKLOG.md" style="color:var(--red)">BACKLOG.md</a>. Run <code style="font-family:var(--mono2);font-size:12px">iris compliance scan</code> or <code style="font-family:var(--mono2);font-size:12px">iris framework suggest</code> to see what applies.</div></div>
+        <div class="faq-a"><div class="faq-a-inner"><strong>14 compliance frameworks</strong> — Colorado AI Act (SB 26-189) is available in Community today via <code style="font-family:var(--mono2);font-size:12px">iris compliance scan</code>, which maps your obligations across frameworks like GDPR, HIPAA, and ISO 42001 — no account required for local CLI use. <strong>SOC 2</strong> is a separate, free, fully offline check — <code style="font-family:var(--mono2);font-size:12px">iris compliance check --framework soc2</code> evaluates 8 TSC-mapped controls with a local PASS/FAIL verdict; it does not run through <code style="font-family:var(--mono2);font-size:12px">compliance scan</code>. <strong>AIUC-1 B006 evidence export</strong> (<code>aiuc-1</code>) and <strong>ISO/IEC 42001</strong> (<code>iso-42001</code>) ship today as Business capabilities — not roadmap items. NIST AI RMF, GDPR, HIPAA, EU AI Act, FedRAMP, CCPA/CPRA ADMT (<code>ccpa-admt</code>), China PIPL (<code>china-pipl</code>), NYC LL 144 (<code>nyc-ll144</code>), and Illinois AI Video (<code>illinois-ai-video</code>) full eval, continuous monitoring, and auditor-grade export packages are Business+. See <a href="https://github.com/IRIS-Security/iris-sdk/blob/main/BACKLOG.md" style="color:var(--red)">BACKLOG.md</a>. Run <code style="font-family:var(--mono2);font-size:12px">iris compliance scan</code> or <code style="font-family:var(--mono2);font-size:12px">iris framework suggest</code> to see what applies.</div></div>
       </div>
     </div>
   </div>
@@ -718,7 +717,7 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
       <div class="feature-card">
         <div class="feature-card-tier">Community</div>
         <div class="feature-card-name">SLSA Level 3 provenance</div>
-        <div class="feature-card-desc">Every PyPI release signed and attested — verify with <code style="font-family:var(--mono2);font-size:11px">pip audit signatures</code>.</div>
+        <div class="feature-card-desc">Every PyPI release signed and attested — verify with <code style="font-family:var(--mono2);font-size:11px">slsa-verifier verify-artifact</code>.</div>
       </div>
       <div class="feature-card">
         <div class="feature-card-tier">Community</div>
