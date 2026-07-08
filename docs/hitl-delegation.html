@@ -40,6 +40,34 @@
 <span class="cmd">iris hitl test --agent loan-processor</span></div>
     <p><code>setup</code> is an interactive wizard: enable HITL, set timeout policy, and declare condition rules (e.g. <code>loan_amount &gt; 50000</code>). HITL fires only when a declared rule matches.</p>
 
+    <h3>Risk-tiered HITL — gate the critical, not everything</h3>
+    <p>Every policy decision resolves to one of three risk tiers. Approval fatigue — gating every action — trains reviewers to rubber-stamp, which defeats the point of human oversight. A well-configured agent should trigger HITL for a small minority of calls.</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Tier</th><th>Meaning</th><th>Human involved?</th></tr>
+        <tr><td><code>AUTO_ALLOW</code></td><td>Reversible, low-impact, within declared intent and policy. The default — this should be the large majority of calls.</td><td>No</td></tr>
+        <tr><td><code>STEP_UP</code></td><td>Irreversible or high-impact per criteria <em>you</em> declare below. Permitted, pending approval.</td><td>Yes</td></tr>
+        <tr><td><code>AUTO_DENY</code></td><td>A clear policy violation (e.g. an absolute compliance block). Blocked without bothering a human.</td><td>No</td></tr>
+      </table>
+    </div>
+    <p>Nothing here is hard-coded by IRIS — you declare what's critical for your agent in <code>hitl:</code> under <code>passport.yaml</code>. Every knob defaults to empty/off, so declaring HITL config never changes behavior until you say what should step up:</p>
+    <div class="code-block"><span class="cmd">spec:</span><br>
+&nbsp;&nbsp;hitl:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enabled: true<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cmd"># Violation severities that step up instead of a silent log or auto-deny</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;required_for_risk_levels: [CRITICAL]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cmd"># Action verbs that step up in staging/production (never in dev/test)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;step_up_actions: [write, delete]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cmd"># Data classifications that always step up, regardless of action</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;sensitive_data_classifications: [phi, pii]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cmd"># Step up when an action drifts outside the agent's declared intent</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;step_up_on_intent_drift: true<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cmd"># Arbitrary conditions (existing mechanism, still supported)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;condition_rules:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- condition: "loan_amount &gt; 50000"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;reason: "High-value loan"</div>
+    <p>Run <code>iris hitl rules --agent &lt;name&gt;</code> to see exactly which of these are configured and why a specific call would (or wouldn't) trigger review — every triggered review's reason is also recorded on the review itself and visible via <code>iris hitl show &lt;review-id&gt;</code>.</p>
+
     <h3>Review queue</h3>
     <div class="code-block"><span class="cmd">iris hitl list</span><br>
 <span class="cmd">iris hitl list --agent loan-processor</span><br>
