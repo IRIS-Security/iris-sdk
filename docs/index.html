@@ -100,6 +100,15 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,.92
 .stat-label{font-size:12px;color:var(--gray);margin-top:2px}
 .hero-visual{background:var(--black3);border:1px solid var(--border);border-radius:2px;padding:1.5rem;font-family:var(--mono2);font-size:12px;line-height:1.8}
 .hv-line{color:var(--gray3)}.hv-kw{color:#C792EA}.hv-st{color:#C3E88D}.hv-cm{color:#546E7A}.hv-ok{color:var(--green)}
+.hero-loop-terminal{background:var(--black3);border:1px solid var(--border);border-radius:2px;padding:1.25rem;font-family:var(--mono2);font-size:12px;line-height:1.9;min-height:265px;margin-top:1.5rem;overflow-x:auto}
+.hlt-cmd{color:var(--green);white-space:pre}
+.hlt-out{color:var(--gray2);white-space:pre}
+.hlt-out code{font-family:var(--mono2);color:var(--gray2);background:var(--black4);padding:1px 5px;border-radius:2px}
+.hlt-pass{color:var(--green);font-weight:600}
+.hlt-fail{color:var(--red);font-weight:600}
+.hlt-cursor{display:inline-block;width:7px;height:1em;background:var(--green);margin-left:2px;vertical-align:text-bottom;animation:hlt-blink 1s steps(1,end) infinite}
+@media (prefers-reduced-motion:reduce){.hlt-cursor{display:none}}
+@keyframes hlt-blink{50%{opacity:0}}
 
 /* Problem */
 .problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;margin-top:2rem}
@@ -269,6 +278,25 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
       <div class="hero-install">$ pip install iris-security-sdk iris-security-cli && iris quickstart</div>
       <div class="cmd-line" style="margin-top:6px;color:var(--gray3)"># Optional: Claude integration via MCP</div>
       <div class="cmd-line" style="font-size:11px">pip install "iris-security-sdk[mcp]"</div>
+      <div class="hero-loop-terminal" id="hero-loop-terminal">
+        <div class="hlt-cmd">$ pip install iris-security-cli</div>
+        <div class="hlt-out">Successfully installed iris-security-cli-0.2.17</div>
+        <div class="hlt-cmd">$ iris compliance check --framework soc2 --agent loan-processor</div>
+        <div class="hlt-out">SOC 2 Trust Services Criteria — Pro required</div>
+        <div class="hlt-out">&nbsp;&nbsp;SOC2-CC6.1  Logical access control ... <span class="hlt-fail">FAIL</span></div>
+        <div class="hlt-out">&nbsp;&nbsp;SOC2-CC6.2  Authentication .......... <span class="hlt-pass">PASS</span></div>
+        <div class="hlt-out">&nbsp;&nbsp;SOC2-CC6.3  Authorization ........... <span class="hlt-pass">PASS</span></div>
+        <div class="hlt-out">Preview: 3 of 8 controls · <code>iris license activate &lt;key&gt;</code></div>
+        <div class="hlt-cmd">$ iris compliance check --framework colorado-ai-act --agent payment-agent</div>
+        <div class="hlt-out">Colorado AI Act — SB 26-189</div>
+        <div class="hlt-out">&nbsp;&nbsp;CO-001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ADMT inventory ......... <span class="hlt-pass">PASS</span></div>
+        <div class="hlt-out">&nbsp;&nbsp;CO-002&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;impact assessment ...... <span class="hlt-pass">PASS</span></div>
+        <div class="hlt-out">&nbsp;&nbsp;CO-003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;consumer notice ........ <span class="hlt-pass">PASS</span></div>
+        <div class="hlt-out">&nbsp;&nbsp;CO-004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;consent gate ........... <span class="hlt-fail">FAIL</span></div>
+        <div class="hlt-out">&nbsp;&nbsp;CO-RR-001&nbsp;&nbsp;record retention ....... <span class="hlt-pass">PASS</span></div>
+        <div class="hlt-out">&nbsp;&nbsp;CO-DEV-001 developer docs ....... <span class="hlt-pass">PASS</span></div>
+        <div class="hlt-out">5/6 PASS · re-run with <code>--fix</code></div>
+      </div>
       <div class="hero-stats" style="margin-top:2rem">
         <div><div class="stat-num">14</div><div class="stat-label">Frameworks mapped · 2 free today</div></div>
         <div><div class="stat-num">&lt;5ms</div><div class="stat-label">Cedar evaluation</div></div>
@@ -916,6 +944,102 @@ if (SHOW_PAID_TIERS) {
       el.classList.remove('is-changing');
     },200);
   },2000);
+})();
+// Hero terminal loop — real iris-security-cli 0.2.17 output, verified against
+// PyPI-published package. Static markup above is the reduced-motion / no-JS
+// fallback; JS below replaces it with a typing animation when motion is allowed.
+(function(){
+  const root=document.getElementById('hero-loop-terminal');
+  if(!root)return;
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+
+  const steps=[
+    {
+      cmd:'$ pip install iris-security-cli',
+      out:['Successfully installed iris-security-cli-0.2.17']
+    },
+    {
+      cmd:'$ iris compliance check --framework soc2 --agent loan-processor',
+      out:[
+        'SOC 2 Trust Services Criteria — Pro required',
+        '&nbsp;&nbsp;SOC2-CC6.1  Logical access control ... <span class="hlt-fail">FAIL</span>',
+        '&nbsp;&nbsp;SOC2-CC6.2  Authentication .......... <span class="hlt-pass">PASS</span>',
+        '&nbsp;&nbsp;SOC2-CC6.3  Authorization ........... <span class="hlt-pass">PASS</span>',
+        'Preview: 3 of 8 controls · <code>iris license activate &lt;key&gt;</code>'
+      ]
+    },
+    {
+      cmd:'$ iris compliance check --framework colorado-ai-act --agent payment-agent',
+      out:[
+        'Colorado AI Act — SB 26-189',
+        '&nbsp;&nbsp;CO-001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ADMT inventory ......... <span class="hlt-pass">PASS</span>',
+        '&nbsp;&nbsp;CO-002&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;impact assessment ...... <span class="hlt-pass">PASS</span>',
+        '&nbsp;&nbsp;CO-003&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;consumer notice ........ <span class="hlt-pass">PASS</span>',
+        '&nbsp;&nbsp;CO-004&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;consent gate ........... <span class="hlt-fail">FAIL</span>',
+        '&nbsp;&nbsp;CO-RR-001&nbsp;&nbsp;record retention ....... <span class="hlt-pass">PASS</span>',
+        '&nbsp;&nbsp;CO-DEV-001 developer docs ....... <span class="hlt-pass">PASS</span>',
+        '5/6 PASS · re-run with <code>--fix</code>'
+      ]
+    }
+  ];
+
+  let stepIndex=0, cmdTextNode, cursor, outWrap, timer;
+
+  function resetTerminal(){
+    root.innerHTML='';
+    const cmdLine=document.createElement('div');
+    cmdLine.className='hlt-cmd';
+    cmdTextNode=document.createTextNode('');
+    cursor=document.createElement('span');
+    cursor.className='hlt-cursor';
+    cmdLine.appendChild(cmdTextNode);
+    cmdLine.appendChild(cursor);
+    outWrap=document.createElement('div');
+    root.appendChild(cmdLine);
+    root.appendChild(outWrap);
+  }
+
+  function typeText(text,cb){
+    let i=0;
+    (function tick(){
+      cmdTextNode.textContent=text.slice(0,i);
+      if(i<text.length){
+        i++;
+        timer=setTimeout(tick,24);
+      }else if(cb){
+        timer=setTimeout(cb,300);
+      }
+    })();
+  }
+
+  function showOutput(lines,cb){
+    let i=0;
+    (function next(){
+      if(i<lines.length){
+        const line=document.createElement('div');
+        line.className='hlt-out';
+        line.innerHTML=lines[i];
+        outWrap.appendChild(line);
+        i++;
+        timer=setTimeout(next,200);
+      }else if(cb){
+        timer=setTimeout(cb,2200);
+      }
+    })();
+  }
+
+  function runTerminal(){
+    resetTerminal();
+    const step=steps[stepIndex];
+    typeText(step.cmd,function(){
+      showOutput(step.out,function(){
+        stepIndex=(stepIndex+1)%steps.length;
+        runTerminal();
+      });
+    });
+  }
+
+  runTerminal();
 })();
 </script>
 </body>
