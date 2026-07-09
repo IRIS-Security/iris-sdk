@@ -1,8 +1,21 @@
 """
 Single source of truth for every IRIS feature and its tier.
 
-To add a new Pro feature: add one line here.
-To move a feature from Pro to Free: change its tier here.
+Tier model (canonical names — use these in docs and cloud plans):
+  COMMUNITY  = Tier.FREE     — single developer / single repo / point-in-time
+  BUSINESS   = Tier.PRO      — multi-party / cross-repo / long-horizon / external
+  ENTERPRISE = Tier.ENTERPRISE
+
+Guiding line: single-developer / single-repo / point-in-time = free;
+multi-party / cross-repo / long-horizon / externally-facing = paid.
+
+Cloud Community tier has ONE job (do not inflate):
+  Bridge local `iris compliance scan --push` -> view the snapshot once in the
+  cloud dashboard. Continuous monitoring, posture-over-time, multi-agent
+  history, and hosted vault retention stay BUSINESS+.
+
+To add a new Business feature: add one line here.
+To move a feature from Business to Community: change its tier here.
 Nothing else needs to change anywhere in the codebase.
 """
 
@@ -13,13 +26,13 @@ from typing import Dict
 
 
 class Tier(str, Enum):
-    FREE = "free"
-    PRO = "pro"
+    FREE = "free"  # Community
+    PRO = "pro"  # Business
     ENTERPRISE = "enterprise"
 
 
 class Feature(str, Enum):
-    # ── FREE TIER ─────────────────────────────────────────────
+    # ── COMMUNITY (FREE) TIER ─────────────────────────────────
     # Core SDK
     AGENT_REGISTRATION = "agent_registration"
     POLICY_COMPILE = "policy_compile"
@@ -29,11 +42,12 @@ class Feature(str, Enum):
     SCAN_GOVERN = "scan_govern"
     CEDAR_ENGINE = "cedar_engine"
     DLP_SCANNER = "dlp_scanner"
-    # Free compliance bundles
+    # Free compliance bundles (Colorado + universal SOC 2 teaser)
     BUNDLE_COLORADO_AI_ACT = "bundle_colorado_ai_act"
     BUNDLE_COLORADO_CHATBOT = "bundle_colorado_chatbot"
     BUNDLE_COLORADO_HEALTH_AI = "bundle_colorado_health_ai"
     BUNDLE_COLORADO_MENTAL_HEALTH = "bundle_colorado_mental_health"
+    BUNDLE_SOC2 = "bundle_soc2"
     # Free CLI commands
     CLI_STATUS = "cli_status"
     CLI_EXPLAIN = "cli_explain"
@@ -54,13 +68,20 @@ class Feature(str, Enum):
     CLI_TEST_TOP3_GAPS = "cli_test_top3_gaps"
     # Free red-team (summary only)
     RED_TEAM_SUMMARY = "red_team_summary"
+    # Personal / local export (CSV/JSON for own use — not auditor deliverables)
+    EVIDENCE_EXPORT_PERSONAL = "evidence_export_personal"
+    EVIDENCE_EXPORT_CSV = "evidence_export_csv"  # alias — personal export, same tier
+    # Personal SCM / single-repo GitHub App install
+    GITHUB_APP_PERSONAL = "github_app_personal"
+    # Cloud Community bridge (push local scan, view snapshot once)
+    CLOUD_SCAN_PUSH = "cloud_scan_push"
+    CLOUD_SCAN_VIEW = "cloud_scan_view"
 
-    # ── PRO TIER ──────────────────────────────────────────────
-    # Pro compliance bundles
+    # ── BUSINESS (PRO) TIER ───────────────────────────────────
+    # Pro compliance bundles (full eval beyond Community teasers)
     BUNDLE_NIST_AI_RMF = "bundle_nist_ai_rmf"
     BUNDLE_FEDRAMP_MODERATE = "bundle_fedramp_moderate"
     BUNDLE_HIPAA = "bundle_hipaa"
-    BUNDLE_SOC2 = "bundle_soc2"
     BUNDLE_GDPR = "bundle_gdpr"
     BUNDLE_EU_AI_ACT = "bundle_eu_ai_act"
     BUNDLE_CCPA_ADMT = "bundle_ccpa_admt"
@@ -78,9 +99,10 @@ class Feature(str, Enum):
     RED_TEAM_FULL_FINDINGS = "red_team_full_findings"
     RED_TEAM_BYPASS_DETAILS = "red_team_bypass_details"
     RED_TEAM_REMEDIATION = "red_team_remediation"
-    # Pro Evidence Vault
+    # Pro Evidence Vault (hosted retention, unlimited local)
     VAULT_UNLIMITED_RETENTION = "vault_unlimited_retention"
     VAULT_CLOUD_SYNC = "vault_cloud_sync"
+    VAULT_CLOUD_HOSTED = "vault_cloud_hosted"
     VAULT_PDF_EXPORT = "vault_pdf_export"
     VAULT_TAMPER_EVIDENT = "vault_tamper_evident"
     VAULT_3_YEAR_RETENTION = "vault_3_year_retention"
@@ -91,6 +113,7 @@ class Feature(str, Enum):
     SCM_ORG_SCANNER = "scm_org_scanner"
     SCM_PR_COMMENTS = "scm_pr_comments"
     GITHUB_APP = "github_app"
+    GITHUB_APP_ORG = "github_app_org"
     GITLAB_INTEGRATION = "gitlab_integration"
     # Pro alerting
     DRIFT_SLACK_ALERT = "drift_slack_alert"
@@ -99,13 +122,13 @@ class Feature(str, Enum):
     COST_ANOMALY_ALERT = "cost_anomaly_alert"
     COST_ORG_SUMMARY = "cost_org_summary"
     COST_TEAM_ROLLUP = "cost_team_rollup"
-    # Pro access control
+    # Pro access control (second+ user / RBAC beyond solo owner)
     TEAM_RBAC = "team_rbac"
     SSO = "sso"
     USER_LEVEL_RBAC = "user_level_rbac"
-    # Pro reporting
+    # Pro reporting — auditor-grade / org-wide export deliverables
     CERTIFICATION_READINESS_PDF = "certification_readiness_pdf"
-    EVIDENCE_EXPORT_CSV = "evidence_export_csv"
+    EVIDENCE_EXPORT_AUDITOR = "evidence_export_auditor"
     POLICY_CATALOG_EXPORT = "policy_catalog_export"
 
     # ── ENTERPRISE TIER ───────────────────────────────────────
@@ -118,7 +141,7 @@ class Feature(str, Enum):
 
 
 FEATURE_TIERS: Dict[Feature, Tier] = {
-    # All FREE features
+    # Community (FREE)
     Feature.AGENT_REGISTRATION: Tier.FREE,
     Feature.POLICY_COMPILE: Tier.FREE,
     Feature.POLICY_DIFF: Tier.FREE,
@@ -131,6 +154,7 @@ FEATURE_TIERS: Dict[Feature, Tier] = {
     Feature.BUNDLE_COLORADO_CHATBOT: Tier.FREE,
     Feature.BUNDLE_COLORADO_HEALTH_AI: Tier.FREE,
     Feature.BUNDLE_COLORADO_MENTAL_HEALTH: Tier.FREE,
+    Feature.BUNDLE_SOC2: Tier.FREE,
     Feature.CLI_STATUS: Tier.FREE,
     Feature.CLI_EXPLAIN: Tier.FREE,
     Feature.CLI_WATCH: Tier.FREE,
@@ -147,11 +171,15 @@ FEATURE_TIERS: Dict[Feature, Tier] = {
     Feature.CLI_TEST_SCORE: Tier.FREE,
     Feature.CLI_TEST_TOP3_GAPS: Tier.FREE,
     Feature.RED_TEAM_SUMMARY: Tier.FREE,
-    # All PRO features
+    Feature.EVIDENCE_EXPORT_PERSONAL: Tier.FREE,
+    Feature.EVIDENCE_EXPORT_CSV: Tier.FREE,
+    Feature.GITHUB_APP_PERSONAL: Tier.FREE,
+    Feature.CLOUD_SCAN_PUSH: Tier.FREE,
+    Feature.CLOUD_SCAN_VIEW: Tier.FREE,
+    # Business (PRO)
     Feature.BUNDLE_NIST_AI_RMF: Tier.PRO,
     Feature.BUNDLE_FEDRAMP_MODERATE: Tier.PRO,
     Feature.BUNDLE_HIPAA: Tier.PRO,
-    Feature.BUNDLE_SOC2: Tier.PRO,
     Feature.BUNDLE_GDPR: Tier.PRO,
     Feature.BUNDLE_EU_AI_ACT: Tier.PRO,
     Feature.BUNDLE_CCPA_ADMT: Tier.PRO,
@@ -169,6 +197,7 @@ FEATURE_TIERS: Dict[Feature, Tier] = {
     Feature.RED_TEAM_REMEDIATION: Tier.PRO,
     Feature.VAULT_UNLIMITED_RETENTION: Tier.PRO,
     Feature.VAULT_CLOUD_SYNC: Tier.PRO,
+    Feature.VAULT_CLOUD_HOSTED: Tier.PRO,
     Feature.VAULT_PDF_EXPORT: Tier.PRO,
     Feature.VAULT_TAMPER_EVIDENT: Tier.PRO,
     Feature.VAULT_3_YEAR_RETENTION: Tier.PRO,
@@ -178,6 +207,7 @@ FEATURE_TIERS: Dict[Feature, Tier] = {
     Feature.SCM_ORG_SCANNER: Tier.PRO,
     Feature.SCM_PR_COMMENTS: Tier.PRO,
     Feature.GITHUB_APP: Tier.PRO,
+    Feature.GITHUB_APP_ORG: Tier.PRO,
     Feature.GITLAB_INTEGRATION: Tier.PRO,
     Feature.DRIFT_SLACK_ALERT: Tier.PRO,
     Feature.DRIFT_EMAIL_ALERT: Tier.PRO,
@@ -189,9 +219,9 @@ FEATURE_TIERS: Dict[Feature, Tier] = {
     Feature.SSO: Tier.PRO,
     Feature.USER_LEVEL_RBAC: Tier.PRO,
     Feature.CERTIFICATION_READINESS_PDF: Tier.PRO,
-    Feature.EVIDENCE_EXPORT_CSV: Tier.PRO,
+    Feature.EVIDENCE_EXPORT_AUDITOR: Tier.PRO,
     Feature.POLICY_CATALOG_EXPORT: Tier.PRO,
-    # All ENTERPRISE features
+    # Enterprise
     Feature.CUSTOM_COMPLIANCE_BUNDLE: Tier.ENTERPRISE,
     Feature.DEDICATED_SUPPORT: Tier.ENTERPRISE,
     Feature.SLA_GUARANTEE: Tier.ENTERPRISE,

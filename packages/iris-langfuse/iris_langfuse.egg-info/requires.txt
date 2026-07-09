@@ -1,9 +1,0 @@
-iris-security-sdk>=0.2.15
-httpx>=0.27
-
-[dev]
-pytest>=8.0
-ruff>=0.4
-
-[live]
-langfuse<4,>=2

@@ -40,6 +40,7 @@ class CapabilityStatus(str, Enum):
 
 CAPABILITY_FLAGS: dict[str, CapabilityStatus] = {
     # Demo / platform capabilities
+    "identity_graph": CapabilityStatus.SHIPPABLE,
     "org_discovery_engine": CapabilityStatus.SHIPPABLE,
     "ciso_coverage_trend": CapabilityStatus.SHIPPABLE,
     "integrations_api": CapabilityStatus.SHIPPABLE,
@@ -56,22 +57,22 @@ CAPABILITY_FLAGS: dict[str, CapabilityStatus] = {
     "compliance_full_eval": CapabilityStatus.SHIPPABLE,
     "certify_export": CapabilityStatus.SHIPPABLE,
     "hitl_notifications": CapabilityStatus.SHIPPABLE,
-    "evidence_vault_cloud": CapabilityStatus.BACKLOG,
+    "evidence_vault_cloud": CapabilityStatus.IN_PROGRESS,
     "vault_siem_export": CapabilityStatus.SHIPPABLE,
-    "github_app_org": CapabilityStatus.IN_PROGRESS,
+    "github_app_org": CapabilityStatus.SHIPPABLE,
     "mcp_pro_tools": CapabilityStatus.IN_PROGRESS,
     "audit_log_export": CapabilityStatus.SHIPPABLE,
     # Enterprise
     "org_policy_enforcement": CapabilityStatus.BACKLOG,
     "sso_saml_oidc": CapabilityStatus.IN_PROGRESS,
     "scim_provisioning": CapabilityStatus.BACKLOG,
-    "rbac_custom_roles": CapabilityStatus.BACKLOG,
+    "rbac_custom_roles": CapabilityStatus.SHIPPABLE,
     "enterprise_vault_integrations": CapabilityStatus.BACKLOG,
     "byok_encryption": CapabilityStatus.BACKLOG,
     "fedramp_region_enforcement": CapabilityStatus.BACKLOG,
 }
 
-BACKLOG_MD_URL = "https://github.com/gimartinb/iris-sdk/blob/main/BACKLOG.md"
+BACKLOG_MD_URL = "https://github.com/IRIS-Security/iris-sdk/blob/main/BACKLOG.md"
 
 # Related: packages/iris-cloud-console/src/components/featureFlags.jsx
 # controls UI nav/feature visibility. Reconcile via BACKLOG.md follow-up
