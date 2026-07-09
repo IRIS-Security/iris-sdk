@@ -123,3 +123,19 @@ def test_detect_workload_skips_data_category_matches_in_test_files(tmp_path: Pat
     )
     profile = detect_workload(str(tmp_path))
     assert profile["data_categories"] == []
+
+
+def test_detect_workload_skips_data_category_matches_in_demo_files(tmp_path: Path):
+    """Regression for the public iris-sdk repo's bundled demo/ tree: it
+    intentionally simulates an "ungoverned agent" with realistic-looking
+    field names to teach a sales demo — that's not evidence the SDK itself
+    handles real customer PII/PHI."""
+    demo_dir = tmp_path / "demo" / "customers" / "meridian_health" / "agents"
+    demo_dir.mkdir(parents=True)
+    (demo_dir / "patient_summarizer.py").write_text(
+        'def summarize_patient_record(patient_id: str, record: dict) -> str:\n'
+        '    return record.get("ssn")\n',
+        encoding="utf-8",
+    )
+    profile = detect_workload(str(tmp_path))
+    assert profile["data_categories"] == []

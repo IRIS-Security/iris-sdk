@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "iris-security-sdk"
-version = "0.2.18"
+version = "0.2.19"
 description = "IRIS — AI Agent Governance SDK. Govern AI agents locally."
 readme = "README.md"
 authors = [{ name = "Gilbert Martin", email = "gilbert@iris-security.io" }]
