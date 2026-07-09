@@ -116,11 +116,15 @@ def _iter_source_files(root: Path) -> list[Path]:
     return files
 
 
+_NON_WORKLOAD_DIR_NAMES = {"tests", "test", "demo", "demos", "examples", "example", "samples", "sample"}
+
+
 def _is_test_file(path: Path) -> bool:
-    """Test suites routinely embed sample field names/fixtures (fake ssns,
-    demo passport.yaml content, etc.) to exercise detection logic itself —
-    that sample data isn't evidence the workload actually handles it."""
-    if any(part in {"tests", "test"} for part in path.parts):
+    """Test suites and demo/example trees routinely embed sample field names
+    and fixtures (fake ssns, illustrative "ungoverned agent" code, etc.) to
+    exercise detection logic or teach a concept — that sample data isn't
+    evidence this workload itself handles it."""
+    if any(part in _NON_WORKLOAD_DIR_NAMES for part in path.parts):
         return True
     stem = path.stem
     return stem.startswith("test_") or stem.endswith("_test")
