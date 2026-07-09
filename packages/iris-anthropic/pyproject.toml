@@ -12,7 +12,7 @@ requires-python = ">=3.10"
 authors = [{ name = "IRIS Platform", email = "sdk@iris.ai" }]
 dependencies = [
   "iris-security-core>=0.1.18",
-  "iris-security-sdk>=0.2.18",
+  "iris-security-sdk>=0.2.19",
 ]
 
 [project.optional-dependencies]
