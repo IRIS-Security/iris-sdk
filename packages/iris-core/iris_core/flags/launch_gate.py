@@ -72,7 +72,7 @@ CAPABILITY_FLAGS: dict[str, CapabilityStatus] = {
     "fedramp_region_enforcement": CapabilityStatus.BACKLOG,
 }
 
-BACKLOG_MD_URL = "https://github.com/gimartinb/iris-sdk/blob/main/BACKLOG.md"
+BACKLOG_MD_URL = "https://github.com/IRIS-Security/iris-sdk/blob/main/BACKLOG.md"
 
 # Related: packages/iris-cloud-console/src/components/featureFlags.jsx
 # controls UI nav/feature visibility. Reconcile via BACKLOG.md follow-up

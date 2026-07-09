@@ -175,7 +175,7 @@ class Entitlements:
                 return (
                     f"{capability_name} is on the IRIS roadmap, not yet "
                     f"available — even to Business/Enterprise customers. "
-                    f"Track it: github.com/gimartinb/iris-sdk/blob/main/BACKLOG.md"
+                    f"Track it: github.com/IRIS-Security/iris-sdk/blob/main/BACKLOG.md"
                 )
         required = FEATURE_TIERS[feature]
         tier_label = {
