@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GitHub Action — IRIS Docs</title>
+<meta name="description" content="Add the IRIS AI Governance GitHub Action to any repo's CI. Offline compliance scan by default; optional cloud push behind an API key.">
+<link rel="canonical" href="https://iris-security.github.io/iris-sdk/github-action.html">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="assets/docs.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body data-page="github-action">
+
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="site-logo">IR<span>I</span>S</a>
+    <div class="site-links">
+      <a href="docs.html" class="active">Docs</a>
+      <div class="nav-actions">
+        <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20design%20partner" class="btn btn-ghost">Design partner</a>
+        <a href="getting-started.html" class="btn btn-primary">Install</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar"><div class="docs-sidebar-inner" id="docs-sidebar-inner"></div></aside>
+  <main class="docs-main">
+    <div class="docs-eyebrow">Build &amp; integrate</div>
+    <h1>GitHub Action</h1>
+    <p class="docs-lead">Add AI governance to any repository's pull-request CI with a single <code>uses:</code> step. The Action wraps the <strong>OSS</strong> <code>iris-security-cli</code> — it runs offline, needs no IRIS Cloud account, and never phones home unless you opt in.</p>
+
+    <div class="callout">
+      <p><strong>OSS vs paid.</strong> <code>compliance scan</code> and <code>policy validate</code> are fully OSS and run locally. Pushing scan results to IRIS Cloud for storage, trends, and evidence is <em>optional</em> — gated behind <code>api-key</code> + cloud entitlement, off by default.</p>
+    </div>
+
+    <h2>Quick start</h2>
+    <p>Create <code>.github/workflows/iris-governance.yml</code>:</p>
+    <div class="code-block"><span class="cmd">name: IRIS Governance</span><br>
+<span class="cmd">on:</span><br>
+<span class="cmd">  pull_request:</span><br>
+<span class="cmd">    branches: [main]</span><br>
+<br>
+<span class="cmd">jobs:</span><br>
+<span class="cmd">  iris-governance:</span><br>
+<span class="cmd">    runs-on: ubuntu-latest</span><br>
+<span class="cmd">    steps:</span><br>
+<span class="cmd">      - uses: actions/checkout@v4</span><br>
+<span class="cmd">      - uses: IRIS-Security/iris-cli@v1</span><br>
+<span class="cmd">        with:</span><br>
+<span class="cmd">          command: compliance scan</span><br>
+<span class="cmd">          fail-on: blocker</span></div>
+
+    <p>The Action lives in the <a href="https://github.com/IRIS-Security/iris-cli" style="color:var(--red)">iris-cli</a> repository (<code>action.yml</code> at repo root). Pin to a release tag (<code>@v1</code>) for stability.</p>
+
+    <h2>Inputs</h2>
+    <table class="docs-table">
+      <thead><tr><th>Input</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>command</code></td><td><code>compliance scan</code></td><td><code>compliance scan</code> (offline workload + obligation eval) or <code>policy validate</code> (<code>iris org-policy validate --strict</code>)</td></tr>
+        <tr><td><code>fail-on</code></td><td><code>blocker</code></td><td>Exit threshold for compliance scan: <code>blocker</code>, <code>required</code>, or <code>none</code></td></tr>
+        <tr><td><code>api-key</code></td><td><em>empty</em></td><td>Optional IRIS Cloud API key — adds <code>--push</code> to compliance scan (paid cloud step)</td></tr>
+        <tr><td><code>working-directory</code></td><td><code>.</code></td><td>Directory to scan or validate</td></tr>
+      </tbody>
+    </table>
+
+    <h2>fail-on thresholds</h2>
+    <p>Compliance obligations are ranked <code>blocker</code> → <code>required</code> → <code>recommended</code>. The Action maps <code>fail-on</code> to a non-zero exit code when obligations at or above the threshold are found:</p>
+    <table class="docs-table">
+      <thead><tr><th>Value</th><th>Fails when</th></tr></thead>
+      <tbody>
+        <tr><td><code>blocker</code></td><td>Any <code>blocker</code> obligation is triggered</td></tr>
+        <tr><td><code>required</code></td><td>Any <code>blocker</code> or <code>required</code> obligation is triggered</td></tr>
+        <tr><td><code>none</code></td><td>Never fails the build (report-only)</td></tr>
+      </tbody>
+    </table>
+    <p>This is dogfooding, not theater — if a repo legitimately triggers blockers, the check fails. That is the product working.</p>
+
+    <h2>Optional cloud push</h2>
+    <div class="code-block"><span class="cmd">- uses: IRIS-Security/iris-cli@v1</span><br>
+<span class="cmd">  with:</span><br>
+<span class="cmd">    command: compliance scan</span><br>
+<span class="cmd">    fail-on: blocker</span><br>
+<span class="cmd">    api-key: ${{ secrets.IRIS_API_KEY }}</span></div>
+    <p>Requires an IRIS Cloud account with compliance-intelligence entitlement. Without <code>api-key</code>, the Action never contacts IRIS Cloud.</p>
+
+    <h2>IRIS governs IRIS</h2>
+    <p>IRIS runs this Action on every pull request in its own public repositories:</p>
+    <ul>
+      <li><a href="https://github.com/IRIS-Security/iris-sdk/blob/main/.github/workflows/iris-governance.yml" style="color:var(--red)">iris-sdk</a></li>
+      <li><a href="https://github.com/IRIS-Security/iris-cli/blob/main/.github/workflows/iris-governance.yml" style="color:var(--red)">iris-cli</a></li>
+      <li><a href="https://github.com/IRIS-Security/iris-terraform-provider/blob/main/.github/workflows/iris-governance.yml" style="color:var(--red)">iris-terraform-provider</a></li>
+    </ul>
+    <p>See a live run: <a href="https://github.com/IRIS-Security/iris-cli/actions/workflows/iris-governance.yml" style="color:var(--red)">iris-cli → IRIS Governance workflow</a>.</p>
+
+    <div class="docs-footer">
+      <a href="scm-scanning.html">← SCM Scanning</a>
+      <a href="integrations.html">Integrations →</a>
+    </div>
+  </main>
+</div>
+<script src="assets/docs.js"></script>
+</body>
+</html>

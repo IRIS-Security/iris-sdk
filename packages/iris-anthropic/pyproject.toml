@@ -4,15 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "iris-security-anthropic"
-version = "0.2.0"
+version = "0.2.1"
 description = "IRIS governance for Anthropic Claude — Cedar policy on every API call"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 authors = [{ name = "IRIS Platform", email = "sdk@iris.ai" }]
 dependencies = [
-  "iris-security-core>=0.1.16",
-  "iris-security-sdk>=0.2.12",
+  "iris-security-core>=0.1.17",
+  "iris-security-sdk>=0.2.17",
 ]
 
 [project.optional-dependencies]
@@ -24,8 +24,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/gimartinb/iris-sdk"
-Repository = "https://github.com/gimartinb/iris-sdk"
+Homepage = "https://iris-security.github.io/iris-sdk/"
+Repository = "https://github.com/IRIS-Security/iris-sdk"
+Documentation = "https://iris-security.github.io/iris-sdk/getting-started.html"
+Issues = "https://github.com/IRIS-Security/iris-sdk/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
