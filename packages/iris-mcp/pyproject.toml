@@ -22,8 +22,8 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-  "iris-security-sdk>=0.2.17",
-  "iris-security-cli>=0.2.17",
+  "iris-security-sdk>=0.2.18",
+  "iris-security-cli>=0.2.18",
   "mcp>=1.0.0",
   "anyio>=4.0",
 ]
