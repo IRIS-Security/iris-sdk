@@ -57,26 +57,42 @@ _MODEL_PROVIDER_PREFIXES: list[tuple[re.Pattern[str], str]] = [
 ]
 
 _DATA_CATEGORY_PATTERNS = {
+    # Note: regulation/framework names (hipaa, pci, gdpr, ...) are deliberately
+    # excluded here. A compliance tool's own source legitimately talks *about*
+    # those frameworks (rule engines, questionnaire copy, requirement labels)
+    # without ever handling the regulated data itself, so a bare framework
+    # name is not evidence of a data category — only concrete data-field
+    # vocabulary is. Likewise "passport" alone is excluded: this codebase's
+    # own AgentPassport/passport.yaml artifact naming collides with the word
+    # far more often than it means travel-document PII.
     "pii": re.compile(
-        r"\b(ssn|social_security|date_of_birth|dob|passport|email_address|phone_number|"
-        r"first_name|last_name|address_line|national_id)\b",
+        r"\b(ssn|social_security|date_of_birth|dob|passport_number|passport_no|"
+        r"email_address|phone_number|first_name|last_name|address_line|national_id)\b",
         re.I,
     ),
     "phi": re.compile(
-        r"\b(patient_id|medical_record|diagnosis|icd_?10|hipaa|health_record|"
+        r"\b(patient_id|medical_record|diagnosis|icd_?10|health_record|"
         r"prescription|mrn|protected_health)\b",
         re.I,
     ),
     "financial": re.compile(
-        r"\b(credit_card|card_number|bank_account|routing_number|iban|pci|"
+        r"\b(credit_card|card_number|bank_account|routing_number|iban|"
         r"account_balance|transaction_amount)\b",
         re.I,
     ),
     "biometric": re.compile(
-        r"\b(fingerprint|face_id|retina_scan|voice_print|biometric)\b",
+        r"\b(fingerprint|face_id|retina_scan|voice_print)\b",
         re.I,
     ),
 }
+
+# Adjacency required (after removing whitespace/quote noise) for a data-field
+# term to count as source code actually *handling* that field, rather than
+# just naming it in a docstring, questionnaire string, or keyword list — an
+# assignment, a type annotation, or a dict/JSON key all qualify; a bare
+# occurrence inside a comma-separated keyword list or prose sentence does
+# not.
+_CODE_ASSIGNMENT_CONTEXT = re.compile(r"\A\s{0,3}[\'\"]?\s{0,3}[:=]")
 
 _REQUIREMENTS_FILES = (
     "requirements.txt",
@@ -98,6 +114,20 @@ def _iter_source_files(root: Path) -> list[Path]:
                 continue
             files.append(path)
     return files
+
+
+_NON_WORKLOAD_DIR_NAMES = {"tests", "test", "demo", "demos", "examples", "example", "samples", "sample"}
+
+
+def _is_test_file(path: Path) -> bool:
+    """Test suites and demo/example trees routinely embed sample field names
+    and fixtures (fake ssns, illustrative "ungoverned agent" code, etc.) to
+    exercise detection logic or teach a concept — that sample data isn't
+    evidence this workload itself handles it."""
+    if any(part in _NON_WORKLOAD_DIR_NAMES for part in path.parts):
+        return True
+    stem = path.stem
+    return stem.startswith("test_") or stem.endswith("_test")
 
 
 def _scan_imports(text: str) -> tuple[set[str], set[str]]:
@@ -129,6 +159,20 @@ def _scan_data_categories(text: str) -> set[str]:
     for category, pattern in _DATA_CATEGORY_PATTERNS.items():
         if pattern.search(text):
             categories.add(category)
+    return categories
+
+
+def _scan_data_categories_in_source(text: str) -> set[str]:
+    """Like `_scan_data_categories`, but for source files: only count a term
+    that sits where a real field would (assignment, annotation, or dict/JSON
+    key), not one that merely appears in prose, a docstring, or a keyword
+    list describing the vocabulary."""
+    categories: set[str] = set()
+    for category, pattern in _DATA_CATEGORY_PATTERNS.items():
+        for match in pattern.finditer(text):
+            if _CODE_ASSIGNMENT_CONTEXT.match(text[match.end() : match.end() + 6]):
+                categories.add(category)
+                break
     return categories
 
 
@@ -196,7 +240,8 @@ def detect_workload(path: str = ".") -> dict[str, Any]:
         providers |= p
         frameworks |= f
         models |= _scan_models(text)
-        data_categories |= _scan_data_categories(text)
+        if not _is_test_file(file_path):
+            data_categories |= _scan_data_categories_in_source(text)
 
     agent_hints = sum(1 for _ in root.rglob("passport.yaml"))
     autonomy = "assistive"

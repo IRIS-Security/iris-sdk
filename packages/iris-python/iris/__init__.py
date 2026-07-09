@@ -47,7 +47,7 @@ from iris_core.evidence.vault import EvidenceVault
 from iris_core.cost.tracker import CostSummary, CostTracker, CostEntry
 from iris_core.cost.pricing import PricingRegistry
 
-__version__ = "0.2.17"
+__version__ = "0.2.19"
 
 AARM_ALIGNMENT = "designed-toward"  # AARM R1–R9 partial; not Core conformant
 AARM_VERSION = "1.0"
