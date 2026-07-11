@@ -201,7 +201,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,.92
 .btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:auto}
 .btn-row .btn{flex:1;justify-content:center;min-width:0}
 
-/* Pricing cards (Community live; Business/Enterprise hidden until built) */
+/* Pricing cards (Community live; Enterprise hidden until built) */
 .pricing-cards{padding:5rem 0;border-top:1px solid var(--border)}
 .feature-card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:2rem}
 .feature-card{background:var(--black3);border:1px solid var(--border);border-radius:2px;padding:1.25rem}
@@ -210,7 +210,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,.92
 .feature-card-desc{font-size:12px;color:var(--gray2);line-height:1.6}
 .roadmap-note{margin-top:2rem;padding:1.25rem 1.5rem;background:var(--black3);border:1px solid var(--border);border-radius:2px;font-size:14px;color:var(--gray2)}
 .roadmap-note a{color:var(--red);text-decoration:underline;text-underline-offset:2px}
-.pricing-cta-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:2rem}
+.pricing-cta-row{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-top:2rem}
 .pc-cta-card{background:var(--black3);border:1px solid var(--border);border-radius:2px;padding:1.5rem;text-align:center}
 .pc-cta-tier{font-family:var(--mono);font-size:11px;color:var(--gray3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem}
 .pc-cta-price{font-size:18px;font-weight:700;margin-bottom:1rem}
@@ -414,11 +414,11 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
       <div class="path-card">
         <div class="path-num">06</div>
         <h3><code style="font-family:var(--mono2);font-size:12px;color:var(--red)">iris certify</code></h3>
-        <p>Prove compliance readiness — Colorado AI Act (free in Community); HIPAA, AIUC-1, ISO 42001 and auditor export are Business+. Free SOC 2 via <code style="font-family:var(--mono2);font-size:11px">iris compliance check --framework soc2</code>.</p>
+        <p>Prove compliance readiness — Colorado AI Act (free in Community); HIPAA, AIUC-1, ISO 42001 and auditor export are Enterprise. Free SOC 2 via <code style="font-family:var(--mono2);font-size:11px">iris compliance check --framework soc2</code>.</p>
       </div>
       <div class="path-card">
         <div class="path-num">07</div>
-        <h3><code style="font-family:var(--mono2);font-size:12px;color:var(--red)">iris sentinel</code> <span style="font-size:11px;color:var(--gray2);font-weight:500">(Business preview)</span></h3>
+        <h3><code style="font-family:var(--mono2);font-size:12px;color:var(--red)">iris sentinel</code> <span style="font-size:11px;color:var(--gray2);font-weight:500">(Enterprise preview)</span></h3>
         <p>Continuous monitoring — drift, score degradation, cost anomalies, and ungoverned agents.</p>
       </div>
     </div>
@@ -634,7 +634,7 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
       </div>
       <div class="faq-item">
         <div class="faq-q">Do you cover AI in hiring and recruiting?</div>
-        <div class="faq-a"><div class="faq-a-inner">Yes. IRIS covers NYC Local Law 144 (the most actively enforced AI hiring law in the US), the Illinois AI Video Interview Act, and the employment-domain provisions of CCPA/CPRA ADMT and the EU AI Act. These are available in Business. The free tier shows you the rules and your top gaps — Business unlocks the full evidence package and certification report that an auditor or the NYC DCWP will ask for.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">Yes. IRIS covers NYC Local Law 144 (the most actively enforced AI hiring law in the US), the Illinois AI Video Interview Act, and the employment-domain provisions of CCPA/CPRA ADMT and the EU AI Act. These are available in Enterprise. The free tier shows you the rules and your top gaps — Enterprise unlocks the full evidence package and certification report that an auditor or the NYC DCWP will ask for.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q">Does IRIS work inside Claude?</div>
@@ -654,15 +654,15 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
       </div>
       <div class="faq-item">
         <div class="faq-q">Does IRIS help with AIUC-1 certification?</div>
-        <div class="faq-a"><div class="faq-a-inner">IRIS generates AIUC-1 B006 readiness evidence (technical evidence only; certification requires an accredited auditor). AIUC-1 is a third-party certifiable AI agent standard — Schellman is the first accredited auditor. IRIS ships B006-format evidence export today as a Business capability (<code style="font-family:var(--mono2);font-size:12px">iris certify --framework aiuc-1 --format aiuc1-export</code>). IRIS generates technical evidence in AIUC-1's own evidence-ID format (B006.1, B006.2, etc.) for the controls IRIS's runtime enforcement directly produces evidence for — agent access restrictions, HITL review records, activity logs, PII leakage prevention. IRIS does not replace the accredited auditor or AIUC-1's required third-party adversarial and hallucination testing — those remain separate engagements.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">IRIS generates AIUC-1 B006 readiness evidence (technical evidence only; certification requires an accredited auditor). AIUC-1 is a third-party certifiable AI agent standard — Schellman is the first accredited auditor. IRIS ships B006-format evidence export today as an Enterprise capability (<code style="font-family:var(--mono2);font-size:12px">iris certify --framework aiuc-1 --format aiuc1-export</code>). IRIS generates technical evidence in AIUC-1's own evidence-ID format (B006.1, B006.2, etc.) for the controls IRIS's runtime enforcement directly produces evidence for — agent access restrictions, HITL review records, activity logs, PII leakage prevention. IRIS does not replace the accredited auditor or AIUC-1's required third-party adversarial and hallucination testing — those remain separate engagements.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q">Do you have paid tiers?</div>
-        <div class="faq-a"><div class="faq-a-inner">Not yet, by design. Community is free, open source, and fully real today — Cedar policy engine, HITL, Evidence Vault, GitHub integration, all of it. We are building Business and Enterprise capabilities in the open and will turn pricing on once they are real, tested, and something we'd stand behind in a customer conversation — not before. Track progress at <a href="https://github.com/IRIS-Security/iris-sdk/blob/main/BACKLOG.md" style="color:var(--red)">BACKLOG.md</a>.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">Not yet, by design. Community is free, open source, and fully real today — Cedar policy engine, HITL, Evidence Vault, GitHub integration, all of it. We are building Enterprise capabilities in the open and will turn pricing on once they are real, tested, and something we'd stand behind in a customer conversation — not before. Want to help shape it? <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20Enterprise%20Design%20Partner" style="color:var(--red)">Reach out as a design partner</a>.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q">Which compliance frameworks does IRIS support?</div>
-        <div class="faq-a"><div class="faq-a-inner"><strong>14 compliance frameworks</strong> — Colorado AI Act (SB 26-189) is available in Community today via <code style="font-family:var(--mono2);font-size:12px">iris compliance scan</code>, which maps your obligations across frameworks like GDPR, HIPAA, and ISO 42001 — no account required for local CLI use. <strong>SOC 2</strong> is a separate, free, fully offline check — <code style="font-family:var(--mono2);font-size:12px">iris compliance check --framework soc2</code> evaluates 8 TSC-mapped controls with a local PASS/FAIL verdict; it does not run through <code style="font-family:var(--mono2);font-size:12px">compliance scan</code>. <strong>AIUC-1 B006 evidence export</strong> (<code>aiuc-1</code>) and <strong>ISO/IEC 42001</strong> (<code>iso-42001</code>) ship today as Business capabilities — not roadmap items. NIST AI RMF, GDPR, HIPAA, EU AI Act, FedRAMP, CCPA/CPRA ADMT (<code>ccpa-admt</code>), China PIPL (<code>china-pipl</code>), NYC LL 144 (<code>nyc-ll144</code>), and Illinois AI Video (<code>illinois-ai-video</code>) full eval, continuous monitoring, and auditor-grade export packages are Business+. See <a href="https://github.com/IRIS-Security/iris-sdk/blob/main/BACKLOG.md" style="color:var(--red)">BACKLOG.md</a>. Run <code style="font-family:var(--mono2);font-size:12px">iris compliance scan</code> or <code style="font-family:var(--mono2);font-size:12px">iris framework suggest</code> to see what applies.</div></div>
+        <div class="faq-a"><div class="faq-a-inner"><strong>14 compliance frameworks</strong> — Colorado AI Act (SB 26-189) is available in Community today via <code style="font-family:var(--mono2);font-size:12px">iris compliance scan</code>, which maps your obligations across frameworks like GDPR, HIPAA, and ISO 42001 — no account required for local CLI use. <strong>SOC 2</strong> is a separate, free, fully offline check — <code style="font-family:var(--mono2);font-size:12px">iris compliance check --framework soc2</code> evaluates 8 TSC-mapped controls with a local PASS/FAIL verdict; it does not run through <code style="font-family:var(--mono2);font-size:12px">compliance scan</code>. <strong>AIUC-1 B006 evidence export</strong> (<code>aiuc-1</code>) and <strong>ISO/IEC 42001</strong> (<code>iso-42001</code>) ship today as Enterprise capabilities — not roadmap items. NIST AI RMF, GDPR, HIPAA, EU AI Act, FedRAMP, CCPA/CPRA ADMT (<code>ccpa-admt</code>), China PIPL (<code>china-pipl</code>), NYC LL 144 (<code>nyc-ll144</code>), and Illinois AI Video (<code>illinois-ai-video</code>) full eval, continuous monitoring, and auditor-grade export packages are Enterprise. Run <code style="font-family:var(--mono2);font-size:12px">iris compliance scan</code> or <code style="font-family:var(--mono2);font-size:12px">iris framework suggest</code> to see what applies.</div></div>
       </div>
     </div>
   </div>
@@ -671,7 +671,7 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
 <section class="pricing-cards" id="pricing">
   <div class="container">
     <div class="section-label">Start with Community</div>
-    <h2 class="section-title">Free, open source, and built for real use.<br>More tiers are coming as we build them in the open.</h2>
+    <h2 class="section-title">Free, open source, and built for real use.<br>Enterprise is coming as we build it in the open.</h2>
 
     <div class="feature-card-grid">
       <div class="feature-card">
@@ -728,42 +728,42 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
 
     <div class="feature-card-grid paid-tier-preview" data-show-paid="false" style="display:none">
       <div class="feature-card">
-        <div class="feature-card-tier">Business</div>
+        <div class="feature-card-tier">Enterprise</div>
         <div class="feature-card-name">Compliance full eval</div>
         <div class="feature-card-desc">All 14 frameworks — HIPAA, SOC 2, GDPR, EU AI Act, AIUC-1, ISO 42001, and more.</div>
       </div>
       <div class="feature-card">
-        <div class="feature-card-tier">Business</div>
+        <div class="feature-card-tier">Enterprise</div>
         <div class="feature-card-name">Certify export</div>
         <div class="feature-card-desc">PDF, JSON, OSCAL, and AIUC-1 evidence packages for auditors.</div>
       </div>
       <div class="feature-card">
-        <div class="feature-card-tier">Business</div>
+        <div class="feature-card-tier">Enterprise</div>
         <div class="feature-card-name">Audit log export</div>
-        <div class="feature-card-desc">Personal JSON/CSV export free; auditor-grade B006/AIUC-1/OSCAL packages are Business+.</div>
+        <div class="feature-card-desc">Personal JSON/CSV export free; auditor-grade B006/AIUC-1/OSCAL packages are Enterprise.</div>
       </div>
       <div class="feature-card">
-        <div class="feature-card-tier">Business</div>
+        <div class="feature-card-tier">Enterprise</div>
         <div class="feature-card-name">HITL notifications</div>
         <div class="feature-card-desc">Slack, email, and PagerDuty alerts when a governed action needs human approval.</div>
       </div>
       <div class="feature-card">
-        <div class="feature-card-tier">Business</div>
+        <div class="feature-card-tier">Enterprise</div>
         <div class="feature-card-name">GitHub App (org-wide)</div>
         <div class="feature-card-desc">Org-wide install with merge gate — block PRs with critical ungoverned agent findings.</div>
       </div>
       <div class="feature-card">
-        <div class="feature-card-tier">Business</div>
+        <div class="feature-card-tier">Enterprise</div>
         <div class="feature-card-name">MCP Pro tools</div>
         <div class="feature-card-desc">Full compliance eval, certify, and org-wide scan tools in Claude and Cursor.</div>
       </div>
       <div class="feature-card">
-        <div class="feature-card-tier">Business</div>
+        <div class="feature-card-tier">Enterprise</div>
         <div class="feature-card-name">Evidence Vault cloud sync</div>
         <div class="feature-card-desc">Cross-repo evidence aggregation with cloud-backed retention policies.</div>
       </div>
       <div class="feature-card">
-        <div class="feature-card-tier">Business</div>
+        <div class="feature-card-tier">Enterprise</div>
         <div class="feature-card-name">Vault SIEM export</div>
         <div class="feature-card-desc">Stream policy decisions to Splunk, Datadog, or your SIEM of choice.</div>
       </div>
@@ -805,8 +805,8 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
     </div>
 
     <div class="roadmap-note">
-      <p>Building Business and Enterprise capabilities in the open. Follow progress:
-      <a href="https://github.com/IRIS-Security/iris-sdk/blob/main/BACKLOG.md">BACKLOG.md</a></p>
+      <p>Building Enterprise capabilities in the open. Want in early?
+      <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20Enterprise%20Design%20Partner">Reach out as a design partner</a>.</p>
     </div>
 
     <div class="pricing-cta-row">
@@ -814,11 +814,6 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
         <div class="pc-cta-tier">Community</div>
         <div class="pc-cta-price">$0 — available now</div>
         <a href="https://github.com/IRIS-Security/iris-sdk" class="btn-red">Install free →</a>
-      </div>
-      <div class="pc-cta-card paid-tier-preview" data-show-paid="false" style="display:none">
-        <div class="pc-cta-tier">Business</div>
-        <div class="pc-cta-price">Coming soon</div>
-        <a href="https://github.com/IRIS-Security/iris-sdk/blob/main/BACKLOG.md" class="btn btn-ghost">Track on BACKLOG.md</a>
       </div>
       <div class="pc-cta-card paid-tier-preview" data-show-paid="false" style="display:none">
         <div class="pc-cta-tier">Enterprise</div>
