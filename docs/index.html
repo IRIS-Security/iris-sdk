@@ -39,7 +39,7 @@
   },
   "url": "https://iris-security.github.io/iris-sdk/",
   "downloadUrl": "https://pypi.org/project/iris-security-sdk/",
-  "softwareVersion": "0.2.17",
+  "softwareVersion": "0.2.19",
   "license": "https://opensource.org/licenses/Apache-2.0"
 }
 </script>
@@ -294,13 +294,18 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
       <div class="cmd-line" style="font-size:11px">pip install "iris-security-sdk[mcp]"</div>
       <div class="hero-loop-terminal" id="hero-loop-terminal">
         <div class="hlt-cmd">$ pip install iris-security-cli</div>
-        <div class="hlt-out">Successfully installed iris-security-cli-0.2.17</div>
+        <div class="hlt-out">Successfully installed iris-security-cli-0.2.19</div>
         <div class="hlt-cmd">$ iris compliance check --framework soc2 --agent loan-processor</div>
-        <div class="hlt-out">SOC 2 Trust Services Criteria — Pro required</div>
-        <div class="hlt-out">&nbsp;&nbsp;SOC2-CC6.1  Logical access control ... <span class="hlt-fail">FAIL</span></div>
-        <div class="hlt-out">&nbsp;&nbsp;SOC2-CC6.2  Authentication .......... <span class="hlt-pass">PASS</span></div>
-        <div class="hlt-out">&nbsp;&nbsp;SOC2-CC6.3  Authorization ........... <span class="hlt-pass">PASS</span></div>
-        <div class="hlt-out">Preview: 3 of 8 controls · <code>iris license activate &lt;key&gt;</code></div>
+        <div class="hlt-out">SOC 2 Trust Services Criteria for AI Agents</div>
+        <div class="hlt-out">&nbsp;&nbsp;SOC2-CC6.1  Logical access controls ... <span class="hlt-pass">PASS</span></div>
+        <div class="hlt-out">&nbsp;&nbsp;SOC2-CC6.2  Authentication ............ <span class="hlt-pass">PASS</span></div>
+        <div class="hlt-out">&nbsp;&nbsp;SOC2-CC6.3  Authorization ............. <span class="hlt-pass">PASS</span></div>
+        <div class="hlt-out">&nbsp;&nbsp;SOC2-CC7.1  System monitoring ......... <span class="hlt-fail">FAIL</span></div>
+        <div class="hlt-out">&nbsp;&nbsp;SOC2-CC7.2  Anomaly detection ......... <span class="hlt-pass">PASS</span></div>
+        <div class="hlt-out">&nbsp;&nbsp;SOC2-CC8.1  Change management ......... <span class="hlt-pass">PASS</span></div>
+        <div class="hlt-out">&nbsp;&nbsp;SOC2-A1.1&nbsp;&nbsp;Availability ............... <span class="hlt-pass">PASS</span></div>
+        <div class="hlt-out">&nbsp;&nbsp;SOC2-CC9.2  Third-party AI provider risk <span class="hlt-fail">FAIL</span></div>
+        <div class="hlt-out">6/8 PASS · free, offline, no account required</div>
         <div class="hlt-cmd">$ iris compliance check --framework colorado-ai-act --agent payment-agent</div>
         <div class="hlt-out">Colorado AI Act — SB 26-189</div>
         <div class="hlt-out">&nbsp;&nbsp;CO-001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ADMT inventory ......... <span class="hlt-pass">PASS</span></div>
@@ -313,7 +318,7 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
       </div>
       <div class="hero-stats" style="margin-top:2rem">
         <div><div class="stat-num">14</div><div class="stat-label">Frameworks mapped · 2 free today</div></div>
-        <div><div class="stat-num">&lt;5ms</div><div class="stat-label">Cedar evaluation</div></div>
+        <div><div class="stat-num">Sub-ms</div><div class="stat-label">Cedar evaluation, in-process</div></div>
         <div><div class="stat-num">Apache 2.0</div><div class="stat-label">Open source</div></div>
       </div>
     </div>
@@ -442,8 +447,8 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
     <div class="paths" style="grid-template-columns:repeat(3,1fr)">
       <div class="path-card">
         <div class="path-num">GH</div>
-        <h3>GitHub App</h3>
-        <p>Install <a href="https://github.com/apps/iris-governance" style="color:var(--red)">IRIS Governance</a> from the GitHub Marketplace. Every PR automatically scanned. Critical findings block merge. No CLI required.</p>
+        <h3>GitHub App <span style="font-size:11px;color:var(--gray2);font-weight:500">(in development)</span></h3>
+        <p>The IRIS Governance GitHub App — org-wide PR scanning with a merge gate — is in active development and not yet on GitHub Marketplace. Use the GitHub Actions workflow today for the same PR scanning.</p>
       </div>
       <div class="path-card">
         <div class="path-num">MCP</div>
@@ -453,7 +458,7 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
       <div class="path-card">
         <div class="path-num">CI</div>
         <h3>GitHub Actions</h3>
-        <p>Use the reusable <code style="font-family:var(--mono2);font-size:11px">iris-governance.yml</code> workflow when you prefer CI over the GitHub App.</p>
+        <p>Use the reusable <code style="font-family:var(--mono2);font-size:11px">iris-governance.yml</code> workflow to scan every PR and gate merges on critical findings — works today, no GitHub App required.</p>
       </div>
     </div>
   </div>
@@ -530,7 +535,7 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
             <span class="cm"># Committed to Git. Reviewed. Auditable. Enforced.</span>
           </div>
           <div style="padding:.75rem 1.25rem;background:var(--black3);border:1px solid var(--border);border-top:none;font-size:12px;color:var(--gray);display:flex;justify-content:space-between;align-items:center">
-            <span>Formally verified · Evaluates in &lt;5ms · Human readable</span>
+            <span>Formally verified · Sub-millisecond-class evaluation · Human readable</span>
             <a href="https://github.com/cedar-policy/cedar" style="color:var(--red);text-decoration:none;font-size:11px" target="_blank">Cedar by AWS ↗</a>
           </div>
         </div>
@@ -545,15 +550,6 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
     <h2 class="section-title">Policy in Git.<br>Enforcement in code.<br><em>Trust verified.</em></h2>
     <div class="trust-grid">
       <div class="trust-items">
-        <div class="trust-item">
-          <div class="trust-title">SLSA Level 3 provenance on every release</div>
-          <div class="trust-desc">Every IRIS release is built by GitHub Actions and attested
-            with SLSA Level 3 provenance via Sigstore. The attestation
-            is recorded in the public Rekor transparency log. Run
-            <code>slsa-verifier verify-artifact</code> after installing IRIS
-            to verify the package was built from the exact commit
-            you see on GitHub. Zero trust required.</div>
-        </div>
         <div class="trust-item">
           <div class="trust-title">Policy in Git — not in our cloud</div>
           <div class="trust-desc">Your policies live in your repository. IRIS never holds your policy data, agent configs, or prompts. The SDK runs fully local with zero network required for enforcement.</div>
@@ -582,44 +578,11 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
       </div>
       <div>
         <div class="trust-terminal">
-          <div class="tt-comment"># Verify the package signature</div>
-          <div class="tt-cmd">$ pip install iris-security-sdk</div>
-          <div class="tt-cmd">$ slsa-verifier verify-artifact iris_security_sdk-0.2.17-py3-none-any.whl \</div>
-          <div class="tt-cmd">&nbsp;&nbsp;--provenance-path *.intoto.jsonl --source-uri github.com/IRIS-Security/iris-sdk</div>
-          <div class="tt-ok">  ✓ Signed by GitHub Actions (OIDC)</div>
-          <div class="tt-ok">  ✓ SLSA Level 3 provenance verified</div>
-          <div class="tt-ok">  ✓ Commit: a3f8c2d · Workflow: publish.yml</div>
-          <br>
           <div class="tt-comment"># Verify policy enforcement locally</div>
+          <div class="tt-cmd">$ pip install iris-security-cli</div>
           <div class="tt-cmd">$ iris compliance check --framework colorado-ai-act</div>
           <div class="tt-ok">  ✓ Agent: loan-processor — PASS</div>
           <div class="tt-ok">  ✓ All 6 Colorado AI Act rules satisfied</div>
-        </div>
-        <div style="margin-top:1rem;background:var(--black3);border:1px solid var(--border);padding:1.25rem">
-          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--gray3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.9rem">Verify it yourself</div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.9">
-            <div style="color:var(--gray3)"># Verify SLSA Level 3 provenance</div>
-            <div style="color:var(--gray3)"># Links the package to the exact commit and</div>
-            <div style="color:var(--gray3)"># workflow run that built it via Sigstore</div>
-            <div style="color:var(--green);margin-top:8px">pip install iris-security-sdk</div>
-            <div style="color:var(--gray3);margin-top:8px"># Verify provenance with slsa-verifier:</div>
-            <div style="color:var(--green)">slsa-verifier verify-artifact \</div>
-            <div style="color:var(--green)">&nbsp;&nbsp;iris_security_sdk-*.whl \</div>
-            <div style="color:var(--green)">&nbsp;&nbsp;--provenance-path *.intoto.jsonl \</div>
-            <div style="color:var(--green)">&nbsp;&nbsp;--source-uri github.com/IRIS-Security/iris-sdk</div>
-            <div style="color:#00C853;margin-top:12px">PASSED: SLSA Level 3</div>
-            <div style="color:var(--gray3)">Verified: commit · workflow · build inputs · Sigstore</div>
-          </div>
-        </div>
-        <div style="margin-top:.75rem;display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
-          <a href="https://github.com/IRIS-Security/iris-sdk/actions" target="_blank"
-             style="text-align:center;padding:8px;background:var(--black3);border:1px solid var(--border);color:var(--gray2);text-decoration:none;font-size:12px;border-radius:2px;transition:border-color .12s">
-            View workflow runs ↗
-          </a>
-          <a href="https://rekor.sigstore.dev" target="_blank"
-             style="text-align:center;padding:8px;background:var(--black3);border:1px solid var(--border);color:var(--gray2);text-decoration:none;font-size:12px;border-radius:2px;transition:border-color .12s">
-            Rekor transparency log ↗
-          </a>
         </div>
       </div>
     </div>
@@ -679,7 +642,7 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
       </div>
       <div class="faq-item">
         <div class="faq-q">Can we install IRIS from GitHub Marketplace?</div>
-        <div class="faq-a"><div class="faq-a-inner">Yes. Install the <a href="https://github.com/apps/iris-governance" style="color:var(--red)">IRIS Governance GitHub App</a> and every PR in your organization is automatically scanned for ungoverned AI agents. Critical findings block the merge. The developer gets a comment with the exact one-line fix. No CLI required.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">Not yet — the IRIS Governance GitHub App (org-wide PR scanning with a one-click merge gate) is in active development and not yet published to GitHub Marketplace. Today, use the reusable <code style="font-family:var(--mono2);font-size:12px">iris-governance.yml</code> GitHub Actions workflow for the same PR scanning: every PR is checked, critical findings block the merge, and the developer gets a comment with the exact one-line fix.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q">Can we have different compliance requirements per environment?</div>
@@ -695,7 +658,7 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
       </div>
       <div class="faq-item">
         <div class="faq-q">Do you have paid tiers?</div>
-        <div class="faq-a"><div class="faq-a-inner">Not yet, by design. Community is free, open source, and fully real today — Cedar policy engine, HITL, the built-in encrypted vault, Evidence Vault, GitHub integration, all of it. We are building Business and Enterprise capabilities in the open and will turn pricing on once they are real, tested, and something we'd stand behind in a customer conversation — not before. Track progress at <a href="https://github.com/IRIS-Security/iris-sdk/blob/main/BACKLOG.md" style="color:var(--red)">BACKLOG.md</a>.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">Not yet, by design. Community is free, open source, and fully real today — Cedar policy engine, HITL, Evidence Vault, GitHub integration, all of it. We are building Business and Enterprise capabilities in the open and will turn pricing on once they are real, tested, and something we'd stand behind in a customer conversation — not before. Track progress at <a href="https://github.com/IRIS-Security/iris-sdk/blob/main/BACKLOG.md" style="color:var(--red)">BACKLOG.md</a>.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q">Which compliance frameworks does IRIS support?</div>
@@ -733,11 +696,6 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
       </div>
       <div class="feature-card">
         <div class="feature-card-tier">Community</div>
-        <div class="feature-card-name">Built-in encrypted vault</div>
-        <div class="feature-card-desc">Local secrets storage with AES-256 — no cloud required for credential governance.</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-card-tier">Community</div>
         <div class="feature-card-name">Evidence Vault (local)</div>
         <div class="feature-card-desc">Append-only JSONL event log by default; Evidence Vault v2 adds HMAC signing, hash chains, control mappings, retention lifecycle, and CI/CD evidence recording.</div>
       </div>
@@ -748,18 +706,13 @@ footer{padding:3rem 0;border-top:1px solid var(--border)}
       </div>
       <div class="feature-card">
         <div class="feature-card-tier">Community</div>
-        <div class="feature-card-name">GitHub App (personal)</div>
-        <div class="feature-card-desc">PR comments with inline findings and one-line fix commands on your repos.</div>
+        <div class="feature-card-name">GitHub App (personal) <span style="font-size:10px;color:var(--gray3)">— in development</span></div>
+        <div class="feature-card-desc">PR comments with inline findings and one-line fix commands on your repos. Not yet published — use the GitHub Actions workflow today.</div>
       </div>
       <div class="feature-card">
         <div class="feature-card-tier">Community</div>
         <div class="feature-card-name">MCP free tools</div>
         <div class="feature-card-desc">Connect IRIS to Claude Desktop and Cursor — scan, check compliance, list HITL reviews.</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-card-tier">Community</div>
-        <div class="feature-card-name">SLSA Level 3 provenance</div>
-        <div class="feature-card-desc">Every PyPI release signed and attested — verify with <code style="font-family:var(--mono2);font-size:11px">slsa-verifier verify-artifact</code>.</div>
       </div>
       <div class="feature-card">
         <div class="feature-card-tier">Community</div>
@@ -959,7 +912,7 @@ if (SHOW_PAID_TIERS) {
     },200);
   },2000);
 })();
-// Hero terminal loop — real iris-security-cli 0.2.17 output, verified against
+// Hero terminal loop — real iris-security-cli 0.2.19 output, verified against
 // PyPI-published package. Static markup above is the reduced-motion / no-JS
 // fallback; JS below replaces it with a typing animation when motion is allowed.
 (function(){
@@ -970,16 +923,21 @@ if (SHOW_PAID_TIERS) {
   const steps=[
     {
       cmd:'$ pip install iris-security-cli',
-      out:['Successfully installed iris-security-cli-0.2.17']
+      out:['Successfully installed iris-security-cli-0.2.19']
     },
     {
       cmd:'$ iris compliance check --framework soc2 --agent loan-processor',
       out:[
-        'SOC 2 Trust Services Criteria — Pro required',
-        '&nbsp;&nbsp;SOC2-CC6.1  Logical access control ... <span class="hlt-fail">FAIL</span>',
-        '&nbsp;&nbsp;SOC2-CC6.2  Authentication .......... <span class="hlt-pass">PASS</span>',
-        '&nbsp;&nbsp;SOC2-CC6.3  Authorization ........... <span class="hlt-pass">PASS</span>',
-        'Preview: 3 of 8 controls · <code>iris license activate &lt;key&gt;</code>'
+        'SOC 2 Trust Services Criteria for AI Agents',
+        '&nbsp;&nbsp;SOC2-CC6.1  Logical access controls ... <span class="hlt-pass">PASS</span>',
+        '&nbsp;&nbsp;SOC2-CC6.2  Authentication ............ <span class="hlt-pass">PASS</span>',
+        '&nbsp;&nbsp;SOC2-CC6.3  Authorization ............. <span class="hlt-pass">PASS</span>',
+        '&nbsp;&nbsp;SOC2-CC7.1  System monitoring ......... <span class="hlt-fail">FAIL</span>',
+        '&nbsp;&nbsp;SOC2-CC7.2  Anomaly detection ......... <span class="hlt-pass">PASS</span>',
+        '&nbsp;&nbsp;SOC2-CC8.1  Change management ......... <span class="hlt-pass">PASS</span>',
+        '&nbsp;&nbsp;SOC2-A1.1&nbsp;&nbsp;Availability ............... <span class="hlt-pass">PASS</span>',
+        '&nbsp;&nbsp;SOC2-CC9.2  Third-party AI provider risk <span class="hlt-fail">FAIL</span>',
+        '6/8 PASS · free, offline, no account required'
       ]
     },
     {
