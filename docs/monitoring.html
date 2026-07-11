@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Monitoring &amp; Witness — IRIS Docs</title>
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="assets/docs.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body data-page="monitoring">
+
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="site-logo">IR<span>I</span>S</a>
+    <div class="site-links">
+      <a href="docs.html" class="active">Docs</a>
+      <div class="nav-actions">
+        <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20design%20partner" class="btn btn-ghost">Design partner</a>
+        <a href="getting-started.html" class="btn btn-primary">Install</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar"><div class="docs-sidebar-inner" id="docs-sidebar-inner"></div></aside>
+  <main class="docs-main">
+    <div class="docs-eyebrow">Operations</div>
+    <h1>Monitoring &amp; Witness</h1>
+    <p class="docs-lead">Watch what runs in real time. IRIS gives you a live attested feed of every policy decision, continuous drift monitoring, and enforcement verification — all local.</p>
+
+    <h2>iris list — fleet inventory</h2>
+    <p>List every agent IRIS knows about — governed or not — with owner, frameworks, risk, and last review date.</p>
+    <div class="code-block"><span class="cmd">iris list</span><br>
+<span class="cmd">iris list --filter-ungoverned</span><br>
+<span class="cmd">iris list --filter-risk critical --format json</span></div>
+
+    <h2>iris status — compliance at a glance</h2>
+    <p>Single-pane view of every agent: compliance score, next action, and estimated monthly cost.</p>
+    <div class="code-block"><span class="cmd">iris status</span><br>
+<span class="cmd">iris status --agent loan-processor</span></div>
+    <p>Think of it as <code>git status</code> for agent governance.</p>
+
+    <h2>iris witness — live policy feed</h2>
+    <p>Stream every permit, deny, and warn decision as it happens. Alias: <code>iris watch</code>.</p>
+    <div class="code-block"><span class="cmd">iris witness --agent loan-processor</span><br>
+<span class="cmd">iris witness --agent loan-processor --tail 20</span></div>
+    <p>Reads from the Evidence Vault (<code>events.jsonl</code> for live decisions; v2 signed log at <code>evidence_events.jsonl</code>). Shows resource, action, rule ID, user context, and cost when available. See <a href="evidence-vault.html" style="color:var(--red)">Evidence Vault</a> for the full data model.</p>
+
+    <h2>iris enforce — verify runtime wiring</h2>
+    <p>Confirms drop-in clients (<code>IrisAnthropic</code>, <code>IrisOpenAI</code>, etc.) or <code>@agent.guard()</code> are actually active in your codebase.</p>
+    <div class="code-block"><span class="cmd">iris enforce --agent loan-processor --dir .</span></div>
+
+    <h2>iris sentinel — continuous monitoring</h2>
+    <p>Polls governance posture on an interval: agent count, violations, compliance drift, and cost.</p>
+    <div class="code-block"><span class="cmd">iris sentinel --interval 60</span></div>
+
+    <h2>iris drift — posture change detection</h2>
+    <p>Snapshot compliance scores and detect when agents degrade or improve. Optional Slack/email alerts.</p>
+    <div class="code-block"><span class="cmd">iris drift snapshot</span><br>
+<span class="cmd">iris drift check</span><br>
+<span class="cmd">iris drift report</span><br>
+<span class="cmd">iris drift watch --interval 300</span></div>
+
+    <h2>iris cost — token spend tracking</h2>
+    <p>Track estimated LLM costs per agent from Evidence Vault events.</p>
+    <div class="code-block"><span class="cmd">iris cost summary</span><br>
+<span class="cmd">iris cost report --agent loan-processor</span><br>
+<span class="cmd">iris cost alert --monthly 500</span></div>
+
+    <h2>iris red-team — adversarial policy testing</h2>
+    <p>Run bypass scenarios against your Cedar policy to find gaps before attackers do.</p>
+    <div class="code-block"><span class="cmd">iris red-team --agent loan-processor</span></div>
+
+    <h2>iris hitl — human approval queue</h2>
+    <p>High-risk actions pause until a reviewer approves or rejects. See <a href="hitl-delegation.html" style="color:var(--red)">HITL &amp; Delegation</a> for the full guide.</p>
+    <div class="code-block"><span class="cmd">iris hitl list</span><br>
+<span class="cmd">iris hitl approve &lt;review-id&gt;</span><br>
+<span class="cmd">iris hitl reject &lt;review-id&gt; --reason "..."</span></div>
+
+    <div class="docs-footer">
+      <a href="compliance.html">← Compliance</a>
+      <a href="evidence-vault.html">Evidence Vault →</a>
+    </div>
+  </main>
+</div>
+<script src="assets/docs.js"></script>
+</body>
+</html>

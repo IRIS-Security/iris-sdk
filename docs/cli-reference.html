@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CLI Reference — IRIS Docs</title>
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="assets/docs.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body data-page="cli-reference">
+
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="site-logo">IR<span>I</span>S</a>
+    <div class="site-links">
+      <a href="docs.html" class="active">Docs</a>
+      <div class="nav-actions">
+        <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20design%20partner" class="btn btn-ghost">Design partner</a>
+        <a href="getting-started.html" class="btn btn-primary">Install</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar"><div class="docs-sidebar-inner" id="docs-sidebar-inner"></div></aside>
+  <main class="docs-main">
+    <div class="docs-eyebrow">Reference</div>
+    <h1>CLI Reference</h1>
+    <p class="docs-lead">All <code>iris</code> commands (v0.2.19), organized by phase. Run <code>iris --help</code> for the live command tree.</p>
+
+    <h2>Discover</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Command</th><th>Description</th></tr>
+        <tr><td><code>iris scan</code></td><td>Scan governance directory for policy violations</td></tr>
+        <tr><td><code>iris scan --discover</code></td><td>Find ungoverned agents in Python/TypeScript source</td></tr>
+        <tr><td><code>iris scan --discover --auto-register</code></td><td>Write passport drafts for ungoverned findings</td></tr>
+        <tr><td><code>iris scan --discover --govern</code></td><td>Register and apply one-line governance fixes</td></tr>
+        <tr><td><code>iris scan --format json</code></td><td>Machine-readable output for CI</td></tr>
+        <tr><td><code>iris scm scan-local</code></td><td>Scan a local repo for agent patterns</td></tr>
+        <tr><td><code>iris scm scan-repo</code></td><td>Scan a GitHub repository</td></tr>
+        <tr><td><code>iris scm scan-org</code></td><td>Inventory agents across a GitHub org</td></tr>
+        <tr><td><code>iris scm webhook start</code></td><td>Listen for push events and re-scan</td></tr>
+        <tr><td><code>iris scm setup</code></td><td>Interactive GitHub token/App setup</td></tr>
+      </table>
+    </div>
+
+    <h2>Inventory</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Command</th><th>Description</th></tr>
+        <tr><td><code>iris declare</code></td><td>Declare an agent — creates passport.yaml (primary)</td></tr>
+        <tr><td><code>iris register</code></td><td>Alias for <code>iris declare</code></td></tr>
+        <tr><td><code>iris quickstart</code></td><td>Interactive setup walkthrough</td></tr>
+        <tr><td><code>iris list</code></td><td>List all governed agents (alias: <code>iris agents</code>)</td></tr>
+        <tr><td><code>iris list --filter-ungoverned</code></td><td>Show agents missing <code>policy.cedar</code></td></tr>
+        <tr><td><code>iris status</code></td><td>Compliance dashboard and next actions per agent</td></tr>
+        <tr><td><code>iris models list</code></td><td>Model tiers, export-control status, fallbacks</td></tr>
+        <tr><td><code>iris models directives</code></td><td>Active model suspensions and kill switches</td></tr>
+        <tr><td><code>iris models reload</code></td><td>Hot-reload registry and directives</td></tr>
+        <tr><td><code>iris users add/list/remove</code></td><td>Manage reviewers and delegation users</td></tr>
+      </table>
+    </div>
+
+    <h2>Define (policy)</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Command</th><th>Description</th></tr>
+        <tr><td><code>iris compile --agent &lt;name&gt;</code></td><td>Plain English intent → Cedar (top-level alias)</td></tr>
+        <tr><td><code>iris policy compile</code></td><td>Same as <code>iris compile</code></td></tr>
+        <tr><td><code>iris policy compile --backend openai</code></td><td>Choose LLM backend (anthropic, openai, google, mistral, groq, ollama, together)</td></tr>
+        <tr><td><code>iris policy compile --litellm-model ollama/llama3.2</code></td><td>Any LiteLLM model string</td></tr>
+        <tr><td><code>iris policy compile --dry-run</code></td><td>Preview Cedar without writing to disk</td></tr>
+        <tr><td><code>iris policy diff</code></td><td>Compare intent draft vs committed Cedar</td></tr>
+        <tr><td><code>iris policy status --agent &lt;name&gt;</code></td><td>Check policy binding, staleness, and draft cache</td></tr>
+        <tr><td><code>iris policy commit --agent &lt;name&gt;</code></td><td>Apply compiled draft to <code>policy.cedar</code></td></tr>
+        <tr><td><code>iris preview --agent &lt;name&gt;</code></td><td>Risk impact of pending policy changes</td></tr>
+        <tr><td><code>iris framework suggest</code></td><td>Recommend applicable compliance frameworks</td></tr>
+      </table>
+    </div>
+
+    <h2>Guard (runtime)</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Command</th><th>Description</th></tr>
+        <tr><td><code>iris enforce</code></td><td>Verify drop-in clients or <code>@agent.guard()</code> are wired</td></tr>
+        <tr><td><code>iris explain</code></td><td>Plain-English explanation of how the proxy works</td></tr>
+        <tr><td><code>iris delegation status/test/log</code></td><td>User delegation config and audit</td></tr>
+        <tr><td><code>iris dlp scan/test</code></td><td>Scan files and test prompts for sensitive data</td></tr>
+      </table>
+    </div>
+
+    <h2>HITL (human-in-the-loop)</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Command</th><th>Description</th></tr>
+        <tr><td><code>iris hitl setup --agent &lt;name&gt;</code></td><td>Interactive wizard to enable HITL and declare condition rules</td></tr>
+        <tr><td><code>iris hitl list</code></td><td>List pending reviews (use <code>--status all</code> for history)</td></tr>
+        <tr><td><code>iris hitl list --agent &lt;name&gt;</code></td><td>Filter reviews by agent</td></tr>
+        <tr><td><code>iris hitl show &lt;review-id&gt;</code></td><td>Full detail for a single review</td></tr>
+        <tr><td><code>iris hitl approve &lt;review-id&gt;</code></td><td>Approve — waiting agent call proceeds</td></tr>
+        <tr><td><code>iris hitl reject &lt;review-id&gt; --reason "..."</code></td><td>Reject — agent call raises <code>IrisViolationError</code></td></tr>
+        <tr><td><code>iris hitl escalate &lt;review-id&gt;</code></td><td>Escalate to a senior reviewer</td></tr>
+        <tr><td><code>iris hitl config --agent &lt;name&gt;</code></td><td>Show HITL configuration for an agent</td></tr>
+        <tr><td><code>iris hitl rules --agent &lt;name&gt;</code></td><td>Show what will and will not trigger HITL</td></tr>
+        <tr><td><code>iris hitl test --agent &lt;name&gt;</code></td><td>Simulate a HITL review flow</td></tr>
+      </table>
+    </div>
+    <p>Full guide: <a href="hitl-delegation.html" style="color:var(--red)">HITL &amp; Delegation</a></p>
+
+    <h2>Audit (compliance)</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Command</th><th>Description</th></tr>
+        <tr><td><code>iris compliance check --framework &lt;id&gt;</code></td><td>Run compliance check (<code>colorado-ai-act</code>, <code>ccpa-admt</code>, <code>china-pipl</code>, <code>hipaa</code>, <code>soc2</code>, <code>aiuc-1</code>, …)</td></tr>
+        <tr><td><code>iris compliance scan</code></td><td>Offline workload detection from local code (default)</td></tr>
+        <tr><td><code>iris compliance scan --from langfuse</code></td><td>Derive profile from Langfuse trace metadata (<code>pip install "iris-langfuse[live]"</code>)</td></tr>
+        <tr><td><code>iris compliance scan --from litellm --config ./litellm.config.yaml</code></td><td>Derive profile from LiteLLM static config</td></tr>
+        <tr><td><code>iris compliance scan --from litellm --proxy &lt;url&gt;</code></td><td>Derive profile from live LiteLLM proxy</td></tr>
+        <tr><td><code>iris compliance scan --push</code></td><td>POST profile to IRIS Cloud when <code>IRIS_API_KEY</code> is set</td></tr>
+        <tr><td><code>iris compliance assess</code></td><td>Impact assessment (Colorado, CCPA ADMT, PIPL PIPIA)</td></tr>
+        <tr><td><code>iris certify --framework colorado-ai-act</code></td><td>Certification readiness score (alias: <code>iris test</code>)</td></tr>
+        <tr><td><code>iris certify --framework aiuc-1 --format aiuc1-export</code></td><td>AIUC-1 evidence JSON keyed by sub-control IDs (B006.1, B006.2, …)</td></tr>
+        <tr><td><code>iris certify --framework iso-42001</code></td><td>ISO 42001 coverage tiers (FULL / PARTIAL / NOT APPLICABLE) from AIUC-1 crosswalk</td></tr>
+        <tr><td><code>iris regulatory check/list/watch</code></td><td>Track AI law changes</td></tr>
+        <tr><td><code>iris regulatory history/apply</code></td><td>View and apply regulatory updates</td></tr>
+        <tr><td><code>iris evidence report --agent &lt;name&gt;</code></td><td>Full audit report for one agent</td></tr>
+        <tr><td><code>iris evidence list --agent &lt;name&gt;</code></td><td>List recent vault events</td></tr>
+        <tr><td><code>iris evidence query</code></td><td>Filter vault events by agent, decision, regulation, risk</td></tr>
+        <tr><td><code>iris evidence export --agent &lt;name&gt;</code></td><td>Export for auditors (JSON, CSV, AIUC-1, OTel)</td></tr>
+        <tr><td><code>iris evidence stats</code></td><td>Aggregate stats across all agents</td></tr>
+        <tr><td><code>iris evidence record-cicd</code></td><td>Write signed <code>cicd_run</code> event from CI/CD (<code>github_actions</code>, <code>gitlab</code>, <code>jenkins</code>, <code>terraform</code>, <code>argocd</code>)</td></tr>
+        <tr><td><code>iris evidence export --format aiuc1</code></td><td>Export via ControlMapping table (same path as AIUC-1 certify)</td></tr>
+        <tr><td><code>iris vault redact</code></td><td>GDPR erasure — tombstone + payload scrub, mappings preserved</td></tr>
+      </table>
+    </div>
+
+    <h2>Monitor</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Command</th><th>Description</th></tr>
+        <tr><td><code>iris witness --agent &lt;name&gt;</code></td><td>Live attested feed of policy decisions (alias: <code>iris watch</code>)</td></tr>
+        <tr><td><code>iris sentinel</code></td><td>Continuous governance monitoring</td></tr>
+        <tr><td><code>iris drift snapshot/check/report/watch</code></td><td>Compliance posture change detection</td></tr>
+        <tr><td><code>iris cost summary/report/alert/optimize</code></td><td>Token cost tracking per agent</td></tr>
+        <tr><td><code>iris red-team --agent &lt;name&gt;</code></td><td>Adversarial policy bypass testing</td></tr>
+      </table>
+    </div>
+
+    <h2>Integrate</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Command</th><th>Description</th></tr>
+        <tr><td><code>iris mcp start</code></td><td>Start Cursor MCP server (stdio)</td></tr>
+        <tr><td><code>iris entitlements</code></td><td>Show tier and feature availability</td></tr>
+        <tr><td><code>iris license status/activate/deactivate</code></td><td>License management</td></tr>
+      </table>
+    </div>
+
+    <h2>SDK optional packages</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Install</th><th>Drop-in client</th></tr>
+        <tr><td><code>pip install iris-security-sdk[anthropic]</code></td><td><code>IrisAnthropic</code></td></tr>
+        <tr><td><code>pip install iris-security-sdk[openai]</code></td><td><code>IrisOpenAI</code></td></tr>
+        <tr><td><code>pip install iris-security-sdk[google]</code></td><td><code>IrisGemini</code></td></tr>
+        <tr><td><code>pip install iris-security-sdk[vertexai]</code></td><td><code>IrisVertexAI</code></td></tr>
+        <tr><td><code>pip install iris-security-sdk[langchain]</code></td><td>LangChain callbacks</td></tr>
+        <tr><td><code>pip install iris-security-sdk[crewai]</code></td><td>CrewAI integration</td></tr>
+        <tr><td><code>pip install iris-security-scm</code></td><td>SCM scanning commands</td></tr>
+      </table>
+    </div>
+
+    <h2>Environment variables</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Variable</th><th>Description</th></tr>
+        <tr><td><code>IRIS_ENV</code></td><td><code>dev</code> · <code>test</code> · <code>staging</code> · <code>production</code> — stamped on Evidence Vault events</td></tr>
+        <tr><td><code>IRIS_AGENT_ID</code></td><td>Default agent for <code>iris evidence record-cicd</code></td></tr>
+        <tr><td><code>IRIS_VAULT_SIGNING_KEY</code></td><td>HMAC signing key for Evidence Vault v2 (local dev default is per-agent derived)</td></tr>
+        <tr><td><code>IRIS_USER_EMAIL</code></td><td>Acting user for delegation and HITL</td></tr>
+        <tr><td><code>IRIS_USER_WORK_AUTHORIZATION</code></td><td>Work authorization for frontier/export-controlled models</td></tr>
+        <tr><td><code>IRIS_TELEMETRY_OPT_OUT=1</code></td><td>Disable anonymous telemetry</td></tr>
+        <tr><td><code>GITHUB_TOKEN</code></td><td>Required for <code>iris scm scan-repo</code> / <code>scan-org</code></td></tr>
+      </table>
+    </div>
+
+    <div class="docs-footer">
+      <a href="hitl-delegation.html">← HITL &amp; Delegation</a>
+      <a href="docs.html">Documentation home →</a>
+    </div>
+  </main>
+</div>
+<script src="assets/docs.js"></script>
+</body>
+</html>

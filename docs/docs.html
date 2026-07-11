@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Documentation — IRIS</title>
+<meta name="description" content="IRIS documentation. Runtime governance for AI agents — discover, inventory, define policy, guard every call.">
+<link rel="canonical" href="https://iris-security.github.io/iris-sdk/docs.html">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="assets/docs.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body data-page="docs">
+
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="site-logo">IR<span>I</span>S</a>
+    <div class="site-links">
+      <a href="index.html" class="hide-mobile">Home</a>
+      <a href="docs.html" class="active">Docs</a>
+      <a href="https://github.com/IRIS-Security/iris-sdk" target="_blank" class="hide-mobile">GitHub</a>
+      <div class="nav-actions">
+        <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20design%20partner" class="btn btn-ghost">Design partner</a>
+        <a href="getting-started.html" class="btn btn-primary">Install</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar"><div class="docs-sidebar-inner" id="docs-sidebar-inner"></div></aside>
+  <main class="docs-main wide">
+    <div class="docs-eyebrow">Documentation</div>
+    <h1>IRIS docs</h1>
+    <p class="docs-lead">IRIS governs what <strong>runs</strong> — not what deploys. These guides walk you through discovering agents, writing policy in plain English, compiling to Cedar, and enforcing governance on every LLM call at runtime.</p>
+
+    <h2>Getting started</h2>
+    <div class="card-grid">
+      <a href="getting-started.html" class="doc-card">
+        <h3>Getting Started</h3>
+        <p>Install IRIS and govern your first agent in five minutes.</p>
+        <div class="arrow">Start here →</div>
+      </a>
+      <a href="basics.html" class="doc-card">
+        <h3>The Basics</h3>
+        <p>Runtime governance vocabulary: discover, inventory, define, guard.</p>
+        <div class="arrow">Read →</div>
+      </a>
+    </div>
+
+    <h2>Build &amp; integrate</h2>
+    <div class="card-grid">
+      <a href="build-agent.html" class="doc-card">
+        <h3>Build an Agent with IRIS</h3>
+        <p>Register an agent, set up governance files, and wire the SDK.</p>
+        <div class="arrow">Read →</div>
+      </a>
+      <a href="runtime-enforcement.html" class="doc-card">
+        <h3>Runtime Enforcement</h3>
+        <p>Drop-in LLM clients and <code>@agent.guard()</code> decorators.</p>
+        <div class="arrow">Read →</div>
+      </a>
+      <a href="mcp-setup.html" class="doc-card">
+        <h3>Cursor MCP Setup</h3>
+        <p>Connect IRIS to Cursor for inline compliance feedback.</p>
+        <div class="arrow">Read →</div>
+      </a>
+      <a href="scm-scanning.html" class="doc-card">
+        <h3>SCM Scanning</h3>
+        <p>Discover agents across GitHub orgs and repos.</p>
+        <div class="arrow">Read →</div>
+      </a>
+      <a href="github-action.html" class="doc-card">
+        <h3>GitHub Action</h3>
+        <p>Add offline AI governance to any repo's pull-request CI.</p>
+        <div class="arrow">Read →</div>
+      </a>
+      <a href="integrations.html" class="doc-card">
+        <h3>Integrations</h3>
+        <p>Langfuse and LiteLLM — keep your stack, add IRIS governance.</p>
+        <div class="arrow">Read →</div>
+      </a>
+    </div>
+
+    <h2>Policy &amp; compliance</h2>
+    <div class="card-grid">
+      <a href="policy-as-code.html" class="doc-card">
+        <h3>Policy as Code</h3>
+        <p>Plain English intent → Cedar policy → Git PR review.</p>
+        <div class="arrow">Read →</div>
+      </a>
+      <a href="compliance.html" class="doc-card">
+        <h3>Compliance Bundles</h3>
+        <p>Community: Colorado bundles + SOC 2 local scan teaser. Business: CCPA/CPRA ADMT, China PIPL, HIPAA, GDPR full eval, auditor export, and more.</p>
+        <div class="arrow">Read →</div>
+      </a>
+      <a href="model-governance.html" class="doc-card">
+        <h3>Model Governance</h3>
+        <p>Kill switches, fallbacks, and export-control gates.</p>
+        <div class="arrow">Read →</div>
+      </a>
+      <a href="regulatory.html" class="doc-card">
+        <h3>Regulatory Intelligence</h3>
+        <p>Track AI law changes that affect your agents.</p>
+        <div class="arrow">Read →</div>
+      </a>
+    </div>
+
+    <h2>Intelligence &amp; reporting</h2>
+    <div class="card-grid">
+      <a href="compliance-intelligence.html" class="doc-card">
+        <h3>Compliance Intelligence</h3>
+        <p>Profile what you're building, map obligations, get next actions — offline first.</p>
+        <div class="arrow">Read →</div>
+      </a>
+      <a href="reports.html" class="doc-card">
+        <h3>Persona Reports</h3>
+        <p>Executive, CISO, platform, and auditor packages for IRIS Cloud.</p>
+        <div class="arrow">Read →</div>
+      </a>
+    </div>
+
+    <h2>Operations</h2>
+    <div class="card-grid">
+      <a href="monitoring.html" class="doc-card">
+        <h3>Monitoring &amp; Witness</h3>
+        <p>Status dashboard, live policy feed, drift, and cost.</p>
+        <div class="arrow">Read →</div>
+      </a>
+      <a href="evidence-vault.html" class="doc-card">
+        <h3>Evidence Vault</h3>
+        <p>Append-only signed ledger, retention lifecycle, CI/CD evidence recording, and auditor exports.</p>
+        <div class="arrow">Read →</div>
+      </a>
+      <a href="hitl-delegation.html" class="doc-card">
+        <h3>HITL &amp; Delegation</h3>
+        <p>Human approval queues and user delegation.</p>
+        <div class="arrow">Read →</div>
+      </a>
+    </div>
+
+    <h2>Reference</h2>
+    <div class="card-grid">
+      <a href="cli-reference.html" class="doc-card">
+        <h3>CLI Reference</h3>
+        <p>All <code>iris</code> commands in one place.</p>
+        <div class="arrow">Read →</div>
+      </a>
+      <a href="https://github.com/IRIS-Security/iris-sdk/blob/main/README.md" class="doc-card" target="_blank">
+        <h3>Full README ↗</h3>
+        <p>Extended reference on GitHub.</p>
+        <div class="arrow">Open →</div>
+      </a>
+    </div>
+
+    <div class="help-box">
+      <h3>Need help?</h3>
+      <p>We're building IRIS with design partners. Try the SDK, tell us what breaks, help shape what ships.</p>
+      <div class="help-actions">
+        <a href="getting-started.html" class="btn btn-primary">Install</a>
+        <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20design%20partner" class="btn btn-ghost">Design partner</a>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="assets/docs.js"></script>
+</body>
+</html>

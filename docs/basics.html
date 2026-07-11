@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Basics — IRIS Docs</title>
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="assets/docs.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body data-page="basics">
+
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="site-logo">IR<span>I</span>S</a>
+    <div class="site-links">
+      <a href="index.html" class="hide-mobile">Home</a>
+      <a href="docs.html" class="active">Docs</a>
+      <div class="nav-actions">
+        <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20design%20partner" class="btn btn-ghost">Design partner</a>
+        <a href="getting-started.html" class="btn btn-primary">Install</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar"><div class="docs-sidebar-inner" id="docs-sidebar-inner"></div></aside>
+  <main class="docs-main">
+    <div class="docs-eyebrow">Getting started</div>
+    <h1>The Basics</h1>
+    <p class="docs-lead">This doc explains the core concepts and command vocabulary for governing AI agents at <strong>runtime</strong> with IRIS.</p>
+
+    <h2>What IRIS is (and isn't)</h2>
+    <p><strong>Terraform governs what deploys. IRIS governs what runs.</strong></p>
+    <p>After your agent is live, it calls APIs on every request, reads customer data, and makes decisions in production. IRIS is the governance layer that watches runtime behavior — not the provisioning layer that stands infrastructure up.</p>
+
+    <div class="table-wrap">
+      <table>
+        <tr><th>Deploy time</th><th>Runtime (IRIS)</th></tr>
+        <tr><td>What gets built</td><td>What actually executes</td></tr>
+        <tr><td><code>terraform plan</code> / <code>apply</code></td><td><code>iris scan</code> · <code>iris register</code> · <code>@agent.guard()</code></td></tr>
+        <tr><td>Infrastructure as Code</td><td>Policy as Code for agents</td></tr>
+      </table>
+    </div>
+
+    <h2>The four phases</h2>
+    <p>IRIS organizes governance around what is <em>running</em>, not what was deployed yesterday.</p>
+
+    <h3>1. Discover — what's running without governance?</h3>
+    <p>Scan your codebase for ungoverned LLM clients, agent frameworks, and tool calls.</p>
+    <div class="code-block"><span class="cmd">iris scan --discover --dir .</span></div>
+
+    <h3>2. Inventory — register agents in your fleet</h3>
+    <p>Every governed agent gets an <strong>AgentPassport</strong> — owner, team, compliance scope, allowed models. This is your inventory for regulators and security teams.</p>
+    <div class="code-block"><span class="cmd">iris register --name my-agent --owner you@company.com --team platform --compliance colorado-ai-act</span><br>
+<span class="cmd">iris list</span>  <span class="cm"># fleet inventory (alias: iris agents)</span></div>
+
+    <h3>3. Define — write what the agent is allowed to do</h3>
+    <p>Write <code>policy-intent.md</code> in plain English. IRIS compiles it to Cedar — a formally verified policy language from AWS. Every change is a Git PR with a reviewer.</p>
+    <div class="code-block"><span class="cmd">iris policy compile --agent my-agent --dry-run</span><br>
+<span class="cmd">iris policy diff --agent my-agent</span><br>
+<span class="cmd">iris policy commit --agent my-agent</span><br>
+<span class="cmd">iris policy status --agent my-agent</span></div>
+
+    <h3>4. Guard — enforce on every call at runtime</h3>
+    <p>Cedar policy evaluates in-process <em>before</em> every LLM call. Violations are blocked. Evidence is logged to the local Evidence Vault.</p>
+    <div class="code-block"><span class="cmd">from iris_anthropic import IrisAnthropic</span><br>
+<span class="cmd">client = IrisAnthropic(passport=passport)</span></div>
+
+    <h3>5. Audit — witness, certify, and prove compliance</h3>
+    <p>After agents run in production, IRIS gives you visibility and evidence for regulators.</p>
+    <div class="code-block"><span class="cmd">iris status</span>                    <span class="cm"># compliance dashboard</span><br>
+<span class="cmd">iris list --filter-ungoverned</span>   <span class="cm"># agents missing policy.cedar</span><br>
+<span class="cmd">iris witness --agent my-agent</span>   <span class="cm"># live policy feed</span><br>
+<span class="cmd">iris certify --agent my-agent --framework colorado-ai-act</span><br>
+<span class="cmd">iris evidence query --decision deny</span><br>
+<span class="cmd">iris evidence report --agent my-agent</span></div>
+
+    <h2>GitOps layout</h2>
+    <p>Every policy is a file. Every change is a PR.</p>
+    <div class="code-block">governance/<br>
+&nbsp;&nbsp;agents/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;my-agent/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;passport.yaml       ← inventory<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;policy-intent.md    ← source of truth (plain English)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;policy.cedar        ← compiled output<br>
+&nbsp;&nbsp;models/registry.yaml      ← model tiers &amp; fallbacks<br>
+&nbsp;&nbsp;directives/active.yaml    ← kill switches (hot-reload)</div>
+
+    <h2>Four environments</h2>
+    <p>IRIS follows a building-permit model — never blocks you in development.</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Environment</th><th>Behavior</th></tr>
+        <tr><td><code>dev</code></td><td>Warn inline, never block</td></tr>
+        <tr><td><code>test</code></td><td>Block critical violations in CI</td></tr>
+        <tr><td><code>staging</code></td><td>Require security approval (<code>iris hitl</code>)</td></tr>
+        <tr><td><code>production</code></td><td>Fail closed — every violation blocked</td></tr>
+      </table>
+    </div>
+    <div class="code-block"><span class="cmd">export IRIS_ENV=production</span></div>
+
+    <div class="docs-footer">
+      <a href="getting-started.html">← Getting Started</a>
+      <a href="build-agent.html">Build an Agent →</a>
+    </div>
+  </main>
+</div>
+<script src="assets/docs.js"></script>
+</body>
+</html>

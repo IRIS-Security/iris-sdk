@@ -1,0 +1,19 @@
+# GitLab CI — IRIS governance with evidence recording
+
+stages:
+  - governance
+
+record_evidence:
+  stage: governance
+  image: python:3.12
+  script:
+    - pip install iris-security-sdk iris-security-cli
+    - iris compliance check --format json || true
+    - iris evidence record-cicd
+        --system gitlab
+        --run-id "$CI_PIPELINE_ID"
+        --pipeline-url "$CI_PIPELINE_URL"
+        --triggered-by "$GITLAB_USER_LOGIN"
+        --outcome "$CI_JOB_STATUS"
+  rules:
+    - when: always

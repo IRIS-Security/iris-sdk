@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://iris-security.github.io/iris-sdk/sitemap.xml

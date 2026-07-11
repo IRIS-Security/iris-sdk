@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Persona Reports — IRIS Docs</title>
+<meta name="description" content="IRIS persona reports for executives, CISOs, platform teams, and external auditors — posture summaries, framework coverage, agent inventory, and assessor-grade evidence packages.">
+<link rel="canonical" href="https://iris-security.github.io/iris-sdk/reports.html">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="assets/docs.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body data-page="reports">
+
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="site-logo">IR<span>I</span>S</a>
+    <div class="site-links">
+      <a href="docs.html" class="active">Docs</a>
+      <div class="nav-actions">
+        <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20design%20partner" class="btn btn-ghost">Design partner</a>
+        <a href="getting-started.html" class="btn btn-primary">Install</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar"><div class="docs-sidebar-inner" id="docs-sidebar-inner"></div></aside>
+  <main class="docs-main">
+    <div class="docs-eyebrow">Intelligence &amp; reporting</div>
+    <h1>Persona Reports</h1>
+    <p class="docs-lead">Four consumption layers over the <a href="compliance-intelligence.html" style="color:var(--red)">compliance intelligence loop</a> — each report is built from live obligation findings, enforcement activity, and Evidence Vault records. Available in IRIS Cloud.</p>
+
+    <h2>Four personas</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Report</th><th>Audience</th><th>What you get</th></tr>
+        <tr>
+          <td><strong>Executive summary</strong></td>
+          <td>Board, CEO, GC</td>
+          <td>Posture score (0–100), 30-day trend, top risks, frameworks in scope, agents governed, policies enforced, evidence record count. Export as PDF.</td>
+        </tr>
+        <tr>
+          <td><strong>CISO report</strong></td>
+          <td>Security leadership</td>
+          <td>Per-framework coverage (controls satisfied, open blockers, nearest deadlines), open findings list, 30-day enforcement stats (blocks, HITL approvals, violations by agent), admin activity summary.</td>
+        </tr>
+        <tr>
+          <td><strong>Platform report</strong></td>
+          <td>Platform / ML engineering</td>
+          <td>Agent inventory (framework, risk level, policy coverage, open blockers), blockers grouped by owner, drift events, provisioning health, quota usage bars.</td>
+        </tr>
+        <tr>
+          <td><strong>Auditor packages</strong></td>
+          <td>External assessors</td>
+          <td>Assessor-grade evidence bundle per framework — see below.</td>
+        </tr>
+      </table>
+    </div>
+
+    <h2>Auditor packages (assessor-grade)</h2>
+    <p>Built for Schellman, Coalfire, and similar SOC 2, ISO 42001, and FedRAMP engagements. Each package is deterministic, hash-verifiable, and re-fetchable.</p>
+
+    <h3>Control matrix</h3>
+    <p>One row per control in the selected framework. Each row includes:</p>
+    <ul>
+      <li><strong>Control ID</strong> — bundle rule identifier (e.g. <code>CO-001</code>, <code>B006</code>)</li>
+      <li><strong>Control text</strong> — obligation description from the regulatory bundle</li>
+      <li><strong>Status</strong> — satisfied, open, in progress, or not evaluated</li>
+      <li><strong>Evidence refs</strong> — linked Evidence Vault records with SHA-256 hashes</li>
+      <li><strong>Gaps</strong> — recommended remediation when status is open</li>
+    </ul>
+
+    <h3>Evidence manifest</h3>
+    <p>Sorted list of every evidence record referenced in the control matrix:</p>
+    <ul>
+      <li><code>evidence_id</code> — vault record identifier</li>
+      <li><code>sha256</code> — tamper-evident hash of the event payload</li>
+      <li><code>agent_name</code>, <code>event_type</code>, <code>timestamp</code></li>
+      <li><code>retention_until</code> — computed from your plan's evidence retention policy</li>
+    </ul>
+    <p>Assessors can independently verify any hash against Evidence Vault exports — no trust-the-vendor PDF required.</p>
+
+    <h3>Deterministic package hash</h3>
+    <p>Each package includes a <code>package_hash</code>: SHA-256 of the canonical JSON payload (sorted keys, no whitespace). The same inputs always produce the same hash. When you re-fetch a persisted artifact, IRIS recomputes the hash and confirms it matches — detecting any tampering between generation and handoff.</p>
+
+    <h3>Persisted artifacts</h3>
+    <p>Generated packages are stored as re-fetchable artifacts in your org. List prior packages, download JSON, or export PDF. Every generation writes an audit log entry with framework key and package hash.</p>
+
+    <h3>Supported frameworks</h3>
+    <p>Generate auditor packages for any framework in your obligation map — including SOC 2, ISO 42001, FedRAMP Moderate, HIPAA, EU AI Act, Colorado AI Act, AIUC-1, and others bundled in IRIS.</p>
+
+    <div class="code-block"><span class="cm"># IRIS Cloud console → Reports → Auditor Package</span><br>
+<span class="cm"># Or via API (requires audit_export entitlement):</span><br>
+<span class="cmd">POST /reports/auditor-package?framework=iso42001</span><br>
+<span class="cmd">GET  /reports/artifacts</span><br>
+<span class="cmd">GET  /reports/artifacts/{id}</span></div>
+
+    <h2>Plan availability</h2>
+    <p>Persona reports are IRIS Cloud capabilities. Community (local OSS) does not include cloud reports. Paid cloud plans gate each layer:</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Capability</th><th>Reports included</th><th>Plans</th></tr>
+        <tr>
+          <td><code>basic_reporting</code></td>
+          <td>Platform report (agent inventory, blockers, drift, provisioning health)</td>
+          <td>Business, Trial, Enterprise, Partner</td>
+        </tr>
+        <tr>
+          <td><code>advanced_reporting</code></td>
+          <td>Executive summary + CISO report (posture score, framework coverage, enforcement stats)</td>
+          <td>Business, Trial, Enterprise, Partner</td>
+        </tr>
+        <tr>
+          <td><code>audit_export</code></td>
+          <td>Auditor packages (control matrix, evidence manifest, package hash, persisted artifacts)</td>
+          <td>Business, Trial, Enterprise, Partner</td>
+        </tr>
+      </table>
+    </div>
+    <p>The <code>iris:auditor</code> role has read-only access to intelligence and report endpoints — scoped for external assessors without write permissions.</p>
+
+    <div class="callout">
+      <p><strong>Local alternative.</strong> For OSS-only workflows, <code>iris certify</code> and <code>iris evidence report</code> produce framework certification scores and evidence exports from your local vault. Auditor packages in IRIS Cloud add persisted artifacts, deterministic hashing, and multi-framework control matrices across your entire fleet.</p>
+    </div>
+
+    <div class="docs-footer">
+      <a href="compliance-intelligence.html">← Compliance Intelligence</a>
+      <a href="evidence-vault.html">Evidence Vault →</a>
+    </div>
+  </main>
+</div>
+<script src="assets/docs.js"></script>
+</body>
+</html>

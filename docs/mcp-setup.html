@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cursor MCP Setup — IRIS Docs</title>
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="assets/docs.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body data-page="mcp-setup">
+
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="site-logo">IR<span>I</span>S</a>
+    <div class="site-links">
+      <a href="docs.html" class="active">Docs</a>
+      <div class="nav-actions">
+        <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20design%20partner" class="btn btn-ghost">Design partner</a>
+        <a href="getting-started.html" class="btn btn-primary">Install</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar"><div class="docs-sidebar-inner" id="docs-sidebar-inner"></div></aside>
+  <main class="docs-main">
+    <div class="docs-eyebrow">Build &amp; integrate</div>
+    <h1>Cursor MCP Setup</h1>
+    <p class="docs-lead">Connect IRIS to Cursor as an MCP server for real-time compliance feedback as you write agent code.</p>
+
+    <h2>1. Copy MCP config</h2>
+    <div class="code-block"><span class="cmd">cp .cursor/mcp.json your-project/.cursor/mcp.json</span></div>
+
+    <h2>2. Start the IRIS MCP server</h2>
+    <div class="code-block"><span class="cmd">iris mcp start</span></div>
+
+    <h2>3. Enable in Cursor</h2>
+    <p>Go to <strong>Settings → MCP</strong>. The IRIS server appears automatically when the config is in your project.</p>
+
+    <h2>MCP tools</h2>
+    <p>Cursor calls these tools when IRIS is connected:</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Tool</th><th>Purpose</th></tr>
+        <tr><td><code>iris_check_agent_code</code></td><td>Flag ungoverned LLM calls and policy violations inline</td></tr>
+        <tr><td><code>iris_get_passport_status</code></td><td>Agent compliance status and next steps</td></tr>
+        <tr><td><code>iris_suggest_policy</code></td><td>Draft <code>policy-intent.md</code> from agent code</td></tr>
+        <tr><td><code>iris_fix_violation</code></td><td>Return corrected code for a specific rule ID</td></tr>
+        <tr><td><code>iris_scan_workspace</code></td><td>Scan workspace for ungoverned agents and gaps</td></tr>
+      </table>
+    </div>
+
+    <h2>What Cursor does with IRIS connected</h2>
+    <ul>
+      <li>Flags ungoverned LLM calls inline as you type</li>
+      <li>Suggests corrected code with <code>@agent.guard()</code> already added</li>
+      <li>Warns on cross-region data transfers</li>
+      <li>Alerts when consequential decisions lack a consent gate</li>
+      <li>Shows Colorado AI Act compliance status in the sidebar</li>
+    </ul>
+
+    <div class="callout">
+      <p>IRIS MCP runs locally. No code or prompts leave your machine unless you configure an LLM backend for policy compilation.</p>
+    </div>
+
+    <div class="docs-footer">
+      <a href="runtime-enforcement.html">← Runtime Enforcement</a>
+      <a href="scm-scanning.html">SCM Scanning →</a>
+    </div>
+  </main>
+</div>
+<script src="assets/docs.js"></script>
+</body>
+</html>

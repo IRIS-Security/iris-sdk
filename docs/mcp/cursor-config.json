@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "iris-governance": {
+      "command": "iris-mcp",
+      "args": ["--cursor-mode"],
+      "env": {
+        "IRIS_LICENSE_KEY": "${env:IRIS_LICENSE_KEY}",
+        "IRIS_GOVERNANCE_DIR": "${workspaceFolder}/governance"
+      }
+    }
+  }
+}

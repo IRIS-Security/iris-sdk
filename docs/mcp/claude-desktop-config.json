@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "iris-governance": {
+      "command": "iris-mcp",
+      "args": [],
+      "env": {
+        "IRIS_LICENSE_KEY": "your-iris-license-key",
+        "IRIS_GOVERNANCE_DIR": "/path/to/your/governance"
+      }
+    }
+  }
+}

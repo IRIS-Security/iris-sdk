@@ -1,0 +1,25 @@
+// Jenkins declarative pipeline — IRIS governance with post { always } evidence
+
+pipeline {
+  agent any
+  stages {
+    stage('IRIS Governance') {
+      steps {
+        sh 'pip install iris-security-sdk iris-security-cli'
+        sh 'iris compliance check --format json || true'
+      }
+    }
+  }
+  post {
+    always {
+      sh '''
+        iris evidence record-cicd \
+          --system jenkins \
+          --run-id "${BUILD_ID}" \
+          --pipeline-url "${BUILD_URL}" \
+          --triggered-by "${BUILD_USER:-automated}" \
+          --outcome "${currentBuild.currentResult}"
+      '''
+    }
+  }
+}

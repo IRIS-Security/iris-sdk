@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Runtime Enforcement — IRIS Docs</title>
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="assets/docs.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body data-page="runtime-enforcement">
+
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="site-logo">IR<span>I</span>S</a>
+    <div class="site-links">
+      <a href="docs.html" class="active">Docs</a>
+      <div class="nav-actions">
+        <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20design%20partner" class="btn btn-ghost">Design partner</a>
+        <a href="getting-started.html" class="btn btn-primary">Install</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar"><div class="docs-sidebar-inner" id="docs-sidebar-inner"></div></aside>
+  <main class="docs-main">
+    <div class="docs-eyebrow">Build &amp; integrate</div>
+    <h1>How Your Agent Calls IRIS</h1>
+    <p class="docs-lead">IRIS enforces Cedar policy <strong>before</strong> every LLM call executes. Replace one import — keep the rest of your code.</p>
+
+    <h2>Drop-in LLM clients</h2>
+    <p>IRIS ships governed wrappers for major SDKs. Cedar evaluates every request in-process.</p>
+
+    <h3>Anthropic</h3>
+    <div class="code-block"><span class="cm"># pip install iris-security-sdk[anthropic]</span><br>
+<span class="cm"># client = anthropic.Anthropic()</span><br>
+<span class="cmd">from iris_anthropic import IrisAnthropic</span><br>
+<br>
+client = IrisAnthropic(<br>
+&nbsp;&nbsp;passport=passport,<br>
+&nbsp;&nbsp;user_work_authorization="us-citizen",  <span class="cm"># for frontier-restricted models</span><br>
+)<br>
+response = client.messages.create(model="claude-sonnet-4-6", ...)</div>
+
+    <h3>OpenAI</h3>
+    <div class="code-block"><span class="cmd">from iris_openai import IrisOpenAI</span><br>
+client = IrisOpenAI(passport=passport)</div>
+
+    <h3>Gemini / Vertex AI</h3>
+    <div class="code-block"><span class="cmd">from iris_gemini import IrisGemini</span><br>
+<span class="cmd">from iris_vertexai import IrisVertexAI</span></div>
+
+    <h3>LangChain &amp; CrewAI</h3>
+    <div class="code-block"><span class="cm"># pip install iris-security-sdk[langchain]</span><br>
+<span class="cmd">from iris_langchain import IrisCallbackHandler</span><br>
+<br>
+<span class="cm"># pip install iris-security-sdk[crewai]</span><br>
+<span class="cm"># CrewAI agents use IrisAgent.guard on tool calls</span></div>
+
+    <h2>Verify enforcement is wired</h2>
+    <div class="code-block"><span class="cmd">iris enforce --agent support-agent --dir .</span><br>
+<span class="cmd">iris explain</span>  <span class="cm"># how the proxy works</span></div>
+    <p>Use <code>@agent.guard()</code> to evaluate non-LLM API calls against Cedar policy.</p>
+    <div class="code-block"><span class="cmd">from iris import IrisAgent</span><br>
+<br>
+agent = IrisAgent(<br>
+&nbsp;&nbsp;name="support-agent",<br>
+&nbsp;&nbsp;owner="you@company.com",<br>
+&nbsp;&nbsp;compliance=["colorado-ai-act"],<br>
+&nbsp;&nbsp;is_high_risk_ai=True,<br>
+)<br>
+<br>
+<span class="cmd">@agent.guard(tool="zendesk-api", action="read")</span><br>
+def fetch_ticket(ticket_id: str) -> dict:<br>
+&nbsp;&nbsp;return zendesk.get(ticket_id)<br>
+<br>
+<span class="cmd">@agent.guard(tool="openai-api", action="call", data_classification="pii")</span><br>
+def generate_response(ticket: dict) -> str:<br>
+&nbsp;&nbsp;return client.complete(ticket)</div>
+
+    <h2>HITL and delegation</h2>
+    <p>High-risk actions can require human approval. Pass <code>hitl_approved=True</code> after <code>iris hitl approve</code>. Cedar evaluates <code>acting_for_user</code> and consent fields for delegation. See <a href="hitl-delegation.html" style="color:var(--red)">HITL &amp; Delegation</a>.</p>
+
+    <h2>What happens on violation</h2>
+    <ul>
+      <li>The call is <strong>blocked</strong> before it executes (in production)</li>
+      <li>A plain-English error explains the violation and remediation step</li>
+      <li>The event is logged to the local <strong>Evidence Vault</strong></li>
+    </ul>
+
+    <h2>Environment behavior</h2>
+    <div class="code-block"><span class="cmd">export IRIS_ENV=production</span>  <span class="cm"># fail closed</span><br>
+<span class="cmd">export IRIS_ENV=dev</span>           <span class="cm"># warn only</span></div>
+
+    <h2>Model suspensions</h2>
+    <p>When a provider or government suspends a model, update <code>governance/directives/active.yaml</code>. IRIS hot-reloads and auto-routes to your fallback. See <a href="model-governance.html" style="color:var(--red)">Model Governance</a>.</p>
+
+    <div class="docs-footer">
+      <a href="build-agent.html">← Build an Agent</a>
+      <a href="mcp-setup.html">Cursor MCP Setup →</a>
+    </div>
+  </main>
+</div>
+<script src="assets/docs.js"></script>
+</body>
+</html>

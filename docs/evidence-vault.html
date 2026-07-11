@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Evidence Vault — IRIS Docs</title>
+<meta name="description" content="IRIS Evidence Vault: append-only, signed, hash-chained audit ledger for compliance. CLI, API, retention lifecycle, and CI/CD evidence recording.">
+<link rel="canonical" href="https://iris-security.github.io/iris-sdk/evidence-vault.html">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="assets/docs.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body data-page="evidence-vault">
+
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="site-logo">IR<span>I</span>S</a>
+    <div class="site-links">
+      <a href="docs.html" class="active">Docs</a>
+      <div class="nav-actions">
+        <a href="mailto:irisgovernance@gmail.com?subject=IRIS%20design%20partner" class="btn btn-ghost">Design partner</a>
+        <a href="getting-started.html" class="btn btn-primary">Install</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar"><div class="docs-sidebar-inner" id="docs-sidebar-inner"></div></aside>
+  <main class="docs-main">
+    <div class="docs-eyebrow">Operations</div>
+    <h1>Evidence Vault</h1>
+    <p class="docs-lead">The system of record for compliance evidence. Every policy decision, HITL approval, DLP finding, and CI/CD run is captured as an immutable, signed, hash-chained event — queryable across all frameworks from a single store. No cloud required.</p>
+
+    <div class="callout">
+      <p><strong>Core principle:</strong> the vault has exactly <strong>one write path</strong> (append a new <code>EvidenceEvent</code>) and <strong>many read paths</strong>. There is no update or delete on an event. Current state — like whether a HITL request is still pending — is always <em>computed</em> by reading the append-only log.</p>
+    </div>
+
+    <h2 id="architecture">Architecture</h2>
+    <p>Evidence Vault v2 is an event-sourced ledger applied to compliance evidence. Tamper-evidence is an architectural property, not a policy checkbox.</p>
+    <ul>
+      <li><strong>EvidenceEvent</strong> — one immutable fact (Cedar decision, HITL action, DLP scan, CI/CD run, …). Signed with HMAC-SHA256 and linked to the previous event via <code>prev_event_hash</code>.</li>
+      <li><strong>EvidenceChain</strong> — computed grouping (e.g. HITL lifecycle from <code>hitl_requested</code> → <code>hitl_resolved</code>). Rebuildable from raw events if the index is lost.</li>
+      <li><strong>ControlMapping</strong> — links each event to N compliance controls (CO-004, AIUC-B006, ISO-A.6.2.8, …). One indexed lookup powers every framework report.</li>
+      <li><strong>RetentionPolicy</strong> — computed at write time from attached controls. The <em>longest</em> retention requirement wins — never the shortest.</li>
+    </ul>
+
+    <h2 id="storage">Where data lives</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>File</th><th>Contents</th></tr>
+        <tr><td><code>~/.iris/evidence/&lt;agent_id&gt;/events.jsonl</code></td><td>Legacy runtime log (policy evaluations, violations)</td></tr>
+        <tr><td><code>~/.iris/evidence/&lt;agent_id&gt;/evidence_events.jsonl</code></td><td>v2 append-only signed event log (system of record)</td></tr>
+        <tr><td><code>~/.iris/evidence/&lt;agent_id&gt;/control_mappings.jsonl</code></td><td>Event → control many-to-many index</td></tr>
+        <tr><td><code>~/.iris/evidence/&lt;agent_id&gt;/assessments.jsonl</code></td><td>Impact assessments (never pruned)</td></tr>
+      </table>
+    </div>
+    <p>Override the root with <code>--vault-dir</code> on CLI commands or set a custom path in SDK integrations.</p>
+
+    <h2 id="event-types">Event types</h2>
+    <p>Each event type has a strict payload schema — unknown fields are rejected at write time.</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>event_type</th><th>When it fires</th></tr>
+        <tr><td><code>cedar_decision</code></td><td>Every Cedar policy evaluation (PERMIT / BLOCK / HITL)</td></tr>
+        <tr><td><code>hitl_requested</code></td><td>Human review queue opened</td></tr>
+        <tr><td><code>hitl_resolved</code></td><td>Review approved, rejected, or timed out</td></tr>
+        <tr><td><code>dlp_finding</code></td><td>SSN, PHI, credit card, or prompt-injection detected</td></tr>
+        <tr><td><code>drift_detected</code></td><td>Policy intent vs compiled Cedar drift</td></tr>
+        <tr><td><code>agent_registered</code></td><td>Agent passport created or updated</td></tr>
+        <tr><td><code>policy_compiled</code></td><td>Intent compiled to Cedar in CI or locally</td></tr>
+        <tr><td><code>rotation_event</code></td><td>API key or secret rotation</td></tr>
+        <tr><td><code>org_policy_changed</code></td><td><code>iris-security.yaml</code> or org policy repo change</td></tr>
+        <tr><td><code>cicd_run</code></td><td>Pipeline run recorded from CI/CD (see below)</td></tr>
+        <tr><td><code>event_expired</code></td><td>Tombstone when retention elapses or erasure completes</td></tr>
+      </table>
+    </div>
+    <p>Payloads never contain raw prompt content — only hashed identifiers (<code>user_id_hash</code>, rule IDs, metadata). <code>pii_redacted</code> is always true.</p>
+
+    <h2 id="cli">CLI commands</h2>
+
+    <h3>Record CI/CD evidence</h3>
+    <p>Write a signed <code>cicd_run</code> event from any pipeline. Runs even when the governance gate failed — a failed check <em>is</em> evidence.</p>
+    <div class="code-block"><span class="cmd">iris evidence record-cicd \</span><br>
+<span class="cmd">&nbsp;&nbsp;--system github_actions \</span><br>
+<span class="cmd">&nbsp;&nbsp;--run-id "${{ github.run_id }}" \</span><br>
+<span class="cmd">&nbsp;&nbsp;--pipeline-url "https://github.com/org/repo/actions/runs/123" \</span><br>
+<span class="cmd">&nbsp;&nbsp;--triggered-by "developer@company.com" \</span><br>
+<span class="cmd">&nbsp;&nbsp;--outcome success</span></div>
+    <p>Supported <code>--system</code> values: <code>github_actions</code>, <code>gitlab</code>, <code>jenkins</code>, <code>terraform</code>, <code>argocd</code>. Returns signed <code>event_id</code> and <code>sequence_number</code> as JSON.</p>
+
+    <h3>Audit reports</h3>
+    <div class="code-block"><span class="cmd">iris evidence report --agent loan-processor</span><br>
+<span class="cmd">iris evidence report --agent loan-processor --format markdown</span><br>
+<span class="cmd">iris evidence report --agent loan-processor --since 2026-01-01</span></div>
+    <p>Includes passport snapshot, compliance status, violation summary, retention window, and integrity check — ready for regulatory review.</p>
+
+    <h3>List and export</h3>
+    <div class="code-block"><span class="cmd">iris evidence list --agent loan-processor</span><br>
+<span class="cmd">iris evidence list --agent loan-processor --violations-only</span><br>
+<span class="cmd">iris evidence query --decision deny</span><br>
+<span class="cmd">iris evidence query --agent loan-processor --regulation AIUC-1 --risk-min 70</span><br>
+<span class="cmd">iris evidence export --agent loan-processor --output audit.json</span><br>
+<span class="cmd">iris evidence export --agent loan-processor --output aiuc1.json --format aiuc1</span><br>
+<span class="cmd">iris evidence stats</span></div>
+    <p><code>evidence query</code> is the signal command — filter by agent, decision, regulation, date range, and risk instead of scrolling the full vault. Export formats: <code>json</code>, <code>csv</code>, <code>aiuc1</code>, <code>pdf</code>, <code>oscal</code>. The <code>aiuc1</code> format pulls from the same <code>ControlMapping</code> table as <code>iris certify --format aiuc1-export</code> — one code path, not a separate scan.</p>
+
+    <h3>GDPR erasure</h3>
+    <div class="code-block"><span class="cmd">iris vault redact --agent loan-processor --user-id &lt;id&gt;</span></div>
+    <p>Erasure writes a tombstone event and scrubs user-identifying payload fields while preserving control mappings (so "we satisfied CO-004 on this date" remains provable).</p>
+
+    <h2 id="lifecycle">Evidence lifecycle</h2>
+    <ol>
+      <li><strong>Capture</strong> — governed action writes exactly one signed <code>EvidenceEvent</code>. The only stage where new facts enter the vault.</li>
+      <li><strong>Index</strong> — async, non-blocking. Updates <code>ControlMapping</code> and chain views. Index failure does not lose the event — call <code>rebuild_from_events()</code> to recover.</li>
+      <li><strong>Query</strong> — read-only. Reports, <code>iris certify</code>, AIUC-1 export, and auditor packages operate here. Unscoped queries above 500 events are rejected.</li>
+      <li><strong>Retention check</strong> — daily job marks events past <code>eligible_for_deletion_at</code>. Legal holds skip deletion and log a <code>retention_extended</code> event.</li>
+      <li><strong>Disposition</strong> — expired events get an <code>event_expired</code> tombstone; payload is scrubbed but the hash chain and timeline remain gap-free.</li>
+    </ol>
+
+    <h2 id="retention">Retention model</h2>
+    <p>When an event satisfies multiple controls, retention takes <code>max()</code> across all attached requirements — never the shortest period.</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Control</th><th>Framework</th><th>Days</th></tr>
+        <tr><td><code>CO-RR-001</code></td><td>Colorado AI Act</td><td>1095 (3 years)</td></tr>
+        <tr><td><code>LL144-005</code></td><td>NYC Local Law 144</td><td>730 (2 years)</td></tr>
+        <tr><td><code>PIPL-006</code></td><td>China PIPL</td><td>1095 (3 years)</td></tr>
+        <tr><td><code>CCPA-006</code></td><td>CCPA/CPRA ADMT</td><td>1095 (3 years)</td></tr>
+        <tr><td><code>HIPAA-001</code></td><td>HIPAA (general)</td><td>2190 (6 years)</td></tr>
+        <tr><td><code>FEDRAMP-CONMON</code></td><td>FedRAMP</td><td>1095 minimum</td></tr>
+        <tr><td><code>AIUC-1</code></td><td>AIUC-1</td><td>365 minimum (annual recert cadence)</td></tr>
+        <tr><td><em>unmapped</em></td><td>—</td><td>365 default (never 0)</td></tr>
+      </table>
+    </div>
+    <p>Free tier prunes legacy <code>events.jsonl</code> after 30 days. Pro unlocks unlimited retention for long-horizon controls like HIPAA and Colorado's 3-year requirement.</p>
+
+    <h2 id="integrity">Integrity verification</h2>
+    <p>Every event is HMAC-signed over <code>event_id + sequence_number + payload_hash + prev_event_hash</code>. Tampering with event N breaks the chain for every subsequent event.</p>
+    <div class="code-block"><span class="cmd">iris evidence report --agent loan-processor</span><br>
+<span class="cm"># Integrity section shows hash chain status</span><br><br>
+<span class="cm"># Programmatic check (Evidence Vault API):</span><br>
+<span class="cmd">GET /v1/agents/&lt;agent_id&gt;/integrity</span><br>
+<span class="cm"># → {"valid": true, "events_checked": N}</span><br>
+<span class="cm"># or {"valid": false, "first_broken_link": "&lt;event_id&gt;"}</span></div>
+    <p>Query responses include a signed integrity proof (<code>query_signature</code>) so callers can prove they received exactly the result set returned.</p>
+
+    <h2 id="api">Query API</h2>
+    <p>Hosted and Enterprise deployments expose a read-heavy REST API. There is exactly one write endpoint and no DELETE or PATCH on events.</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Method</th><th>Endpoint</th><th>Purpose</th></tr>
+        <tr><td><code>POST</code></td><td><code>/v1/events</code></td><td>Append one event (server signs — client signatures ignored)</td></tr>
+        <tr><td><code>GET</code></td><td><code>/v1/agents/:id/events</code></td><td>List events (scoped by date range, event type)</td></tr>
+        <tr><td><code>GET</code></td><td><code>/v1/agents/:id/chains</code></td><td>HITL and rotation lifecycle chains</td></tr>
+        <tr><td><code>GET</code></td><td><code>/v1/controls/:id/evidence</code></td><td>All events satisfying a control — one query, all frameworks</td></tr>
+        <tr><td><code>GET</code></td><td><code>/v1/frameworks/:id/coverage</code></td><td>FULL / PARTIAL / NONE breakdown for <code>iris certify</code></td></tr>
+        <tr><td><code>GET</code></td><td><code>/v1/agents/:id/integrity</code></td><td>Walk hash chain, return validity</td></tr>
+        <tr><td><code>GET</code></td><td><code>/v1/agents/:id/export</code></td><td>Auditor package on demand (<code>pdf</code>, <code>json</code>, <code>oscal</code>, <code>aiuc1</code>)</td></tr>
+      </table>
+    </div>
+    <p>Admin scope (security team): <code>POST /v1/erasure-requests</code>, <code>POST /v1/legal-holds</code>, <code>DELETE /v1/legal-holds/:id</code>. Even admins cannot delete events — only request erasure through the lifecycle.</p>
+
+    <h2 id="cicd">CI/CD integrations</h2>
+    <p>Every integration writes <code>cicd_run</code> events at meaningful pipeline moments. Pipelines never read from the vault during deploy — evidence recording never blocks deployments.</p>
+    <p>Copy-ready templates live in the repo under <code>docs/gha/</code>:</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Platform</th><th>Template</th><th>Key pattern</th></tr>
+        <tr><td>GitHub Actions</td><td><code>docs/gha/developer.yml</code></td><td><code>if: always()</code> — records evidence even on failure</td></tr>
+        <tr><td>GitLab CI</td><td><code>docs/gha/gitlab-ci.yml</code></td><td><code>rules: when: always</code></td></tr>
+        <tr><td>Jenkins</td><td><code>docs/gha/Jenkinsfile</code></td><td><code>post { always { ... } }</code></td></tr>
+        <tr><td>Terraform</td><td><code>terraform/evidence_record.tf</code></td><td><code>null_resource</code> on policy hash change</td></tr>
+        <tr><td>ArgoCD</td><td><code>docs/gha/argocd-evidence-hook.yaml</code></td><td>PostSync hook after actual deploy</td></tr>
+      </table>
+    </div>
+
+    <h3>GitHub Actions example</h3>
+    <div class="code-block"><span class="cmd">- name: Record CI evidence to vault</span><br>
+<span class="cmd">&nbsp;&nbsp;if: always()</span><br>
+<span class="cmd">&nbsp;&nbsp;run: |</span><br>
+<span class="cmd">&nbsp;&nbsp;&nbsp;&nbsp;iris evidence record-cicd \</span><br>
+<span class="cmd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--system github_actions \</span><br>
+<span class="cmd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--run-id "${{ github.run_id }}" \</span><br>
+<span class="cmd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--pipeline-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \</span><br>
+<span class="cmd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--triggered-by "${{ github.actor }}" \</span><br>
+<span class="cmd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--outcome "${{ job.status }}"</span></div>
+
+    <h2 id="compliance-as-code">Compliance as Code, Evidence as Code</h2>
+    <p>These are architectural properties, not separate features:</p>
+    <ul>
+      <li><strong>Compliance as Code</strong> — <code>governance/agents/&lt;name&gt;/policy.cedar</code> is the compliance policy: version-controlled, PR-reviewed, diffable. See <a href="policy-as-code.html" style="color:var(--red)">Policy as Code</a>.</li>
+      <li><strong>Evidence as Code</strong> — every pipeline run writes a permanent, queryable <code>EvidenceEvent</code>. If you can ask "what changed in this PR," you can ask "what evidence did this PR generate" with the same tooling.</li>
+    </ul>
+    <p>Compliance as Code declares what <em>should</em> happen. Evidence as Code proves what <em>did</em> happen. The gap between them is what <code>iris drift check</code> and <code>iris sentinel</code> monitor continuously.</p>
+
+    <h2 id="certify">Pair with certification</h2>
+    <div class="code-block"><span class="cmd">iris certify --agent loan-processor --framework colorado-ai-act</span><br>
+<span class="cmd">iris certify --agent loan-processor --framework aiuc-1 --format aiuc1-export</span><br>
+<span class="cmd">iris evidence export --agent loan-processor --format aiuc1 --output auditor-package.json</span></div>
+    <p>Certification readiness scores plus Evidence Vault exports form the auditor package. All framework reports query the same <code>ControlMapping</code> index — generate evidence once, satisfy many frameworks.</p>
+
+    <h2 id="env">Environment variables</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Variable</th><th>Description</th></tr>
+        <tr><td><code>IRIS_ENV</code></td><td>Resolved environment stamped on every event (<code>dev</code>, <code>staging</code>, <code>production</code>, …)</td></tr>
+        <tr><td><code>IRIS_AGENT_ID</code></td><td>Default agent for <code>record-cicd</code> when <code>--agent</code> is omitted</td></tr>
+        <tr><td><code>IRIS_VAULT_SIGNING_KEY</code></td><td>HMAC signing key override (default: derived per agent for local dev)</td></tr>
+      </table>
+    </div>
+
+    <div class="docs-footer">
+      <a href="monitoring.html">← Monitoring</a>
+      <a href="hitl-delegation.html">HITL &amp; Delegation →</a>
+    </div>
+  </main>
+</div>
+<script src="assets/docs.js"></script>
+</body>
+</html>
