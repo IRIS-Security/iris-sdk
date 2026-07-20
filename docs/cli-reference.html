@@ -119,6 +119,7 @@
         <tr><td><code>iris compliance scan --from langfuse</code></td><td>Derive profile from Langfuse trace metadata (<code>pip install "iris-langfuse[live]"</code>)</td></tr>
         <tr><td><code>iris compliance scan --from litellm --config ./litellm.config.yaml</code></td><td>Derive profile from LiteLLM static config</td></tr>
         <tr><td><code>iris compliance scan --from litellm --proxy &lt;url&gt;</code></td><td>Derive profile from live LiteLLM proxy</td></tr>
+        <tr><td><code>iris compliance scan --from agt --audit-file audit_trail.jsonl</code></td><td>Derive profile from a Microsoft AGT audit-trail export (<code>pip install iris-agt</code>)</td></tr>
         <tr><td><code>iris compliance scan --push</code></td><td>POST profile to IRIS Cloud when <code>IRIS_API_KEY</code> is set</td></tr>
         <tr><td><code>iris compliance assess</code></td><td>Impact assessment (Colorado, CCPA ADMT, PIPL PIPIA)</td></tr>
         <tr><td><code>iris certify --framework colorado-ai-act</code></td><td>Certification readiness score (alias: <code>iris test</code>)</td></tr>
