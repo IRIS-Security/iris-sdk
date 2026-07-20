@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Integrations — IRIS Docs</title>
-<meta name="description" content="Keep your Langfuse or LiteLLM observability stack. IRIS reads what you're running and maps regulations — with tamper-evident proof.">
+<meta name="description" content="Keep your Langfuse or LiteLLM observability stack, or your Cedar/AGT enforcement engine. IRIS reads what you're running and maps regulations — with tamper-evident proof.">
 <link rel="canonical" href="https://iris-security.github.io/iris-sdk/integrations.html">
 <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
 <link rel="stylesheet" href="assets/docs.css">
@@ -30,7 +30,14 @@
   <main class="docs-main">
     <div class="docs-eyebrow">Build &amp; integrate</div>
     <h1>Works with your stack</h1>
-    <p class="docs-lead">IRIS does not compete with observability or routing tools. <strong>Keep your Langfuse or LiteLLM setup.</strong> IRIS reads what you're running and tells you which regulations apply — with tamper-evident proof.</p>
+    <p class="docs-lead">IRIS does not compete with observability, routing, or enforcement tools. <strong>Keep your Langfuse or LiteLLM setup, your Cedar policies, or your Microsoft AGT deployment.</strong> IRIS reads what you're running and tells you which regulations apply — with tamper-evident proof.</p>
+
+    <h2>Microsoft AGT (and other enforcement engines)</h2>
+    <p>AGT (agent-governance-toolkit) is a runtime enforcement platform — pre-execution interception, sandboxing, policy enforcement across five languages. It's a strong choice for <em>stopping</em> an agent from doing the wrong thing. AGT's own documentation is explicit that it does not guarantee compliance with GDPR, HIPAA, the EU AI Act, or Colorado's SB 26-189, and recommends consulting legal counsel — enforcement and regulatory compliance are different problems.</p>
+    <p>That's the gap IRIS is built for. IRIS doesn't replace an enforcement engine — Cedar-based or otherwise — it sits alongside one and answers the question the enforcement layer deliberately leaves open: <strong>which laws apply to this workload, and can you prove you complied?</strong></p>
+    <div class="callout">
+      <p><strong>Not enforcement.</strong> An <code>iris-agt</code> read-only adapter — mapping AGT's audit/decision output (decision-BOM, Merkle audit chain, OTel events) to regulatory obligations via IRIS's registry — is planned and not yet published. Today, IRIS's compliance scan and check commands work independently of whatever enforcement engine you run.</p>
+    </div>
 
     <h2>Langfuse</h2>
     <p>Derive a <a href="compliance-intelligence.html" style="color:var(--red)">WorkloadProfile</a> from Langfuse trace and observation metadata over a lookback window.</p>
