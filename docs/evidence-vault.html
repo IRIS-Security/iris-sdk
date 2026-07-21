@@ -139,17 +139,17 @@
     <p>Every event is HMAC-signed over <code>event_id + sequence_number + payload_hash + prev_event_hash</code>. Tampering with event N breaks the chain for every subsequent event.</p>
     <div class="code-block"><span class="cmd">iris evidence report --agent loan-processor</span><br>
 <span class="cm"># Integrity section shows hash chain status</span><br><br>
-<span class="cm"># Programmatic check (Evidence Vault API):</span><br>
-<span class="cmd">GET /v1/agents/&lt;agent_id&gt;/integrity</span><br>
+<span class="cm"># Programmatic check (EvidenceVaultAPI.dispatch, in-process):</span><br>
+<span class="cmd">EvidenceVaultAPI(agent_id).dispatch("GET", "/v1/agents/&lt;agent_id&gt;/integrity")</span><br>
 <span class="cm"># → {"valid": true, "events_checked": N}</span><br>
 <span class="cm"># or {"valid": false, "first_broken_link": "&lt;event_id&gt;"}</span></div>
     <p>Query responses include a signed integrity proof (<code>query_signature</code>) so callers can prove they received exactly the result set returned.</p>
 
     <h2 id="api">Query API</h2>
-    <p>Hosted and Enterprise deployments expose a read-heavy REST API. There is exactly one write endpoint and no DELETE or PATCH on events.</p>
+    <p><code>EvidenceVaultAPI</code> is a local, in-process method dispatcher — callable from the CLI, tests, or an HTTP adapter you wire up yourself. It is not currently exposed as a hosted network endpoint on IRIS Cloud. The route-style method/path pairs below name its dispatch surface (<code>dispatch(method, path, ...)</code>), not URLs you can curl today. There is exactly one write path and no DELETE or PATCH on events.</p>
     <div class="table-wrap">
       <table>
-        <tr><th>Method</th><th>Endpoint</th><th>Purpose</th></tr>
+        <tr><th>Method</th><th>Path</th><th>Purpose</th></tr>
         <tr><td><code>POST</code></td><td><code>/v1/events</code></td><td>Append one event (server signs — client signatures ignored)</td></tr>
         <tr><td><code>GET</code></td><td><code>/v1/agents/:id/events</code></td><td>List events (scoped by date range, event type)</td></tr>
         <tr><td><code>GET</code></td><td><code>/v1/agents/:id/chains</code></td><td>HITL and rotation lifecycle chains</td></tr>
