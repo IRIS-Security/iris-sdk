@@ -257,6 +257,7 @@ def evaluate_openai_call(
     user_email: Optional[str] = None,
     user_role: Optional[str] = None,
     user_context: Optional[UserContext] = None,
+    additional: Optional[dict] = None,
 ) -> PolicyResult:
     data_region = passport.allowed_regions[0] if passport.allowed_regions else None
     destination_region = parse_azure_endpoint_region(azure_endpoint)
@@ -264,6 +265,15 @@ def evaluate_openai_call(
         user_email=user_email, user_role=user_role
     )
     user_fields = effective_user.evaluation_fields()
+
+    merged_additional = {
+        "operation": operation,
+        "model": model,
+        "tool_names": tool_names or [],
+        "azure_endpoint": azure_endpoint,
+    }
+    if additional:
+        merged_additional.update(additional)
 
     ctx = EvaluationContext(
         agent_id=passport.agent_id,
@@ -275,12 +285,7 @@ def evaluate_openai_call(
         destination_region=destination_region,
         data_classification=data_classification or passport.data_classification.value,
         dlp_prompt_findings=dlp_prompt_findings,
-        additional={
-            "operation": operation,
-            "model": model,
-            "tool_names": tool_names or [],
-            "azure_endpoint": azure_endpoint,
-        },
+        additional=merged_additional,
         user_context=user_context,
         **user_fields,
     )

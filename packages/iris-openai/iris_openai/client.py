@@ -31,6 +31,25 @@ def _lazy_openai():
     return openai
 
 
+def _estimate_call_cost_usd(model_id: Any, messages: Any, system: Any, max_tokens: Any) -> Optional[float]:
+    """Pre-call cost estimate for the budget check — never raises; a governed
+    call must never fail because cost estimation failed."""
+    if not model_id:
+        return None
+    try:
+        from iris_core.cost.counter import TokenCounter
+        from iris_core.cost.pricing import PricingRegistry
+
+        input_tokens = TokenCounter().count_input(
+            provider="openai", model=str(model_id), messages=messages, system=system
+        )
+        return PricingRegistry().calculate_cost(
+            "openai", str(model_id), input_tokens, int(max_tokens or 0)
+        )
+    except Exception:
+        return None
+
+
 def _extract_tool_names_from_messages(messages: List[Any]) -> List[str]:
     names: List[str] = []
     for msg in messages or []:
@@ -125,6 +144,13 @@ class _GovernedCompletionsBase:
         if kwargs.get("tools"):
             kwargs["tools"] = guard_openai_tools(kwargs["tools"], self._passport, env)
         tool_names = _extract_tool_names_from_kwargs(kwargs)
+        additional = None
+        if self._passport.budget_config and self._passport.budget_config.enabled:
+            additional = {
+                "estimated_call_cost_usd": _estimate_call_cost_usd(
+                    kwargs.get("model"), kwargs.get("messages"), None, kwargs.get("max_tokens")
+                )
+            }
         result = evaluate_openai_call(
             self._engine,
             self._vault,
@@ -138,6 +164,7 @@ class _GovernedCompletionsBase:
             user_email=getattr(self._parent, "_user_email", None),
             user_role=getattr(self._parent, "_user_role", None),
             user_context=call_user_context,
+            additional=additional,
         )
         enforce_result(result, env)
 
