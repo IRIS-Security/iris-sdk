@@ -1,5 +1,6 @@
 """Token cost tracking, estimation, and reporting."""
 
+from iris_core.cost.budget import BudgetConfig
 from iris_core.cost.pricing import PricingRegistry
 from iris_core.cost.tracker import (
     CostAnomaly,
@@ -13,6 +14,7 @@ from iris_core.cost.tracker import (
 )
 
 __all__ = [
+    "BudgetConfig",
     "CostTracker",
     "CostReport",
     "CostSummary",
