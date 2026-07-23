@@ -73,6 +73,20 @@ def _cost_anomaly_ids(passport: AgentPassport, fallback_name: str) -> List[str]:
         return []
 
 
+def _agent_trust_state(passport: AgentPassport) -> Optional[str]:
+    """Current trust state for this agent, or None if trust tracking isn't
+    configured. Never raises: trust tracking is optional and must not break
+    drift snapshots."""
+    if not passport.trust_state_config or not passport.trust_state_config.enabled:
+        return None
+    try:
+        from iris_core.trust.state import compute_trust_state
+
+        return compute_trust_state(passport.agent_id, passport.trust_state_config).state.value
+    except Exception:
+        return None
+
+
 def _frameworks_for_agent(passport: AgentPassport) -> List[str]:
     tags = [t.value for t in passport.compliance_tags]
     if not tags:
@@ -95,6 +109,10 @@ class AgentSnapshot:
     # populates `violations`), so this is diffed separately rather than
     # shoehorned into the compliance-rule model.
     cost_anomalies: List[str] = field(default_factory=list)
+    # Single scalar per snapshot (unlike violations/cost_anomalies, which are
+    # sets of independent IDs) — diffed like is_production_ready, not via
+    # set difference. None when trust tracking isn't configured.
+    trust_state: Optional[str] = None
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -169,6 +187,9 @@ class DriftReport:
     # regulatory-framework-typed; cost anomalies aren't a regulatory rule).
     new_cost_anomalies: List[DriftEvent] = field(default_factory=list)
     resolved_cost_anomalies: List[DriftEvent] = field(default_factory=list)
+    # Trust-state downgrades (Phase 7a) — agent names whose computed trust
+    # state got worse between snapshots (e.g. trusted -> degraded).
+    trust_downgraded: List[str] = field(default_factory=list)
 
     def has_degradation(self) -> bool:
         return bool(
@@ -177,6 +198,7 @@ class DriftReport:
             or self.production_ready_lost
             or self.net_score_change < 0
             or self.new_cost_anomalies
+            or self.trust_downgraded
         )
 
     def to_dict(self) -> dict:
@@ -193,6 +215,7 @@ class DriftReport:
             "production_ready_lost": self.production_ready_lost,
             "new_cost_anomalies": [e.to_dict() for e in self.new_cost_anomalies],
             "resolved_cost_anomalies": [e.to_dict() for e in self.resolved_cost_anomalies],
+            "trust_downgraded": self.trust_downgraded,
         }
 
 
@@ -233,6 +256,7 @@ class DriftDetector:
             violations=violation_ids,
             is_production_ready=prod_ready,
             cost_anomalies=_cost_anomaly_ids(passport, name),
+            trust_state=_agent_trust_state(passport),
         )
 
     def _current_snapshot(self) -> ComplianceSnapshot:
@@ -372,6 +396,8 @@ class DriftDetector:
         return f"{filename} was modified {ago}"
 
     def detect_drift(self, since: str | None = None) -> DriftReport:
+        from iris_core.trust.state import TrustState, is_worse
+
         current = self._current_snapshot()
         baseline, period = self._resolve_baseline(since)
         generated_at = _utc_now_iso()
@@ -395,6 +421,7 @@ class DriftDetector:
         production_ready_lost: List[str] = []
         new_cost_anomalies: List[DriftEvent] = []
         resolved_cost_anomalies: List[DriftEvent] = []
+        trust_downgraded: List[str] = []
 
         all_agent_names = sorted(set(baseline.agents) | set(current.agents))
 
@@ -419,6 +446,8 @@ class DriftDetector:
                     )
                 if not curr.is_production_ready:
                     production_ready_lost.append(name)
+                if curr.trust_state is not None and curr.trust_state != TrustState.TRUSTED.value:
+                    trust_downgraded.append(name)
                 for entry_id in curr.cost_anomalies:
                     anomaly_type, description = self._cost_anomaly_details(name, entry_id)
                     new_cost_anomalies.append(
@@ -501,6 +530,12 @@ class DriftDetector:
             if prev.is_production_ready and not curr.is_production_ready:
                 production_ready_lost.append(name)
 
+            if curr.trust_state is not None:
+                prev_trust = TrustState(prev.trust_state) if prev.trust_state else TrustState.TRUSTED
+                curr_trust = TrustState(curr.trust_state)
+                if is_worse(curr_trust, prev_trust):
+                    trust_downgraded.append(name)
+
             frameworks = sorted(set(prev.compliance_scores) | set(curr.compliance_scores))
             agent_delta = 0.0
             for fw in frameworks:
@@ -553,6 +588,7 @@ class DriftDetector:
             production_ready_lost=production_ready_lost,
             new_cost_anomalies=new_cost_anomalies,
             resolved_cost_anomalies=resolved_cost_anomalies,
+            trust_downgraded=sorted(set(trust_downgraded)),
         )
 
     def _build_summary(

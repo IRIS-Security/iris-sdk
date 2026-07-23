@@ -33,6 +33,15 @@ def _load_budget_config(spec: dict):
     return BudgetConfig.from_dict(budget_data)
 
 
+def _load_trust_state_config(spec: dict):
+    from iris_core.trust.state import TrustStateConfig
+
+    trust_data = spec.get("trust")
+    if not trust_data:
+        return None
+    return TrustStateConfig.from_dict(trust_data)
+
+
 class Environment(str, Enum):
     DEV = "dev"
     TEST = "test"
@@ -208,6 +217,7 @@ class AgentPassport:
     evidence_vault_retention_days: Optional[int] = None
     hitl_config: Optional["HITLConfig"] = None
     budget_config: Optional["BudgetConfig"] = None
+    trust_state_config: Optional["TrustStateConfig"] = None
     compliance_response_overrides: Dict[str, Dict[str, str]] = field(default_factory=dict)
 
     # Metadata
@@ -260,6 +270,8 @@ class AgentPassport:
             data["spec"]["hitl"] = self.hitl_config.to_dict()
         if self.budget_config:
             data["spec"]["budget"] = self.budget_config.to_dict()
+        if self.trust_state_config:
+            data["spec"]["trust"] = self.trust_state_config.to_dict()
         if self.compliance_response_overrides:
             data["spec"]["compliance_response_overrides"] = self.compliance_response_overrides
         return yaml.dump(data, default_flow_style=False, sort_keys=False)
@@ -318,6 +330,7 @@ class AgentPassport:
             is_high_risk_ai=spec.get("is_high_risk_ai", False),
             hitl_config=_load_hitl_config(spec),
             budget_config=_load_budget_config(spec),
+            trust_state_config=_load_trust_state_config(spec),
             compliance_response_overrides=spec.get("compliance_response_overrides") or {},
             last_reviewed_at=(
                 datetime.fromisoformat(spec["last_reviewed_at"])

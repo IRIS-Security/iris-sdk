@@ -73,6 +73,8 @@ class PolicyResult:
     drift_score: Optional[float] = None
     drift_flagged: bool = False
     aarm_r7: bool = False
+    trust_state: Optional[str] = None
+    trust_state_reason: Optional[str] = None
 
     @property
     def permitted(self) -> bool:

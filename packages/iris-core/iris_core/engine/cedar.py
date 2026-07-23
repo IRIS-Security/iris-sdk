@@ -428,6 +428,33 @@ class CedarEngine:
                     hitl_rule = overage_reason
                     hitl_review_type = "business"
 
+        # Trust state (Phase 7a) — observation-only: a rolling-window tally
+        # of this agent's recent violations/HITL denials, surfaced on
+        # PolicyResult and recorded to evidence, but never blocking or
+        # forcing HITL by itself. Enforcement on trust state is a separate,
+        # paid concern (quarantine-by-policy), not built here.
+        trust_config = passport.trust_state_config
+        trust_result = None
+        if (
+            trust_config
+            and trust_config.enabled
+            and not context.hitl_approved
+            and not is_compliance_block
+        ):
+            from iris_core.trust.state import compute_trust_state
+
+            try:
+                trust_result = compute_trust_state(passport.agent_id, trust_config)
+                vault = EvidenceVault(agent_id=passport.agent_id)
+                vault.record_trust_state(
+                    trust_state=trust_result.state.value,
+                    reason=trust_result.reason,
+                    violation_count=trust_result.violation_count,
+                    hitl_denial_count=trust_result.hitl_denial_count,
+                )
+            except Exception:
+                trust_result = None  # trust state is observation-only; never blocks the call
+
         return PolicyResult(
             decision=decision,
             violations=violations,
@@ -445,6 +472,8 @@ class CedarEngine:
             drift_score=drift_event.semantic_distance,
             drift_flagged=drift_event.flagged,
             aarm_r7=True,
+            trust_state=trust_result.state.value if trust_result else None,
+            trust_state_reason=trust_result.reason if trust_result else None,
         )
 
     def _env_decision(self, env: Environment, violations: List[Violation]) -> str:
