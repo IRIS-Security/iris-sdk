@@ -160,6 +160,27 @@ class EvidenceVault:
             }
         )
 
+    def record_trust_state(
+        self,
+        *,
+        trust_state: str,
+        reason: str,
+        violation_count: int,
+        hitl_denial_count: int,
+    ) -> str:
+        """Record a trust-state check — written on every call once trust
+        tracking is configured, not just on a downgrade, so the agent's
+        trust posture is provable over time (not only a log of downgrades)."""
+        return self.record_raw(
+            {
+                "event_type": "trust_state_check",
+                "trust_state": trust_state,
+                "reason": reason,
+                "violation_count": violation_count,
+                "hitl_denial_count": hitl_denial_count,
+            }
+        )
+
     def record_dlp_scan(
         self,
         event_type: str,
