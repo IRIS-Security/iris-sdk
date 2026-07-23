@@ -1,0 +1,55 @@
+apiVersion: iris.io/v1alpha1
+kind: ModelRegistry
+metadata:
+  name: default
+spec:
+  models:
+    claude-sonnet-4-6:
+      provider: anthropic
+      tier: standard
+      capabilities: [general-reasoning, code]
+      export_control: unrestricted
+      retention_days: 0
+      requires_hitl: false
+      allowed_work_authorizations: []
+      fallback_model: null
+      aliases:
+        - claude-sonnet-4-*
+
+    claude-opus-4-6:
+      provider: anthropic
+      tier: frontier
+      capabilities: [general-reasoning, code, long-context]
+      export_control: unrestricted
+      retention_days: 0
+      requires_hitl: false
+      allowed_work_authorizations: []
+      fallback_model: claude-sonnet-4-6
+
+    claude-fable-5:
+      provider: anthropic
+      tier: frontier-restricted
+      capabilities: [cyber-analysis, code-audit, vulnerability-research]
+      export_control: bis-restricted
+      retention_days: 30
+      requires_hitl: true
+      allowed_work_authorizations:
+        - us-citizen
+        - us-permanent-resident
+      fallback_model: claude-sonnet-4-6
+      aliases:
+        - claude-fable-*
+
+    claude-mythos-5:
+      provider: anthropic
+      tier: frontier-restricted
+      capabilities: [cyber-analysis, code-audit, vulnerability-research]
+      export_control: bis-restricted
+      retention_days: 30
+      requires_hitl: true
+      allowed_work_authorizations:
+        - us-citizen
+        - us-permanent-resident
+      fallback_model: claude-sonnet-4-6
+      aliases:
+        - claude-mythos-*
