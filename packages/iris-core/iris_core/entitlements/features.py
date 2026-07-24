@@ -42,12 +42,16 @@ class Feature(str, Enum):
     SCAN_GOVERN = "scan_govern"
     CEDAR_ENGINE = "cedar_engine"
     DLP_SCANNER = "dlp_scanner"
-    # Free compliance bundles (Colorado + universal SOC 2 teaser)
+    # Free compliance bundles (Colorado + SOC 2 + GDPR/HIPAA/EU AI Act
+    # assessment — see the gaps free, pay for certify/export/monitoring)
     BUNDLE_COLORADO_AI_ACT = "bundle_colorado_ai_act"
     BUNDLE_COLORADO_CHATBOT = "bundle_colorado_chatbot"
     BUNDLE_COLORADO_HEALTH_AI = "bundle_colorado_health_ai"
     BUNDLE_COLORADO_MENTAL_HEALTH = "bundle_colorado_mental_health"
     BUNDLE_SOC2 = "bundle_soc2"
+    BUNDLE_GDPR = "bundle_gdpr"
+    BUNDLE_HIPAA = "bundle_hipaa"
+    BUNDLE_EU_AI_ACT = "bundle_eu_ai_act"
     # Free CLI commands
     CLI_STATUS = "cli_status"
     CLI_EXPLAIN = "cli_explain"
@@ -81,9 +85,6 @@ class Feature(str, Enum):
     # Pro compliance bundles (full eval beyond Community teasers)
     BUNDLE_NIST_AI_RMF = "bundle_nist_ai_rmf"
     BUNDLE_FEDRAMP_MODERATE = "bundle_fedramp_moderate"
-    BUNDLE_HIPAA = "bundle_hipaa"
-    BUNDLE_GDPR = "bundle_gdpr"
-    BUNDLE_EU_AI_ACT = "bundle_eu_ai_act"
     BUNDLE_CCPA_ADMT = "bundle_ccpa_admt"
     BUNDLE_CHINA_PIPL = "bundle_china_pipl"
     BUNDLE_ILLINOIS_AI_VIDEO = "bundle_illinois_ai_video"
@@ -110,6 +111,7 @@ class Feature(str, Enum):
     # Pro infrastructure
     K8S_SIDECAR = "k8s_sidecar"
     HITL_GATE = "hitl_gate"
+    TRUST_QUARANTINE = "trust_quarantine"
     SCM_ORG_SCANNER = "scm_org_scanner"
     SCM_PR_COMMENTS = "scm_pr_comments"
     GITHUB_APP = "github_app"
@@ -155,6 +157,9 @@ FEATURE_TIERS: Dict[Feature, Tier] = {
     Feature.BUNDLE_COLORADO_HEALTH_AI: Tier.FREE,
     Feature.BUNDLE_COLORADO_MENTAL_HEALTH: Tier.FREE,
     Feature.BUNDLE_SOC2: Tier.FREE,
+    Feature.BUNDLE_GDPR: Tier.FREE,
+    Feature.BUNDLE_HIPAA: Tier.FREE,
+    Feature.BUNDLE_EU_AI_ACT: Tier.FREE,
     Feature.CLI_STATUS: Tier.FREE,
     Feature.CLI_EXPLAIN: Tier.FREE,
     Feature.CLI_WATCH: Tier.FREE,
@@ -179,9 +184,6 @@ FEATURE_TIERS: Dict[Feature, Tier] = {
     # Business (PRO)
     Feature.BUNDLE_NIST_AI_RMF: Tier.PRO,
     Feature.BUNDLE_FEDRAMP_MODERATE: Tier.PRO,
-    Feature.BUNDLE_HIPAA: Tier.PRO,
-    Feature.BUNDLE_GDPR: Tier.PRO,
-    Feature.BUNDLE_EU_AI_ACT: Tier.PRO,
     Feature.BUNDLE_CCPA_ADMT: Tier.PRO,
     Feature.BUNDLE_CHINA_PIPL: Tier.PRO,
     Feature.BUNDLE_ILLINOIS_AI_VIDEO: Tier.PRO,
@@ -204,6 +206,7 @@ FEATURE_TIERS: Dict[Feature, Tier] = {
     Feature.VAULT_GDPR_REDACTION: Tier.PRO,
     Feature.K8S_SIDECAR: Tier.PRO,
     Feature.HITL_GATE: Tier.PRO,
+    Feature.TRUST_QUARANTINE: Tier.PRO,
     Feature.SCM_ORG_SCANNER: Tier.PRO,
     Feature.SCM_PR_COMMENTS: Tier.PRO,
     Feature.GITHUB_APP: Tier.PRO,

@@ -38,6 +38,10 @@ class TrustStateConfig:
     degrade_after_violations: int = 3
     suspect_after_violations: int = 8
     degrade_after_hitl_denials: int = 2
+    # Quarantine-by-policy (Phase 7b, paid) — a separate opt-in from
+    # `enabled`, so upgrading to Pro doesn't silently start blocking calls.
+    # "off" | "step_up" | "deny". Requires Feature.TRUST_QUARANTINE.
+    on_quarantine: str = "off"
 
     @classmethod
     def from_dict(cls, data: Optional[dict]) -> "TrustStateConfig":
@@ -49,6 +53,7 @@ class TrustStateConfig:
             degrade_after_violations=int(data.get("degrade_after_violations", 3)),
             suspect_after_violations=int(data.get("suspect_after_violations", 8)),
             degrade_after_hitl_denials=int(data.get("degrade_after_hitl_denials", 2)),
+            on_quarantine=str(data.get("on_quarantine", "off")),
         )
 
     def to_dict(self) -> dict:
@@ -58,6 +63,7 @@ class TrustStateConfig:
             "degrade_after_violations": self.degrade_after_violations,
             "suspect_after_violations": self.suspect_after_violations,
             "degrade_after_hitl_denials": self.degrade_after_hitl_denials,
+            "on_quarantine": self.on_quarantine,
         }
 
 

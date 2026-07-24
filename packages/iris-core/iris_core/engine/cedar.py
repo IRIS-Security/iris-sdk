@@ -428,32 +428,73 @@ class CedarEngine:
                     hitl_rule = overage_reason
                     hitl_review_type = "business"
 
-        # Trust state (Phase 7a) — observation-only: a rolling-window tally
-        # of this agent's recent violations/HITL denials, surfaced on
-        # PolicyResult and recorded to evidence, but never blocking or
-        # forcing HITL by itself. Enforcement on trust state is a separate,
-        # paid concern (quarantine-by-policy), not built here.
+        # Trust state (Phase 7a, free) — observation-only: a rolling-window
+        # tally of this agent's recent violations/HITL denials, surfaced on
+        # PolicyResult and recorded to evidence. Quarantine-by-policy
+        # (Phase 7b, paid) turns a DEGRADED/SUSPECT state into DENY/step-up,
+        # gated behind Feature.TRUST_QUARANTINE — trust state itself stays
+        # observable on every tier; only enforcement requires Pro.
         trust_config = passport.trust_state_config
         trust_result = None
+        quarantined = False
+        quarantine_decision = None
         if (
             trust_config
             and trust_config.enabled
             and not context.hitl_approved
             and not is_compliance_block
         ):
-            from iris_core.trust.state import compute_trust_state
+            from iris_core.trust.state import compute_trust_state, TrustState
 
             try:
                 trust_result = compute_trust_state(passport.agent_id, trust_config)
-                vault = EvidenceVault(agent_id=passport.agent_id)
-                vault.record_trust_state(
-                    trust_state=trust_result.state.value,
-                    reason=trust_result.reason,
-                    violation_count=trust_result.violation_count,
-                    hitl_denial_count=trust_result.hitl_denial_count,
-                )
             except Exception:
                 trust_result = None  # trust state is observation-only; never blocks the call
+
+            if trust_result:
+                quarantined = trust_result.state != TrustState.TRUSTED
+                if quarantined and trust_config.on_quarantine != "off":
+                    from iris_core.entitlements import Feature
+
+                    if passport.has_feature(Feature.TRUST_QUARANTINE):
+                        quarantine_decision = trust_config.on_quarantine
+                        trust_reason = (
+                            f"Agent trust state is {trust_result.state.value}: "
+                            f"{trust_result.reason}"
+                        )
+                        if trust_config.on_quarantine == "deny":
+                            decision = "DENY"
+                            violations = violations + [
+                                Violation(
+                                    rule_id="TRUST-QUARANTINE-001",
+                                    severity=Severity.HIGH,
+                                    message=trust_reason,
+                                    compliance_refs=[],
+                                    remediation=(
+                                        "Investigate recent violations/HITL denials, "
+                                        "or adjust passport.trust thresholds."
+                                    ),
+                                )
+                            ]
+                        elif not requires_hitl:
+                            requires_hitl = True
+                            hitl_rule = trust_reason
+                            hitl_review_type = "business"
+                    else:
+                        quarantine_decision = "not_entitled"
+
+                try:
+                    vault = EvidenceVault(agent_id=passport.agent_id)
+                    vault.record_trust_state(
+                        trust_state=trust_result.state.value,
+                        reason=trust_result.reason,
+                        violation_count=trust_result.violation_count,
+                        hitl_denial_count=trust_result.hitl_denial_count,
+                        quarantined=quarantined,
+                        quarantine_decision=quarantine_decision,
+                    )
+                except Exception:
+                    pass  # trust evidence never blocks the call
 
         return PolicyResult(
             decision=decision,
