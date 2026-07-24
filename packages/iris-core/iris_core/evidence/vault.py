@@ -167,10 +167,18 @@ class EvidenceVault:
         reason: str,
         violation_count: int,
         hitl_denial_count: int,
+        quarantined: bool = False,
+        quarantine_decision: Optional[str] = None,
     ) -> str:
         """Record a trust-state check — written on every call once trust
         tracking is configured, not just on a downgrade, so the agent's
-        trust posture is provable over time (not only a log of downgrades)."""
+        trust posture is provable over time (not only a log of downgrades).
+
+        quarantine_decision is "step_up"/"deny" when Phase 7b enforcement
+        fired, "not_entitled" when policy asked for quarantine but the
+        license doesn't have Feature.TRUST_QUARANTINE (so free tier gets
+        an honest record of what would have happened, not silence), or
+        None when quarantine isn't configured or the agent is trusted."""
         return self.record_raw(
             {
                 "event_type": "trust_state_check",
@@ -178,6 +186,8 @@ class EvidenceVault:
                 "reason": reason,
                 "violation_count": violation_count,
                 "hitl_denial_count": hitl_denial_count,
+                "quarantined": quarantined,
+                "quarantine_decision": quarantine_decision,
             }
         )
 
