@@ -243,7 +243,7 @@ class IrisGenerativeModel:
             if fedramp_model_violation:
                 violations.append(fedramp_model_violation)
 
-        user_ctx = UserContext.from_params(self._user_email, self._user_role)
+        user_ctx = UserContext.from_params(user_email=self._user_email, user_role=self._user_role)
         ctx = EvaluationContext(
             agent_id=self._passport.agent_id,
             action=action,

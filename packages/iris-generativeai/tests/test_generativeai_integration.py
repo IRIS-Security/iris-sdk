@@ -97,9 +97,10 @@ class TestIrisGenerativeAI:
         generative_model_ctor.assert_called_once_with("gemini-1.5-pro")
         model_mock.generate_content.assert_called_once()
         events = vault.get_events()
-        assert len(events) == 1
-        assert events[0]["decision"] in ("PERMIT", "PERMIT_WITH_WARNINGS")
-        assert events[0]["resource"] == "gemini-api/gemini-1.5-pro"
+        decision_events = [e for e in events if e.get("event_type") is None]
+        assert len(decision_events) == 1
+        assert decision_events[0]["decision"] in ("PERMIT", "PERMIT_WITH_WARNINGS")
+        assert decision_events[0]["resource"] == "gemini-api/gemini-1.5-pro"
 
     def test_model_blocks_in_production(
         self, high_risk_incomplete_passport, tmp_path, monkeypatch
@@ -158,7 +159,8 @@ class TestIrisGenerativeAI:
             chat.send_message("Help this customer over chat.")
 
         chat_session_mock.send_message.assert_called_once()
-        assert len(vault.get_events()) == 1
+        decision_events = [e for e in vault.get_events() if e.get("event_type") is None]
+        assert len(decision_events) == 1
 
     def test_evidence_vault_records_call(self, compliant_passport, tmp_path, monkeypatch):
         monkeypatch.setenv("IRIS_ENV", "dev")
@@ -185,6 +187,7 @@ class TestIrisGenerativeAI:
             model.generate_content("First call")
 
         events = vault.get_events()
-        assert len(events) == 1
-        assert events[0]["action"] == "call"
-        assert events[0]["resource"] == "gemini-api/gemini-1.5-pro"
+        decision_events = [e for e in events if e.get("event_type") is None]
+        assert len(decision_events) == 1
+        assert decision_events[0]["action"] == "call"
+        assert decision_events[0]["resource"] == "gemini-api/gemini-1.5-pro"

@@ -165,7 +165,10 @@ class AgentGovernor:
             if prompt_text.strip()
             else None
         )
-        user_ctx = UserContext.from_params(self._user_email, self._user_role)
+        user_ctx = UserContext.from_params(user_email=self._user_email, user_role=self._user_role)
+        user_fields = user_ctx.evaluation_fields()
+        explicit_consent = bool(inputs.get("user_consent_logged")) if inputs else False
+        user_fields["user_consent_logged"] = explicit_consent or user_fields["user_consent_logged"]
         ctx = EvaluationContext(
             agent_id=self.passport.agent_id,
             action=action,
@@ -175,9 +178,8 @@ class AgentGovernor:
             data_region=data_region,
             destination_region=destination_region,
             data_classification=data_classification,
-            user_consent_logged=bool(inputs.get("user_consent_logged")) if inputs else False,
             dlp_prompt_findings=dlp_result.findings if dlp_result else None,
-            **user_ctx.evaluation_fields(),
+            **user_fields,
         )
         result = self._engine.evaluate(self.passport, ctx)
         result = apply_no_policy_gate(self._engine, self.passport, self.env, result)

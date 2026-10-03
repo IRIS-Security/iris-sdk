@@ -1,6 +1,6 @@
 {
   "registry_version": "2.0.0",
-  "last_updated": "2026-06-19",
+  "last_updated": "2026-10-02",
   "bundles": {
     "aiuc-1": {
       "metadata": {
@@ -9,13 +9,21 @@
         "law_name": "AIUC-1 \u2014 AI Agent Security, Safety and Reliability Standard",
         "effective_date": "",
         "signed_date": "",
-        "last_changed": "2026-06-15",
-        "change_summary": "",
+        "last_changed": "2026-10-02",
+        "change_summary": "AIUC-1 released a new version on 2026-07-15 (coding-agent requirements A008/B010, 8 requirements and 41 controls updated, auditor guidance). IRIS rule mapping not yet re-verified against this release.",
         "change_severity": "WATCH",
         "iris_bundle_version": "0.2.0",
         "source_url": "https://www.aiuc-1.com/changelog",
         "notes": "Voluntary certification standard, updated quarterly. Not a law \u2014 track via changelog, not effective dates.",
-        "history": []
+        "history": [
+          {
+            "date": "2026-07-15",
+            "severity": "MINOR",
+            "summary": "AIUC-1 2026-07-15 release: new coding-agent requirements (A008, B010), 8 requirements / 41 controls updated. IRIS mapping pending re-verification.",
+            "source": "https://standard.aiuc-1.com/changelog/",
+            "version": "tracks aiuc-1.com/changelog"
+          }
+        ]
       },
       "rules": [
         {
@@ -451,15 +459,23 @@
         "bundle_id": "colorado-ai-act-original",
         "current_version": "1.0.0",
         "law_name": "Colorado AI Act (SB 24-205)",
-        "effective_date": "2026-07-01",
+        "effective_date": "2026-06-30",
         "signed_date": "",
-        "last_changed": "2026-06-19",
-        "change_summary": "",
+        "last_changed": "2026-10-02",
+        "change_summary": "SB 24-205 never took effect. SB 25B-004 (signed 2025-08-28) moved its effective date to 2026-06-30; SB 26-189 (signed 2026-05-14) repealed and reenacted the provisions before that date. effective_date corrected from 2026-07-01 to the statutory 2026-06-30. Bundle retained for audit trail; see colorado-ai-act.",
         "change_severity": "STABLE",
         "iris_bundle_version": "0.1.0",
         "source_url": "",
         "notes": "",
-        "history": []
+        "history": [
+          {
+            "date": "2026-05-14",
+            "severity": "MAJOR",
+            "summary": "SB 24-205 repealed and reenacted by SB 26-189 before its 2026-06-30 effective date (set by SB 25B-004). effective_date corrected 2026-07-01 -> 2026-06-30.",
+            "source": "https://leg.colorado.gov/bills/sb26-189",
+            "version": "1.0.0"
+          }
+        ]
       },
       "rules": [
         {
@@ -739,15 +755,23 @@
         "bundle_id": "eu-ai-act",
         "current_version": "1.0.0",
         "law_name": "EU Artificial Intelligence Act",
-        "effective_date": "",
+        "effective_date": "2027-12-02",
         "signed_date": "",
-        "last_changed": "2026-06-19",
-        "change_summary": "",
+        "last_changed": "2026-10-02",
+        "change_summary": "Regulation (EU) 2026/1744 (Digital Omnibus on AI), in force 2026-07-27, delayed high-risk obligations: Annex III stand-alone high-risk systems from 2026-08-02 to 2027-12-02; Annex I product-integrated high-risk systems from 2027-08-02 to 2028-08-02. effective_date reflects the Annex III date.",
         "change_severity": "STABLE",
         "iris_bundle_version": "0.1.0",
         "source_url": "",
         "notes": "",
-        "history": []
+        "history": [
+          {
+            "date": "2026-07-27",
+            "severity": "MAJOR",
+            "summary": "Regulation (EU) 2026/1744 delays high-risk obligations: Annex III 2026-08-02 -> 2027-12-02; Annex I 2027-08-02 -> 2028-08-02.",
+            "source": "https://eur-lex.europa.eu/eli/reg/2026/1744/oj/eng",
+            "version": "1.0.0"
+          }
+        ]
       },
       "rules": [
         {
@@ -771,13 +795,21 @@
         "law_name": "FedRAMP Moderate for AI Systems",
         "effective_date": "",
         "signed_date": "",
-        "last_changed": "2026-06-19",
-        "change_summary": "",
-        "change_severity": "STABLE",
+        "last_changed": "2026-10-02",
+        "change_summary": "FedRAMP published the Consolidated Rules for 2026 on 2026-06-25: Rev5 Moderate is relabeled Class C, the rules become mandatory for all stakeholders on 2027-01-01, and new Rev5 certification applications close 2027-06-11. Bundle control mapping (NIST SP 800-53 Rev5 Moderate) not yet re-verified against the Consolidated Rules.",
+        "change_severity": "WATCH",
         "iris_bundle_version": "0.1.0",
         "source_url": "",
         "notes": "",
-        "history": []
+        "history": [
+          {
+            "date": "2026-06-25",
+            "severity": "MAJOR",
+            "summary": "FedRAMP Consolidated Rules for 2026 published: Moderate -> Class C; mandatory 2027-01-01; new Rev5 applications close 2027-06-11.",
+            "source": "https://www.fedramp.gov/2026/timeline/",
+            "version": "1.0.0"
+          }
+        ]
       },
       "rules": [
         {
@@ -993,13 +1025,21 @@
         "law_name": "FedRAMP Moderate for AI Systems",
         "effective_date": "",
         "signed_date": "",
-        "last_changed": "2026-06-19",
-        "change_summary": "",
-        "change_severity": "STABLE",
+        "last_changed": "2026-10-02",
+        "change_summary": "FedRAMP published the Consolidated Rules for 2026 on 2026-06-25: Rev5 Moderate is relabeled Class C, the rules become mandatory for all stakeholders on 2027-01-01, and new Rev5 certification applications close 2027-06-11. Bundle control mapping (NIST SP 800-53 Rev5 Moderate) not yet re-verified against the Consolidated Rules.",
+        "change_severity": "WATCH",
         "iris_bundle_version": "0.1.0",
         "source_url": "",
         "notes": "",
-        "history": []
+        "history": [
+          {
+            "date": "2026-06-25",
+            "severity": "MAJOR",
+            "summary": "FedRAMP Consolidated Rules for 2026 published: Moderate -> Class C; mandatory 2027-01-01; new Rev5 applications close 2027-06-11.",
+            "source": "https://www.fedramp.gov/2026/timeline/",
+            "version": "1.0.0"
+          }
+        ]
       },
       "rules": [
         {
@@ -1329,13 +1369,21 @@
         "law_name": "HIPAA for AI Agents",
         "effective_date": "",
         "signed_date": "",
-        "last_changed": "2026-06-15",
-        "change_summary": "",
-        "change_severity": "STABLE",
+        "last_changed": "2026-10-02",
+        "change_summary": "HIPAA Security Rule NPRM (RIN 0945-AA22, published 2025-01-06) remains a proposal. HHS's 2026 Unified Agenda moved it to Long-Term Actions with final action targeted for July 2027 (an estimate, not a deadline). Current Security Rule (45 CFR Part 164 Subpart C) remains in force.",
+        "change_severity": "WATCH",
         "iris_bundle_version": "0.2.0",
         "source_url": "",
         "notes": "",
-        "history": []
+        "history": [
+          {
+            "date": "2026-10-02",
+            "severity": "MINOR",
+            "summary": "Verified 2026-10-02: no final rule issued; Security Rule NPRM moved to Long-Term Actions, final action target 07/2027 per 2026 Unified Agenda.",
+            "source": "https://www.reginfo.gov/public/do/eAgendaViewRule?pubId=202604&RIN=0945-AA22",
+            "version": "1.0.0"
+          }
+        ]
       },
       "rules": [
         {

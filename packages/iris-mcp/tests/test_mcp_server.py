@@ -52,7 +52,7 @@ def test_pro_tools_require_license():
     free_tools = collect_tools(include_pro=False)
     pro_tools = collect_tools(include_pro=True)
     assert len(pro_tools) > len(free_tools)
-    assert not Entitlements().has(Feature.BUNDLE_HIPAA)
+    assert not Entitlements().has(Feature.MCP_PRO_TOOLS)
 
 
 @pytest.mark.asyncio

@@ -160,7 +160,8 @@ def test_evidence_vault_includes_gcp_metadata(passport, tmp_path, monkeypatch):
 
     events_file = Path(tmp_path) / passport.agent_id / "events.jsonl"
     lines = events_file.read_text().strip().splitlines()
-    event = json.loads(lines[-1])
+    decision_events = [json.loads(line) for line in lines if json.loads(line).get("event_type") is None]
+    event = decision_events[-1]
     assert event["gcp_project"] == "proj-1"
     assert event["gcp_location"] == "us-central1"
     assert event["additional"]["gcp_project"] == "proj-1"

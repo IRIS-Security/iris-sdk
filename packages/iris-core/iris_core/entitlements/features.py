@@ -132,6 +132,8 @@ class Feature(str, Enum):
     CERTIFICATION_READINESS_PDF = "certification_readiness_pdf"
     EVIDENCE_EXPORT_AUDITOR = "evidence_export_auditor"
     POLICY_CATALOG_EXPORT = "policy_catalog_export"
+    # Pro MCP — full compliance eval, certify, and org-wide scan tools via MCP
+    MCP_PRO_TOOLS = "mcp_pro_tools"
 
     # ── ENTERPRISE TIER ───────────────────────────────────────
     CUSTOM_COMPLIANCE_BUNDLE = "custom_compliance_bundle"
@@ -224,6 +226,7 @@ FEATURE_TIERS: Dict[Feature, Tier] = {
     Feature.CERTIFICATION_READINESS_PDF: Tier.PRO,
     Feature.EVIDENCE_EXPORT_AUDITOR: Tier.PRO,
     Feature.POLICY_CATALOG_EXPORT: Tier.PRO,
+    Feature.MCP_PRO_TOOLS: Tier.PRO,
     # Enterprise
     Feature.CUSTOM_COMPLIANCE_BUNDLE: Tier.ENTERPRISE,
     Feature.DEDICATED_SUPPORT: Tier.ENTERPRISE,

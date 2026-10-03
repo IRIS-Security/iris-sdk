@@ -1,0 +1,60 @@
+{
+  "data": [
+    {
+      "byok_usage_inference": 0,
+      "cached_tokens": 0,
+      "completion_tokens": 4210,
+      "date": "2026-09-28",
+      "endpoint_id": "11111111-1111-4111-8111-111111111111",
+      "model": "openai/gpt-4.1",
+      "model_permaslug": "openai/gpt-4.1-2025-04-14",
+      "prompt_tokens": 18800,
+      "provider_name": "OpenAI",
+      "reasoning_tokens": 0,
+      "requests": 42,
+      "usage": 0.21
+    },
+    {
+      "byok_usage_inference": 0,
+      "cached_tokens": 120,
+      "completion_tokens": 9100,
+      "date": "2026-09-29",
+      "endpoint_id": "22222222-2222-4222-8222-222222222222",
+      "model": "anthropic/claude-sonnet-4",
+      "model_permaslug": "anthropic/claude-sonnet-4",
+      "prompt_tokens": 30500,
+      "provider_name": "Anthropic",
+      "reasoning_tokens": 0,
+      "requests": 77,
+      "usage": 0.55
+    },
+    {
+      "byok_usage_inference": 0,
+      "cached_tokens": 0,
+      "completion_tokens": 1500,
+      "date": "2026-09-29",
+      "endpoint_id": "33333333-3333-4333-8333-333333333333",
+      "model": "meta-llama/llama-3.3-70b-instruct",
+      "model_permaslug": "meta-llama/llama-3.3-70b-instruct",
+      "prompt_tokens": 6000,
+      "provider_name": "Together",
+      "reasoning_tokens": 0,
+      "requests": 9,
+      "usage": 0.01
+    },
+    {
+      "byok_usage_inference": 0,
+      "cached_tokens": 0,
+      "completion_tokens": 0,
+      "date": "2026-09-30",
+      "endpoint_id": "44444444-4444-4444-8444-444444444444",
+      "model": "mistralai/mistral-large",
+      "model_permaslug": "mistralai/mistral-large-2411",
+      "prompt_tokens": 0,
+      "provider_name": "Mistral",
+      "reasoning_tokens": 0,
+      "requests": 0,
+      "usage": 0
+    }
+  ]
+}

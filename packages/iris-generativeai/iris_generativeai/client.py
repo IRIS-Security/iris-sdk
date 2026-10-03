@@ -209,7 +209,7 @@ class IrisGenerativeModel:
             resource=f"gemini-api/{self._model_name}",
         )
         content_violations = _scan_content_violations(contents, self._passport)
-        user_ctx = UserContext.from_params(self._user_email, self._user_role)
+        user_ctx = UserContext.from_params(user_email=self._user_email, user_role=self._user_role)
         ctx = EvaluationContext(
             agent_id=self._passport.agent_id,
             action="call",

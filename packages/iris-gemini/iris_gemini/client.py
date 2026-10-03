@@ -165,7 +165,9 @@ class IrisModelsResource:
             resource=f"gemini-api/{model_name}",
         )
         content_violations = scan_gemini_content(request_contents, self._passport)
-        user_ctx = UserContext.from_params(self._parent._user_email, self._parent._user_role)
+        user_ctx = UserContext.from_params(
+            user_email=self._parent._user_email, user_role=self._parent._user_role
+        )
         require_hitl = bool(kwargs.pop("require_hitl", False))
         require_hitl_reason = kwargs.pop("require_hitl_reason", None)
         ctx = EvaluationContext(

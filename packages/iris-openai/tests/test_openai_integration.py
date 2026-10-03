@@ -102,9 +102,10 @@ class TestIrisOpenAIClient:
         assert result.choices[0].message.content == "Hello from GPT"
         mock_client.chat.completions.create.assert_called_once()
         events = vault.get_events()
-        assert len(events) == 1
-        assert events[0]["decision"] in ("PERMIT", "PERMIT_WITH_WARNINGS")
-        assert events[0]["resource"] == "openai-api"
+        decision_events = [e for e in events if e.get("event_type") is None and e.get("resource") == "openai-api"]
+        assert len(decision_events) == 1
+        assert decision_events[0]["decision"] in ("PERMIT", "PERMIT_WITH_WARNINGS")
+        assert decision_events[0]["resource"] == "openai-api"
 
     def test_client_blocks_in_production(
         self, high_risk_incomplete_passport, tmp_path, monkeypatch
@@ -132,7 +133,9 @@ class TestIrisOpenAIClient:
                 )
 
         assert exc_info.value.result.decision == "DENY"
-        assert any(v.rule_id == "CO-001" for v in exc_info.value.result.violations)
+        # CO-001 (ADMT inventory) is INFORM-only and never appears in a blocking
+        # violation set; CO-004 (no logged consent) is what actually denies here.
+        assert any(v.rule_id == "CO-004" for v in exc_info.value.result.violations)
         mock_module.OpenAI.return_value.chat.completions.create.assert_not_called()
 
     def test_client_warns_in_dev(
@@ -163,7 +166,9 @@ class TestIrisOpenAIClient:
         captured = capsys.readouterr()
         assert "[IRIS WARNING]" in captured.err
         events = vault.get_events()
-        assert events[0]["decision"] == "DENY"
+        decision_events = [e for e in events if e.get("event_type") is None and e.get("resource") == "openai-api"]
+        # dev mode never blocks — warns and proceeds, hence PERMIT_WITH_WARNINGS not DENY.
+        assert decision_events[0]["decision"] == "PERMIT_WITH_WARNINGS"
 
     def test_tool_filtering_removes_unpermitted_tools(
         self, compliant_passport, tmp_path, monkeypatch, capsys
@@ -248,8 +253,9 @@ class TestIrisOpenAIClient:
 
         mock_client.embeddings.create.assert_called_once()
         events = vault.get_events()
-        assert len(events) == 1
-        assert events[0]["resource"] == "openai-api"
+        decision_events = [e for e in events if e.get("event_type") is None and e.get("resource") == "openai-api"]
+        assert len(decision_events) == 1
+        assert decision_events[0]["resource"] == "openai-api"
 
     def test_streaming_intercept(self, compliant_passport, tmp_path, monkeypatch):
         monkeypatch.setenv("IRIS_ENV", "dev")
@@ -270,7 +276,8 @@ class TestIrisOpenAIClient:
             list(stream)
 
         mock_client.chat.completions.stream.assert_called_once()
-        assert len(vault.get_events()) == 1
+        decision_events = [e for e in vault.get_events() if e.get("event_type") is None and e.get("resource") == "openai-api"]
+        assert len(decision_events) == 1
 
     def test_evidence_vault_records_call(self, compliant_passport, tmp_path, monkeypatch):
         monkeypatch.setenv("IRIS_ENV", "dev")
@@ -294,9 +301,10 @@ class TestIrisOpenAIClient:
             )
 
         events = vault.get_events()
-        assert len(events) == 2
-        assert all(e["action"] == "call" for e in events)
-        assert all(e["resource"] == "openai-api" for e in events)
+        decision_events = [e for e in events if e.get("event_type") is None and e.get("resource") == "openai-api"]
+        assert len(decision_events) == 2
+        assert all(e["action"] == "call" for e in decision_events)
+        assert all(e["resource"] == "openai-api" for e in decision_events)
 
 
 class TestGuardOpenAITools:

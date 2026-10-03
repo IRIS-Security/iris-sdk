@@ -88,9 +88,10 @@ class TestIrisGeminiClient:
         assert result.text == "Hello from Gemini"
         mock_client.models.generate_content.assert_called_once()
         events = vault.get_events()
-        assert len(events) == 1
-        assert events[0]["decision"] in ("PERMIT", "PERMIT_WITH_WARNINGS")
-        assert events[0]["resource"] == "gemini-api/gemini-2.0-flash"
+        decision_events = [e for e in events if e.get("event_type") is None]
+        assert len(decision_events) == 1
+        assert decision_events[0]["decision"] in ("PERMIT", "PERMIT_WITH_WARNINGS")
+        assert decision_events[0]["resource"] == "gemini-api/gemini-2.0-flash"
 
     def test_client_blocks_in_production(
         self, high_risk_incomplete_passport, tmp_path, monkeypatch
@@ -163,7 +164,8 @@ class TestIrisGeminiClient:
             list(stream)
 
         mock_client.models.generate_content_stream.assert_called_once()
-        assert len(vault.get_events()) == 1
+        decision_events = [e for e in vault.get_events() if e.get("event_type") is None]
+        assert len(decision_events) == 1
 
     def test_evidence_vault_records_call(self, compliant_passport, tmp_path, monkeypatch):
         monkeypatch.setenv("IRIS_ENV", "dev")
@@ -179,9 +181,10 @@ class TestIrisGeminiClient:
             client.models.generate_content(model="gemini-2.0-flash", contents="First call")
 
         events = vault.get_events()
-        assert len(events) == 1
-        assert events[0]["action"] == "call"
-        assert events[0]["resource"] == "gemini-api/gemini-2.0-flash"
+        decision_events = [e for e in events if e.get("event_type") is None]
+        assert len(decision_events) == 1
+        assert decision_events[0]["action"] == "call"
+        assert decision_events[0]["resource"] == "gemini-api/gemini-2.0-flash"
 
     def test_drop_in_replacement_compatibility(self, compliant_passport, monkeypatch):
         monkeypatch.setenv("IRIS_ENV", "dev")

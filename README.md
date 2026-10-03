@@ -27,6 +27,12 @@ agent = wrap(your_openai_client, policy="./policies/default.cedar")
 Developer docs (getting started, CLI reference, compliance guides):
 **https://iris-security.github.io/iris-sdk/**
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for dev setup, tests, and the
+OSS/Cloud scope boundary. Please read
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) too.
+
 ## Need more?
 
 Centralized policy management across a team, hosted audit evidence

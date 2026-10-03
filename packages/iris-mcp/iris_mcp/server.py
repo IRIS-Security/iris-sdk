@@ -30,7 +30,7 @@ app = Server("iris-governance")
 
 def collect_tools(*, include_pro: bool | None = None) -> list:
     if include_pro is None:
-        include_pro = Entitlements().has(Feature.BUNDLE_HIPAA)
+        include_pro = Entitlements().has(Feature.MCP_PRO_TOOLS)
 
     tools = []
     tools.extend(discovery.get_tools())

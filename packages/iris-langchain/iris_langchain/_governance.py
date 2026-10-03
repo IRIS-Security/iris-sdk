@@ -254,7 +254,9 @@ def evaluate_and_record(
     user_email: Optional[str] = None,
     user_role: Optional[str] = None,
 ) -> PolicyResult:
-    user_ctx = UserContext.from_params(user_email, user_role)
+    user_ctx = UserContext.from_params(user_email=user_email, user_role=user_role)
+    user_fields = user_ctx.evaluation_fields()
+    user_fields["user_consent_logged"] = user_consent_logged or user_fields["user_consent_logged"]
     ctx = EvaluationContext(
         agent_id=passport.agent_id,
         action=action,
@@ -264,10 +266,9 @@ def evaluate_and_record(
         data_region=data_region,
         destination_region=destination_region,
         data_classification=data_classification,
-        user_consent_logged=user_consent_logged,
         dlp_prompt_findings=dlp_prompt_findings,
         additional={"run_id": run_id} if run_id else {},
-        **user_ctx.evaluation_fields(),
+        **user_fields,
     )
     result = engine.evaluate(passport, ctx)
     result = apply_no_policy_gate(engine, passport, env, result)

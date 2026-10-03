@@ -64,8 +64,17 @@
     <div class="code-block"><span class="cmd">iris compliance scan --from litellm --config ./litellm.config.yaml</span><br>
 <span class="cmd">iris compliance scan --from litellm --proxy https://litellm.internal</span></div>
 
+    <h2>OpenRouter</h2>
+    <p>Derive a <a href="compliance-intelligence.html" style="color:var(--red)">WorkloadProfile</a> from your OpenRouter usage activity: which models you actually ran, and which providers served them, over OpenRouter's last 30 completed UTC days.</p>
+    <p><strong>Live network call, not offline.</strong> This adapter calls OpenRouter's <code>GET https://openrouter.ai/api/v1/activity</code> over the internet every time it runs. That endpoint requires an OpenRouter <strong>Management API key</strong>, which is a different key from the inference key you use for chat completions. Create one at <a href="https://openrouter.ai/settings/management-keys" style="color:var(--red)">openrouter.ai/settings/management-keys</a> (see OpenRouter's <a href="https://openrouter.ai/docs/guides/overview/auth/management-api-keys" style="color:var(--red)">Management API Keys guide</a>). If OpenRouter rejects the key, IRIS stops and tells you a Management key is needed.</p>
+    <div class="code-block"><span class="cmd">pip install &quot;git+https://github.com/IRIS-Security/iris-sdk.git#subdirectory=packages/iris-openrouter&quot;</span><br>
+<span class="cmd">export OPENROUTER_MANAGEMENT_KEY=...</span><br>
+<span class="cmd">iris compliance scan --from openrouter</span></div>
+    <p><strong>Profile data IRIS derives:</strong> distinct model slugs, distinct serving providers (OpenRouter's <code>provider_name</code>, meaning where the request was actually served), OpenRouter as framework signal. Per-model request and token volume is available from <code>summarize_activity()</code>.</p>
+    <p><strong>What's read:</strong> model, provider, date, endpoint ID, and request/token counts. Cost fields are dropped, and the activity endpoint returns no prompt or completion content.</p>
+
     <div class="callout">
-      <p><strong>Not tracing. Not routing.</strong> Langfuse and LiteLLM own observability and model routing. IRIS adds compliance intelligence on top — see <a href="compliance-intelligence.html" style="color:var(--red)">Compliance Intelligence</a> for the full loop.</p>
+      <p><strong>Not tracing. Not routing.</strong> Langfuse, LiteLLM, and OpenRouter own observability and model routing. IRIS adds compliance intelligence on top — see <a href="compliance-intelligence.html" style="color:var(--red)">Compliance Intelligence</a> for the full loop.</p>
     </div>
 
     <div class="docs-footer">

@@ -88,6 +88,13 @@ class EvidenceVault:
         if aarm_r7 or getattr(result, "aarm_r7", False):
             entry["aarm_r7"] = True
 
+        # Distinct from agent_id above: this is the end user the agent acted
+        # on behalf of, when one was supplied — never merge this into agent_id.
+        # See iris_core.models.context.EvaluationContext.user_email/user_role.
+        if getattr(context, "user_email", None) or getattr(context, "user_role", None):
+            entry["on_behalf_of_user_email"] = getattr(context, "user_email", None)
+            entry["on_behalf_of_user_role"] = getattr(context, "user_role", None)
+
         if getattr(context, "is_delegated", False) and getattr(context, "user_context", None):
             user_ctx = context.user_context
             agent_name = passport.name if passport else self._agent_id
