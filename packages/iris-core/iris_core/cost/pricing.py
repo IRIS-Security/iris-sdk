@@ -16,6 +16,12 @@ DEFAULT_PRICING: Dict[str, Tuple[float, float]] = {
     "anthropic/claude-opus-4-6": (15.00, 75.00),
     "anthropic/claude-sonnet-4-6": (3.00, 15.00),
     "anthropic/claude-haiku-4-5": (0.80, 4.00),
+    # Same tier as the -4-6 line above; current model family observed in
+    # Claude Code session transcripts (e.g. "claude-sonnet-5") doesn't
+    # match that key's fuzzy-match pattern. Carries the existing tier's
+    # rate forward — update when official current-gen pricing is published.
+    "anthropic/claude-opus-5": (15.00, 75.00),
+    "anthropic/claude-sonnet-5": (3.00, 15.00),
     # OpenAI
     "openai/gpt-4o": (2.50, 10.00),
     "openai/gpt-4o-mini": (0.15, 0.60),
@@ -44,6 +50,15 @@ DEFAULT_PRICING: Dict[str, Tuple[float, float]] = {
 
 OVERRIDES_PATH = Path.home() / ".iris" / "pricing-overrides.yaml"
 _VERSION_SUFFIX = re.compile(r"-\d{4}(-\d{2})?(-\d{2})?$|-v\d+(\.\d+)*$", re.IGNORECASE)
+
+# Anthropic's published prompt-caching multipliers, applied to the base
+# input rate. Cache writes cost MORE than a fresh input token (you're
+# paying to populate the cache); cache reads cost LESS (that's the
+# saving caching exists to deliver). Same ratios apply across providers
+# that support caching in the same shape; provider-specific overrides
+# can be added here if that stops holding.
+CACHE_WRITE_MULTIPLIER = 1.25  # 5-minute TTL cache write premium
+CACHE_READ_MULTIPLIER = 0.10  # cache hit discount
 
 
 def overrides_path() -> Path:
@@ -113,12 +128,24 @@ class PricingRegistry:
         model: str,
         input_tokens: int,
         output_tokens: int,
+        cache_creation_tokens: int = 0,
+        cache_read_tokens: int = 0,
     ) -> float:
-        """Return total USD cost for a single LLM call."""
+        """Return total USD cost for a single LLM call.
+
+        cache_creation_tokens/cache_read_tokens are additive to
+        input_tokens, not included in it — pass the fresh (uncached)
+        input token count separately, as providers report it.
+        """
         input_price, output_price = self.get_price(provider, model)
-        return (input_tokens / 1_000_000 * input_price) + (
+        cost = (input_tokens / 1_000_000 * input_price) + (
             output_tokens / 1_000_000 * output_price
         )
+        if cache_creation_tokens:
+            cost += cache_creation_tokens / 1_000_000 * input_price * CACHE_WRITE_MULTIPLIER
+        if cache_read_tokens:
+            cost += cache_read_tokens / 1_000_000 * input_price * CACHE_READ_MULTIPLIER
+        return cost
 
     def update_pricing(
         self,
